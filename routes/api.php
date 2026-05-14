@@ -1,0 +1,81 @@
+<?php
+
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\HouseholdController;
+use App\Http\Controllers\Api\UtilityController;
+use App\Http\Controllers\Api\MeterController;
+use App\Http\Controllers\Api\BusinessOrderController;
+use App\Http\Controllers\Api\DebtController;
+use App\Http\Controllers\Api\SavingController;
+use App\Http\Controllers\Api\InvitationController;
+use App\Http\Controllers\Api\AIController;
+use App\Http\Controllers\Api\AIFinanceController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/me', [AuthController::class, 'update']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Household management
+    Route::get('/household', [HouseholdController::class, 'show']);
+    Route::put('/household', [HouseholdController::class, 'update']);
+    Route::put('/household/categories', [HouseholdController::class, 'updateCategories']);
+    Route::put('/household/code', [HouseholdController::class, 'updateInviteCode']);
+    Route::post('/household/members', [HouseholdController::class, 'addMember']);
+    Route::put('/household/members/{member}', [HouseholdController::class, 'updateMember']);
+    Route::delete('/household/members/{member}', [HouseholdController::class, 'deleteMember']);
+
+    // Transactions / Budget
+    Route::apiResource('transactions', TransactionController::class);
+    Route::post('/transactions/clone', [TransactionController::class, 'cloneMonth']);
+    Route::post('/transactions/{transaction}/items', [TransactionController::class, 'addItem']);
+    Route::delete('/transactions/{transaction}/items/{item}', [TransactionController::class, 'deleteItem']);
+    
+    // Utilities
+    Route::apiResource('utilities', UtilityController::class);
+    
+    // Meters
+    Route::apiResource('meters', MeterController::class);
+    Route::post('/meters/{meter}/readings', [MeterController::class, 'addReading']);
+    Route::put('/meters/{meter}/readings/{reading}', [MeterController::class, 'updateReading']);
+    Route::delete('/meters/{meter}/readings/{reading}', [MeterController::class, 'deleteReading']);
+    
+    // Business (Little Loom)
+    Route::post('/business-orders/shopify-import', [BusinessOrderController::class, 'shopifyImport']);
+    Route::apiResource('business-orders', BusinessOrderController::class);
+    
+    // Debts
+    Route::apiResource('debts', DebtController::class);
+    
+    // Savings
+    Route::apiResource('savings', SavingController::class);
+    Route::post('/savings/{saving}/entries', [SavingController::class, 'addEntry']);
+    Route::delete('/savings/{saving}/entries/{entry}', [SavingController::class, 'deleteEntry']);
+    
+    // Invitations
+    Route::apiResource('invitations', InvitationController::class);
+
+    // AI Integration
+    Route::post('/ai/query', [AIController::class, 'query']);
+
+    // AI v1 finance features (strict_ai mode)
+    Route::prefix('ai/v1')->group(function () {
+        Route::post('/transactions/auto-categorize', [AIFinanceController::class, 'autoCategorizeTransaction']);
+        Route::get('/budget/overspend-root-cause', [AIFinanceController::class, 'overspendRootCause']);
+        Route::get('/budget/cashflow-forecast', [AIFinanceController::class, 'cashflowForecast']);
+        Route::get('/utilities/anomalies', [AIFinanceController::class, 'utilityAnomalies']);
+        Route::post('/savings/recommendations', [AIFinanceController::class, 'savingsRecommendations']);
+        Route::post('/debts/optimize', [AIFinanceController::class, 'optimizeDebts']);
+        Route::get('/dashboard/weekly-briefing', [AIFinanceController::class, 'weeklyBriefing']);
+    });
+});
