@@ -37,7 +37,15 @@ class ImportDatabaseJson extends Command
             'settings'
         ];
 
-        DB::statement('SET CONSTRAINTS ALL DEFERRED'); // For Postgres
+        // Disable foreign key checks for the import
+        $driver = DB::getDriverName();
+        if ($driver === 'pgsql') {
+            DB::statement('SET CONSTRAINTS ALL DEFERRED');
+        } elseif ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        } elseif ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        }
 
         foreach ($tables as $table) {
             if (isset($data[$table])) {
@@ -54,6 +62,12 @@ class ImportDatabaseJson extends Command
                     DB::table($table)->insert($rows);
                 }
             }
+        }
+
+        if ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        } elseif ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON');
         }
 
         $this->info("Database imported successfully from {$file}");
