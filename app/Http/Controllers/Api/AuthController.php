@@ -96,10 +96,18 @@ class AuthController extends Controller
     {
         $user = $request->user();
         
+        $request->validate([
+            'firstName' => 'sometimes|string|max:255',
+            'lastName' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|string|min:8|confirmed',
+        ]);
+        
         $data = [];
         if ($request->has('firstName')) $data['first_name'] = $request->firstName;
         if ($request->has('lastName')) $data['last_name'] = $request->lastName;
         if ($request->has('email')) $data['email'] = $request->email;
+        if ($request->has('password')) $data['password'] = Hash::make($request->password);
 
         $user->update($data);
 
