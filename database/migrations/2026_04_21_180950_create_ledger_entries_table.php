@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('saving_id')->constrained()->onDelete('cascade');
             $table->date('date');
-            $table->decimal('amount', 15, 2);
+            $table->decimal('amount', 24, 8);
             $table->string('reason');
             $table->timestamps();
         });

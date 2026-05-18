@@ -12,4 +12,11 @@ class Debt extends Model {
         'due_day',
         'status'
     ];
+    
+    protected $casts = [
+        'target_amount' => 'float',
+        'paid_amount' => 'float',
+        'annual_interest_rate' => 'float',
+        'minimum_payment' => 'float',
+    ];
 }
