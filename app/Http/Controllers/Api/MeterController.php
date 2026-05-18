@@ -96,7 +96,8 @@ class MeterController extends Controller
             'year' => (int)$date->format('Y'),
             'consumption' => 0,
             'is_reset' => $request->isReset || $request->is_reset || false,
-            'is_estimated' => $request->isEstimated || $request->is_estimated || false
+            'is_estimated' => $request->isEstimated || $request->is_estimated || false,
+            'is_official' => $request->isOfficial || $request->is_official || false
         ]);
 
         $this->recalculateConsumptions($meter->id);
@@ -121,7 +122,8 @@ class MeterController extends Controller
             'month' => (int)$date->format('m'),
             'year' => (int)$date->format('Y'),
             'is_reset' => $request->isReset || $request->is_reset || $reading->is_reset,
-            'is_estimated' => $request->isEstimated || $request->is_estimated || $reading->is_estimated
+            'is_estimated' => $request->isEstimated || $request->is_estimated || $reading->is_estimated,
+            'is_official' => $request->isOfficial || $request->is_official || $reading->is_official
         ]);
 
         $this->recalculateConsumptions($meter->id);
