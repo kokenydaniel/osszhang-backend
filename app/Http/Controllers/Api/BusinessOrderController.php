@@ -103,11 +103,24 @@ class BusinessOrderController extends Controller
     public function shopifyImport(Request $request, ShopifyService $shopifyService)
     {
         try {
+            $user = $request->user();
+            $household = $user->household;
+
+            if (!$household || !$household->shopify_shop_url || !$household->shopify_access_token) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Nincsenek beállítva Shopify hozzáférési adatok ehhez a háztartáshoz!'
+                ], 400);
+            }
+
+            // Bind the household specific Shopify credentials
+            $shopifyService->setCredentials($household->shopify_shop_url, $household->shopify_access_token);
+
             // Import all available orders
             $shopifyOrders = $shopifyService->getOrders();
             
             $importedCount = 0;
-            $householdId = $request->user()->household_id;
+            $householdId = $user->household_id;
 
             foreach ($shopifyOrders as $so) {
                 // Shopify order identifier (e.g., #1001 or long ID)

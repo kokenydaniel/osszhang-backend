@@ -21,10 +21,33 @@ class AuthController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'invite_code' => 'required|string|exists:households,invite_code',
+            'household_name' => 'required|string|max:255',
         ]);
 
-        $household = Household::where('invite_code', $request->invite_code)->first();
+        // Create unique invite code based on household name
+        $cleanName = preg_replace('/[^A-Za-z0-9]/', '', $request->household_name);
+        if (empty($cleanName)) {
+            $cleanName = 'PILOT';
+        }
+        $inviteCode = strtoupper(substr($cleanName, 0, 5)) . rand(100, 999);
+        while (Household::where('invite_code', $inviteCode)->exists()) {
+            $inviteCode = strtoupper(substr($cleanName, 0, 5)) . rand(100, 999);
+        }
+
+        $household = Household::create([
+            'name' => $request->household_name,
+            'invite_code' => $inviteCode,
+            'categories' => [
+                'Fizetés',
+                'Kaja',
+                'Tankolás',
+                'Rezsi',
+                'Kölcsönök',
+                'Szórakozás',
+                'Megtakarítás',
+                'Vállalkozás',
+            ]
+        ]);
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -32,7 +55,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'household_id' => $household->id,
-            'role' => 'member',
+            'role' => 'admin',
             'permissions' => ['budget', 'utilities', 'business', 'meters', 'debts', 'savings'],
         ]);
 

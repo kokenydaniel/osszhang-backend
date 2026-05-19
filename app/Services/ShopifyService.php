@@ -7,13 +7,22 @@ use Illuminate\Support\Facades\Log;
 
 class ShopifyService
 {
-    protected string $baseUrl;
-    protected string $accessToken;
+    protected ?string $baseUrl = null;
+    protected ?string $accessToken = null;
 
     public function __construct()
     {
         $this->baseUrl = config('services.shopify.url');
         $this->accessToken = config('services.shopify.token');
+    }
+
+    /**
+     * Dynamically override Shopify credentials.
+     */
+    public function setCredentials(?string $url, ?string $token)
+    {
+        $this->baseUrl = $url;
+        $this->accessToken = $token;
     }
 
     /**

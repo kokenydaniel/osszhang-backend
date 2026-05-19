@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SavingController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\AIController;
 use App\Http\Controllers\Api\AIFinanceController;
+use App\Http\Controllers\Api\InvestmentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,6 +63,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('savings', SavingController::class);
     Route::post('/savings/{saving}/entries', [SavingController::class, 'addEntry']);
     Route::delete('/savings/{saving}/entries/{entry}', [SavingController::class, 'deleteEntry']);
+    
+    // Investments
+    Route::apiResource('investments', InvestmentController::class);
     
     // Invitations
     Route::apiResource('invitations', InvitationController::class);
