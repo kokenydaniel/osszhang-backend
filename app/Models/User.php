@@ -12,7 +12,16 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    protected $fillable = ['first_name', 'last_name', 'email', 'password', 'household_id', 'role', 'permissions'];
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'username',
+        'password',
+        'must_change_password',
+        'household_id',
+        'role',
+        'permissions',
+    ];
     protected $hidden = ['password', 'remember_token'];
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -30,10 +39,10 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
             'permissions' => 'array',
-            'role' => 'string'
+            'role' => 'string',
         ];
     }
 }

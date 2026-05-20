@@ -27,7 +27,10 @@ class HouseholdResource extends JsonResource
             'utility_split_enabled' => $this->utility_split_enabled,
             'utility_split_partner_id' => $this->utility_split_partner_id,
             'utility_templates' => $sensitive['utility_templates'] ?? [],
-            'users' => $this->whenLoaded('users', fn () => $this->users),
+            'users' => $this->whenLoaded(
+                'users',
+                fn () => UserResource::collection($this->users)->resolve(),
+            ),
         ];
     }
 }

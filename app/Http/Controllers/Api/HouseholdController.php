@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HouseholdResource;
 use App\Services\EncryptedRecordService;
+use App\Http\Resources\UserResource;
 use App\Support\BusinessSettings;
+use App\Support\Username;
 use App\Support\UtilityTemplates;
 use Illuminate\Http\Request;
 
@@ -147,7 +149,7 @@ class HouseholdController extends Controller
 
         $member->update($request->only(['role', 'permissions']));
 
-        return response()->json($member->fresh());
+        return new UserResource($member->fresh());
     }
 
     public function addMember(Request $request)
@@ -156,26 +158,29 @@ class HouseholdController extends Controller
             return response()->json(['message' => 'Nincs jogosultságod.'], 403);
         }
 
+        $username = Username::normalize($request->input('username', ''));
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'username' => ['required', 'string', 'min:3', 'max:32', 'regex:/^[a-z0-9_]+$/', 'unique:users,username'],
             'password' => 'required|string|min:8',
             'role' => 'required|string|in:admin,editor,reader',
-            'permissions' => 'required|array'
+            'permissions' => 'required|array',
         ]);
 
         $member = \App\Models\User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'email' => $request->email,
+            'username' => $username,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'must_change_password' => true,
             'household_id' => $request->user()->household_id,
             'role' => $request->role,
             'permissions' => $request->permissions,
         ]);
 
-        return response()->json($member);
+        return new UserResource($member);
     }
 
     public function deleteMember(Request $request, \App\Models\User $member)

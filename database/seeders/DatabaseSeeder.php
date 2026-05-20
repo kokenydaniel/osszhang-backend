@@ -22,9 +22,11 @@ class DatabaseSeeder extends Seeder
         User::create([
             'first_name' => 'Dani',
             'last_name' => 'K.',
-            'email' => 'dani@example.com',
+            'username' => 'dani',
             'password' => Hash::make('password123'),
-            'household_id' => $household->id
+            'household_id' => $household->id,
+            'role' => 'admin',
+            'permissions' => ['budget', 'utilities', 'business', 'meters', 'debts', 'savings'],
         ]);
     }
 }
