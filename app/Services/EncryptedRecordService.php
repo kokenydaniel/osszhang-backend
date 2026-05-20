@@ -12,6 +12,7 @@ use App\Models\MeterReading;
 use App\Models\Saving;
 use App\Models\Utility;
 use App\Models\UtilitySettlement;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Háztartásonkénti titkosítás — az adatbázisban csak blob + semleges placeholder látszik.
@@ -35,7 +36,12 @@ class EncryptedRecordService
 
         try {
             return $this->cipher->decrypt($household, $blob);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            Log::warning('household.decrypt_failed', [
+                'household_id' => $household->id,
+                'message' => $e->getMessage(),
+            ]);
+
             return null;
         }
     }
