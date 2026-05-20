@@ -10,7 +10,8 @@ class Debt extends Model {
         'annual_interest_rate',
         'minimum_payment',
         'due_day',
-        'status'
+        'status',
+        'encrypted_payload',
     ];
     
     protected $casts = [

@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Household;
 use App\Models\Meter;
 use App\Models\MeterReading;
+use App\Services\EncryptedRecordService;
 use Illuminate\Http\Request;
 
 class MeterController extends Controller
 {
-    private function recalculateConsumptions(int $meterId): void
+    public function __construct(
+        private readonly EncryptedRecordService $crypto,
+    ) {}
+
+    private function recalculateConsumptions(int $meterId, Household $household): void
     {
         $readings = MeterReading::where('meter_id', $meterId)
             ->orderBy('date', 'asc')
@@ -18,20 +24,24 @@ class MeterController extends Controller
 
         $previous = null;
         foreach ($readings as $reading) {
-            if (!$previous) {
+            $resolved = $this->crypto->readingResolved($reading, $household);
+            $value = (float) ($resolved['value'] ?? 0);
+
+            if (! $previous) {
                 $consumption = 0;
             } elseif ($reading->is_reset) {
-                // Reset event itself should not create artificial consumption spike.
                 $consumption = 0;
             } else {
-                $diff = $reading->value - $previous->value;
-                $consumption = $diff >= 0 ? $diff : $reading->value;
+                $prevValue = (float) ($this->crypto->readingResolved($previous, $household)['value'] ?? 0);
+                $diff = $value - $prevValue;
+                $consumption = $diff >= 0 ? $diff : $value;
             }
 
-            if ((float)$reading->consumption !== (float)$consumption) {
-                $reading->consumption = $consumption;
-                $reading->save();
-            }
+            $this->crypto->persistReading($reading, $household, [
+                'value' => $value,
+                'consumption' => $consumption,
+            ]);
+            $reading->save();
 
             $previous = $reading;
         }
@@ -39,112 +49,125 @@ class MeterController extends Controller
 
     public function index(Request $request)
     {
+        $household = $request->user()->household;
+
         return response()->json(
-            Meter::where('household_id', $request->user()->household_id)
-                ->with(['readings' => function($q) {
-                    $q->orderBy('date', 'desc');
-                }])
+            Meter::where('household_id', $household->id)
+                ->with(['readings' => fn ($q) => $q->orderBy('date', 'desc')])
                 ->get()
+                ->map(fn ($m) => $this->crypto->formatMeter($m, $household))
         );
     }
 
     public function store(Request $request)
     {
+        $household = $request->user()->household;
         $v = $request->validate([
             'name' => 'required|string',
             'unit' => 'required|string',
-            'location' => 'nullable|string'
+            'location' => 'nullable|string',
         ]);
 
-        $meter = Meter::create([
-            'household_id' => $request->user()->household_id,
-            'name' => $v['name'],
+        $meter = new Meter([
+            'household_id' => $household->id,
             'unit' => $v['unit'],
-            'location' => $v['location'] ?? 'Otthon',
-            'icon' => '📊'
+            'icon' => '📊',
         ]);
+        $this->crypto->persistMeter($meter, $household, [
+            'name' => $v['name'],
+            'location' => $v['location'] ?? 'Otthon',
+        ]);
+        $meter->save();
 
-        return response()->json($meter->load('readings'), 201);
+        return response()->json($this->crypto->formatMeter($meter->load('readings'), $household), 201);
     }
 
     public function show(Request $request, $id)
     {
-        return response()->json(
-            Meter::where('household_id', $request->user()->household_id)
-                ->with(['readings' => function($q) {
-                    $q->orderBy('date', 'desc');
-                }])
-                ->findOrFail($id)
-        );
+        $household = $request->user()->household;
+        $meter = Meter::where('household_id', $household->id)
+            ->with(['readings' => fn ($q) => $q->orderBy('date', 'desc')])
+            ->findOrFail($id);
+
+        return response()->json($this->crypto->formatMeter($meter, $household));
     }
 
     public function addReading(Request $request, $id)
     {
-        $meter = Meter::where('household_id', $request->user()->household_id)->findOrFail($id);
-        
+        $household = $request->user()->household;
+        $meter = Meter::where('household_id', $household->id)->findOrFail($id);
+
         $v = $request->validate([
             'value' => 'required|numeric',
-            'date' => 'required|date'
+            'date' => 'required|date',
         ]);
 
         $date = new \DateTime($v['date']);
 
-        $meter->readings()->create([
-            'value' => $v['value'],
+        $reading = new MeterReading([
+            'meter_id' => $meter->id,
             'date' => $v['date'],
-            'month' => (int)$date->format('m'),
-            'year' => (int)$date->format('Y'),
-            'consumption' => 0,
+            'month' => (int) $date->format('m'),
+            'year' => (int) $date->format('Y'),
             'is_reset' => $request->isReset || $request->is_reset || false,
             'is_estimated' => $request->isEstimated || $request->is_estimated || false,
-            'is_official' => $request->isOfficial || $request->is_official || false
+            'is_official' => $request->isOfficial || $request->is_official || false,
         ]);
+        $this->crypto->persistReading($reading, $household, [
+            'value' => (float) $v['value'],
+            'consumption' => 0,
+        ]);
+        $reading->save();
 
-        $this->recalculateConsumptions($meter->id);
+        $this->recalculateConsumptions($meter->id, $household);
 
-        return response()->json($meter->load('readings'));
+        return response()->json($this->crypto->formatMeter($meter->fresh()->load(['readings' => fn ($q) => $q->orderBy('date', 'desc')]), $household));
     }
 
     public function updateReading(Request $request, $meterId, $readingId)
     {
-        $meter = Meter::where('household_id', $request->user()->household_id)->findOrFail($meterId);
+        $household = $request->user()->household;
+        $meter = Meter::where('household_id', $household->id)->findOrFail($meterId);
         $reading = MeterReading::where('meter_id', $meter->id)->findOrFail($readingId);
-        
+
         $v = $request->validate([
             'value' => 'required|numeric',
-            'date' => 'required|date'
+            'date' => 'required|date',
         ]);
 
         $date = new \DateTime($v['date']);
-        $reading->update([
-            'value' => $v['value'],
-            'date' => $v['date'],
-            'month' => (int)$date->format('m'),
-            'year' => (int)$date->format('Y'),
-            'is_reset' => $request->isReset || $request->is_reset || $reading->is_reset,
-            'is_estimated' => $request->isEstimated || $request->is_estimated || $reading->is_estimated,
-            'is_official' => $request->isOfficial || $request->is_official || $reading->is_official
-        ]);
+        $reading->date = $v['date'];
+        $reading->month = (int) $date->format('m');
+        $reading->year = (int) $date->format('Y');
+        $reading->is_reset = $request->isReset || $request->is_reset || $reading->is_reset;
+        $reading->is_estimated = $request->isEstimated || $request->is_estimated || $reading->is_estimated;
+        $reading->is_official = $request->isOfficial || $request->is_official || $reading->is_official;
 
-        $this->recalculateConsumptions($meter->id);
+        $resolved = $this->crypto->readingResolved($reading, $household);
+        $resolved['value'] = (float) $v['value'];
+        $this->crypto->persistReading($reading, $household, $resolved);
+        $reading->save();
 
-        return response()->json($meter->load('readings'));
+        $this->recalculateConsumptions($meter->id, $household);
+
+        return response()->json($this->crypto->formatMeter($meter->fresh()->load(['readings' => fn ($q) => $q->orderBy('date', 'desc')]), $household));
     }
 
     public function deleteReading(Request $request, $meterId, $readingId)
     {
-        $meter = Meter::where('household_id', $request->user()->household_id)->findOrFail($meterId);
-        $reading = MeterReading::where('meter_id', $meter->id)->findOrFail($readingId);
-        $reading->delete();
+        $household = $request->user()->household;
+        $meter = Meter::where('household_id', $household->id)->findOrFail($meterId);
+        MeterReading::where('meter_id', $meter->id)->findOrFail($readingId)->delete();
 
-        $this->recalculateConsumptions($meter->id);
+        $this->recalculateConsumptions($meter->id, $household);
 
-        return response()->json($meter->load('readings'));
+        return response()->json($this->crypto->formatMeter($meter->fresh()->load(['readings' => fn ($q) => $q->orderBy('date', 'desc')]), $household));
     }
 
     public function destroy($id)
     {
         Meter::where('household_id', auth()->user()->household_id)->findOrFail($id)->delete();
+
         return response()->json(null, 204);
     }
 }

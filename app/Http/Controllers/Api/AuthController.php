@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\HouseholdResource;
 use App\Models\User;
 use App\Models\Household;
 use Illuminate\Http\Request;
@@ -112,7 +113,19 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        return response()->json($request->user()->load('household.users'));
+        $user = $request->user()->load('household.users');
+
+        return response()->json([
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'permissions' => $user->permissions,
+            'household' => $user->household
+                ? (new HouseholdResource($user->household))->resolve()
+                : null,
+        ]);
     }
 
     public function update(Request $request)

@@ -10,7 +10,8 @@ class Investment extends Model
         'household_id', 'name', 'type', 'principal_amount', 
         'annual_interest_rate', 'purchase_date', 'maturity_date', 
         'owner', 'count_in_savings', 'current_value',
-        'maturity_amount', 'next_payout_amount', 'next_payout_date'
+        'maturity_amount', 'next_payout_amount', 'next_payout_date',
+        'encrypted_payload',
     ];
 
     protected $casts = [

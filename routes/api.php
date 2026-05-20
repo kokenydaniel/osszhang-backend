@@ -31,19 +31,22 @@ Route::middleware('auth:sanctum')->group(function () {
     // Household management
     Route::get('/household', [HouseholdController::class, 'show']);
     Route::put('/household', [HouseholdController::class, 'update']);
+    Route::delete('/household', [HouseholdController::class, 'destroy']);
     Route::put('/household/categories', [HouseholdController::class, 'updateCategories']);
     Route::put('/household/code', [HouseholdController::class, 'updateInviteCode']);
     Route::post('/household/members', [HouseholdController::class, 'addMember']);
     Route::put('/household/members/{member}', [HouseholdController::class, 'updateMember']);
     Route::delete('/household/members/{member}', [HouseholdController::class, 'deleteMember']);
-
     // Transactions / Budget
     Route::apiResource('transactions', TransactionController::class);
     Route::post('/transactions/clone', [TransactionController::class, 'cloneMonth']);
     Route::post('/transactions/{transaction}/items', [TransactionController::class, 'addItem']);
     Route::delete('/transactions/{transaction}/items/{item}', [TransactionController::class, 'deleteItem']);
     
-    // Utilities
+    // Utilities (specifikus útvonalak előbb — különben a {utility} elnyeli a „settlement” szegmenst)
+    Route::post('/utilities/clone', [UtilityController::class, 'cloneMonth']);
+    Route::post('/utilities/settlement', [UtilityController::class, 'settleMonth']);
+    Route::delete('/utilities/settlement', [UtilityController::class, 'unsettleMonth']);
     Route::apiResource('utilities', UtilityController::class);
     
     // Meters
@@ -62,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Savings
     Route::apiResource('savings', SavingController::class);
     Route::post('/savings/{saving}/entries', [SavingController::class, 'addEntry']);
+    Route::put('/savings/{saving}/entries/{entry}', [SavingController::class, 'updateEntry']);
     Route::delete('/savings/{saving}/entries/{entry}', [SavingController::class, 'deleteEntry']);
     
     // Investments

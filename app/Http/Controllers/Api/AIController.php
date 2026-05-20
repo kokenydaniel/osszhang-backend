@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\EncryptedRecordService;
+use App\Services\HouseholdCipherService;
 use App\Services\OpenAIService;
+use App\Services\TransactionSensitiveData;
 use Illuminate\Http\Request;
 
 class AIController extends Controller
 {
-    protected $ai;
-
-    public function __construct(OpenAIService $ai)
-    {
-        $this->ai = $ai;
-    }
+    public function __construct(
+        protected OpenAIService $ai,
+        protected TransactionSensitiveData $sensitive,
+        protected HouseholdCipherService $cipher,
+        protected EncryptedRecordService $crypto,
+    ) {}
 
     /**
      * Handle generic financial AI queries.
@@ -31,27 +34,44 @@ class AIController extends Controller
             $household = $user->household;
             
             // Summarize Transactions
-            $transactions = \App\Models\Transaction::where('household_id', $user->household_id)->get();
-            $income = (float)$transactions->where('type', 'income')->sum('amount');
-            $expense = (float)$transactions->where('type', 'expense')->sum('amount');
+            $transactions = \App\Models\Transaction::where('household_id', $user->household_id)->with('items')->get();
+            if ($household) {
+                $this->cipher->ensureCipherKey($household);
+            }
+            $income = (float) $transactions
+                ->where('type', 'income')
+                ->sum(fn ($t) => $this->sensitive->resolvedAmount($t, $household));
+            $expense = (float) $transactions
+                ->where('type', 'expense')
+                ->sum(fn ($t) => $this->sensitive->expenseTotal($t, $household));
             
             // Summarize Utilities
             $utilities = \App\Models\Utility::where('household_id', $user->household_id)->get();
-            $unpaidUtilities = (float)$utilities->whereNull('paid_date')->sum(function($u) {
-                return $u->split_rule === 'shared' ? $u->total / 2 : ($u->split_rule === 'dani-private' ? $u->total : 0);
+            $unpaidUtilities = (float) $utilities->whereNull('paid_date')->sum(function ($u) use ($household) {
+                $s = $this->crypto->utilityResolved($u, $household);
+                $total = (float) ($s['total'] ?? 0);
+                $rule = $s['split_rule'] ?? 'shared';
+
+                return $rule === 'shared' ? $total / 2 : ($rule === 'dani-private' ? $total : 0);
             });
 
             // Summarize Savings
             $savings = \App\Models\Saving::where('household_id', $user->household_id)->with('ledger')->get();
-            $savingsTotal = (float)$savings->sum(fn($s) => $s->ledger->sum('amount'));
+            $savingsTotal = (float) $savings->sum(function ($s) use ($household) {
+                return $s->ledger->sum(fn ($e) => (float) ($this->crypto->ledgerResolved($e, $household)['amount'] ?? 0));
+            });
 
             // Summarize Debts
             $debts = \App\Models\Debt::where('household_id', $user->household_id)->get();
-            $debtsTotal = (float)$debts->sum(fn($d) => $d->target_amount - $d->paid_amount);
+            $debtsTotal = (float) $debts->sum(function ($d) use ($household) {
+                $s = $this->crypto->debtResolved($d, $household);
+
+                return (float) ($s['target_amount'] ?? 0) - (float) ($s['paid_amount'] ?? 0);
+            });
 
             // Summarize Little Loom Business
             $orders = \App\Models\BusinessOrder::where('household_id', $user->household_id)->get();
-            $ordersTotal = (float)$orders->sum('amount');
+            $ordersTotal = (float) $orders->sum(fn ($o) => (float) ($this->crypto->businessOrderResolved($o, $household)['amount'] ?? 0));
             $pendingOrdersCount = $orders->where('state', '!=', 'RENDBEN')->count();
 
             $context = [

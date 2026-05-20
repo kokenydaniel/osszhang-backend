@@ -1,37 +1,32 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Models\Investment;
+use App\Services\EncryptedRecordService;
 use Illuminate\Http\Request;
 
-class InvestmentController extends Controller {
-    private function formatInvestment(Investment $i): array {
-        return [
-            'id' => $i->id,
-            'name' => $i->name,
-            'type' => $i->type,
-            'principalAmount' => (float)$i->principal_amount,
-            'annualInterestRate' => (float)$i->annual_interest_rate,
-            'purchaseDate' => $i->purchase_date->toDateString(),
-            'maturityDate' => $i->maturity_date ? $i->maturity_date->toDateString() : null,
-            'owner' => $i->owner,
-            'countInSavings' => (bool)$i->count_in_savings,
-            'currentValue' => $i->current_value ? (float)$i->current_value : null,
-            'maturityAmount' => $i->maturity_amount ? (float)$i->maturity_amount : null,
-            'nextPayoutAmount' => $i->next_payout_amount ? (float)$i->next_payout_amount : null,
-            'nextPayoutDate' => $i->next_payout_date ? $i->next_payout_date->toDateString() : null
-        ];
-    }
+class InvestmentController extends Controller
+{
+    public function __construct(
+        private readonly EncryptedRecordService $crypto,
+    ) {}
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
+        $household = $request->user()->household;
+
         return response()->json(
-            Investment::where('household_id', $request->user()->household_id)
+            Investment::where('household_id', $household->id)
                 ->get()
-                ->map(fn($i) => $this->formatInvestment($i))
+                ->map(fn ($i) => $this->crypto->formatInvestment($i, $household))
         );
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
+        $household = $request->user()->household;
         $v = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'nullable|string',
@@ -44,28 +39,35 @@ class InvestmentController extends Controller {
             'currentValue' => 'nullable|numeric|min:0',
             'maturityAmount' => 'nullable|numeric|min:0',
             'nextPayoutAmount' => 'nullable|numeric|min:0',
-            'nextPayoutDate' => 'nullable|date'
+            'nextPayoutDate' => 'nullable|date',
         ]);
-        $i = Investment::create([
-            'household_id' => $request->user()->household_id,
-            'name' => $v['name'],
-            'type' => $v['type'] ?? 'bond',
-            'principal_amount' => $v['principalAmount'],
-            'annual_interest_rate' => $v['annualInterestRate'],
+
+        $i = new Investment([
+            'household_id' => $household->id,
             'purchase_date' => $v['purchaseDate'],
             'maturity_date' => $v['maturityDate'] ?? null,
-            'owner' => $v['owner'] ?? 'Közös',
             'count_in_savings' => $v['countInSavings'] ?? true,
+            'next_payout_date' => $v['nextPayoutDate'] ?? null,
+        ]);
+        $this->crypto->persistInvestment($i, $household, [
+            'name' => $v['name'],
+            'type' => $v['type'] ?? 'bond',
+            'principal_amount' => (float) $v['principalAmount'],
+            'annual_interest_rate' => (float) $v['annualInterestRate'],
+            'owner' => $v['owner'] ?? 'Közös',
             'current_value' => $v['currentValue'] ?? null,
             'maturity_amount' => $v['maturityAmount'] ?? null,
             'next_payout_amount' => $v['nextPayoutAmount'] ?? null,
-            'next_payout_date' => $v['nextPayoutDate'] ?? null
         ]);
-        return response()->json($this->formatInvestment($i), 201);
+        $i->save();
+
+        return response()->json($this->crypto->formatInvestment($i, $household), 201);
     }
 
-    public function update(Request $request, $id) {
-        $i = Investment::where('household_id', $request->user()->household_id)->findOrFail($id);
+    public function update(Request $request, $id)
+    {
+        $household = $request->user()->household;
+        $i = Investment::where('household_id', $household->id)->findOrFail($id);
         $v = $request->validate([
             'name' => 'sometimes|string|max:255',
             'type' => 'sometimes|string',
@@ -78,27 +80,57 @@ class InvestmentController extends Controller {
             'currentValue' => 'nullable|numeric|min:0',
             'maturityAmount' => 'nullable|numeric|min:0',
             'nextPayoutAmount' => 'nullable|numeric|min:0',
-            'nextPayoutDate' => 'nullable|date'
+            'nextPayoutDate' => 'nullable|date',
         ]);
-        $data = [];
-        if (array_key_exists('name', $v)) $data['name'] = $v['name'];
-        if (array_key_exists('type', $v)) $data['type'] = $v['type'];
-        if (array_key_exists('principalAmount', $v)) $data['principal_amount'] = $v['principalAmount'];
-        if (array_key_exists('annualInterestRate', $v)) $data['annual_interest_rate'] = $v['annualInterestRate'];
-        if (array_key_exists('purchaseDate', $v)) $data['purchase_date'] = $v['purchaseDate'];
-        if (array_key_exists('maturityDate', $v)) $data['maturity_date'] = $v['maturityDate'];
-        if (array_key_exists('owner', $v)) $data['owner'] = $v['owner'];
-        if (array_key_exists('countInSavings', $v)) $data['count_in_savings'] = $v['countInSavings'];
-        if (array_key_exists('currentValue', $v)) $data['current_value'] = $v['currentValue'];
-        if (array_key_exists('maturityAmount', $v)) $data['maturity_amount'] = $v['maturityAmount'];
-        if (array_key_exists('nextPayoutAmount', $v)) $data['next_payout_amount'] = $v['nextPayoutAmount'];
-        if (array_key_exists('nextPayoutDate', $v)) $data['next_payout_date'] = $v['nextPayoutDate'];
-        $i->update($data);
-        return response()->json($this->formatInvestment($i));
+
+        $sensitive = $this->crypto->investmentResolved($i, $household);
+        if (array_key_exists('name', $v)) {
+            $sensitive['name'] = $v['name'];
+        }
+        if (array_key_exists('type', $v)) {
+            $sensitive['type'] = $v['type'];
+        }
+        if (array_key_exists('principalAmount', $v)) {
+            $sensitive['principal_amount'] = (float) $v['principalAmount'];
+        }
+        if (array_key_exists('annualInterestRate', $v)) {
+            $sensitive['annual_interest_rate'] = (float) $v['annualInterestRate'];
+        }
+        if (array_key_exists('owner', $v)) {
+            $sensitive['owner'] = $v['owner'];
+        }
+        if (array_key_exists('currentValue', $v)) {
+            $sensitive['current_value'] = $v['currentValue'];
+        }
+        if (array_key_exists('maturityAmount', $v)) {
+            $sensitive['maturity_amount'] = $v['maturityAmount'];
+        }
+        if (array_key_exists('nextPayoutAmount', $v)) {
+            $sensitive['next_payout_amount'] = $v['nextPayoutAmount'];
+        }
+        if (array_key_exists('purchaseDate', $v)) {
+            $i->purchase_date = $v['purchaseDate'];
+        }
+        if (array_key_exists('maturityDate', $v)) {
+            $i->maturity_date = $v['maturityDate'];
+        }
+        if (array_key_exists('nextPayoutDate', $v)) {
+            $i->next_payout_date = $v['nextPayoutDate'];
+        }
+        if (array_key_exists('countInSavings', $v)) {
+            $i->count_in_savings = $v['countInSavings'];
+        }
+
+        $this->crypto->persistInvestment($i, $household, $sensitive);
+        $i->save();
+
+        return response()->json($this->crypto->formatInvestment($i, $household));
     }
 
-    public function destroy(Request $request, $id) {
+    public function destroy(Request $request, $id)
+    {
         Investment::where('household_id', $request->user()->household_id)->findOrFail($id)->delete();
+
         return response()->json(null, 204);
     }
 }

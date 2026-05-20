@@ -3,13 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\HouseholdResource;
+use App\Services\EncryptedRecordService;
+use App\Support\BusinessSettings;
+use App\Support\UtilityTemplates;
 use Illuminate\Http\Request;
 
 class HouseholdController extends Controller
 {
+    public function __construct(
+        private readonly EncryptedRecordService $crypto,
+    ) {}
+
     public function show(Request $request)
     {
-        return response()->json($request->user()->household->load('users'));
+        return new HouseholdResource($request->user()->household->load('users'));
     }
 
     public function update(Request $request)
@@ -22,9 +30,23 @@ class HouseholdController extends Controller
             'business_enabled' => 'sometimes|boolean',
             'business_name' => 'sometimes|string|max:255',
             'shopify_shop_url' => 'sometimes|nullable|string|max:255',
-            'shopify_access_token' => 'sometimes|nullable|string|max:255',
+            'shopify_access_token' => 'sometimes|nullable|string|max:4096',
             'utility_split_enabled' => 'sometimes|boolean',
             'utility_split_partner_id' => 'sometimes|nullable|integer|exists:users,id',
+            'business_settings' => 'sometimes|array',
+            'business_settings.channels' => 'sometimes|array|min:1',
+            'business_settings.channels.*' => 'string|max:100',
+            'business_settings.payment_methods' => 'sometimes|array|min:1',
+            'business_settings.payment_methods.*' => 'string|max:100',
+            'business_settings.providers' => 'sometimes|array|min:1',
+            'business_settings.providers.*' => 'string|max:100',
+            'business_settings.destinations' => 'sometimes|array|min:1',
+            'business_settings.destinations.*' => 'string|max:100',
+            'utility_templates' => 'sometimes|array',
+            'utility_templates.*.type' => 'required|string|max:100',
+            'utility_templates.*.total' => 'sometimes|numeric|min:0',
+            'utility_templates.*.due_day' => 'sometimes|integer|min:1|max:28',
+            'utility_templates.*.split_rule' => 'sometimes|in:shared,dani-private,ildi-private',
         ]);
 
         // If a partner is selected, ensure they belong to the same household
@@ -35,13 +57,62 @@ class HouseholdController extends Controller
             }
         }
 
-        $household->update($request->only([
-            'name', 'manual_balance', 'business_enabled', 'business_name',
-            'shopify_shop_url', 'shopify_access_token', 'utility_split_enabled',
-            'utility_split_partner_id'
-        ]));
+        $data = [];
 
-        return response()->json($household->load('users'));
+        if ($request->has('name')) {
+            $data['name'] = $request->name;
+        }
+        $householdSensitive = null;
+        if ($request->has('manual_balance') || $request->exists('utility_templates')) {
+            $householdSensitive = $this->crypto->householdSensitive($household);
+        }
+        if ($request->has('manual_balance')) {
+            $householdSensitive['manual_balance'] = (float) $request->manual_balance;
+        }
+        if ($request->has('business_enabled')) {
+            $data['business_enabled'] = $request->boolean('business_enabled');
+        }
+        if ($request->has('business_name')) {
+            $data['business_name'] = $request->business_name;
+        }
+        if ($request->has('shopify_shop_url')) {
+            $data['shopify_shop_url'] = $request->shopify_shop_url;
+        }
+        if ($request->has('utility_split_enabled')) {
+            $data['utility_split_enabled'] = $request->boolean('utility_split_enabled');
+        }
+        if ($request->has('utility_split_partner_id')) {
+            $data['utility_split_partner_id'] = $request->utility_split_partner_id;
+        }
+        if ($request->has('business_settings')) {
+            $data['business_settings'] = BusinessSettings::resolve($request->business_settings);
+        }
+        if ($request->exists('utility_templates')) {
+            $householdSensitive = $householdSensitive ?? $this->crypto->householdSensitive($household);
+            $householdSensitive['utility_templates'] = UtilityTemplates::resolve($request->input('utility_templates', []));
+        }
+        if ($request->filled('shopify_access_token')) {
+            $token = trim($request->shopify_access_token);
+            if (! str_starts_with($token, 'shpat_') && ! str_starts_with($token, 'shpua_')) {
+                return response()->json([
+                    'message' => 'A Shopify Admin API token shpat_ vagy shpua_ előtaggal kezdődik.',
+                    'errors' => ['shopify_access_token' => ['Érvénytelen token formátum.']],
+                ], 422);
+            }
+            $data['shopify_access_token'] = $token;
+        }
+
+        if ($householdSensitive !== null) {
+            $this->crypto->persistHouseholdSensitive($household, $householdSensitive);
+        }
+
+        if (! empty($data)) {
+            $household->update($data);
+        } elseif ($householdSensitive !== null) {
+            $household->saveQuietly();
+        }
+
+        return new HouseholdResource($household->fresh()->load('users'));
     }
 
     public function updateInviteCode(Request $request)
@@ -134,5 +205,38 @@ class HouseholdController extends Controller
         ]);
 
         return response()->json($household->categories);
+    }
+
+    /**
+     * Teljes háztartás törlése: minden adat + minden felhasználói fiók.
+     */
+    public function destroy(Request $request)
+    {
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Csak az adminisztrátor törölheti a háztartást.'], 403);
+        }
+
+        $household = $request->user()->household;
+
+        $request->validate([
+            'confirm_name' => 'required|string',
+        ]);
+
+        if (trim($request->confirm_name) !== trim($household->name)) {
+            return response()->json([
+                'message' => 'A megerősítő szövegnek pontosan a háztartás nevét kell beírnod.',
+            ], 422);
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($household) {
+            $users = $household->users()->get();
+            foreach ($users as $user) {
+                $user->tokens()->delete();
+            }
+            $household->users()->delete();
+            $household->delete();
+        });
+
+        return response()->json(null, 204);
     }
 }

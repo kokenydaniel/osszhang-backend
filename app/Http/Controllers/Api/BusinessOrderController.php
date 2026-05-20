@@ -4,22 +4,32 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BusinessOrder;
+use App\Services\EncryptedRecordService;
 use App\Services\ShopifyService;
+use App\Support\BusinessSettings;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class BusinessOrderController extends Controller
 {
+    public function __construct(
+        private readonly EncryptedRecordService $crypto,
+    ) {}
+
     public function index(Request $request)
     {
-        return response()->json(BusinessOrder::where('household_id', $request->user()->household_id)
+        $household = $request->user()->household;
+
+        return response()->json(BusinessOrder::where('household_id', $household->id)
             ->orderBy('date', 'desc')
             ->get()
-            ->map(fn($o) => $this->mapOrder($o)));
+            ->map(fn ($o) => $this->mapOrder($o, $household)));
     }
 
     public function store(Request $request)
     {
+        $biz = $request->user()->household?->resolvedBusinessSettings() ?? BusinessSettings::defaults();
+
         $v = $request->validate([
             'customerName' => 'required',
             'amount' => 'required|numeric',
@@ -32,63 +42,73 @@ class BusinessOrderController extends Controller
             'invoiceId' => 'nullable|string',
         ]);
 
-        $o = BusinessOrder::create([
-            'household_id' => $request->user()->household_id,
-            'customer_name' => $v['customerName'],
-            'amount' => $v['amount'],
+        $household = $request->user()->household;
+        $o = new BusinessOrder([
+            'household_id' => $household->id,
             'date' => $v['date'],
-            'channel' => $v['channel'] ?? 'Webshop',
-            'payment_method' => $v['paymentMethod'] ?? 'Kártya',
-            'provider' => $v['provider'] ?? 'Shopify',
-            'destination' => $v['destination'] ?? 'Szolgáltatónál',
             'paid_date' => $v['paidDate'] ?? null,
-            'invoice_id' => $v['invoiceId'] ?? null,
-            'state' => ($v['paidDate'] ?? null) ? 'RENDBEN' : 'KINT'
+            'state' => ($v['paidDate'] ?? null) ? 'RENDBEN' : 'KINT',
         ]);
+        $this->crypto->persistBusinessOrder($o, $household, [
+            'customer_name' => $v['customerName'],
+            'amount' => (float) $v['amount'],
+            'channel' => $v['channel'] ?? ($biz['channels'][0] ?? 'Webshop'),
+            'payment_method' => $v['paymentMethod'] ?? ($biz['payment_methods'][0] ?? 'Kártya'),
+            'provider' => $v['provider'] ?? ($biz['providers'][0] ?? 'Nincs'),
+            'destination' => $v['destination'] ?? ($biz['destinations'][0] ?? 'Szolgáltatónál parkol'),
+            'invoice_id' => $v['invoiceId'] ?? null,
+        ]);
+        $o->save();
 
-        return response()->json($this->mapOrder($o), 201);
+        return response()->json($this->mapOrder($o, $household), 201);
     }
 
     public function update(Request $request, BusinessOrder $businessOrder)
     {
+        $household = $request->user()->household;
         $v = $request->validate([
             'customerName' => 'sometimes|required',
             'amount' => 'sometimes|required|numeric',
             'date' => 'sometimes|required|date',
         ]);
 
-        $businessOrder->update([
-            'customer_name' => $v['customerName'] ?? $businessOrder->customer_name,
-            'amount' => $v['amount'] ?? $businessOrder->amount,
-            'date' => $v['date'] ?? $businessOrder->date,
-            'channel' => $request->channel ?? $businessOrder->channel,
-            'payment_method' => $request->paymentMethod ?? $businessOrder->payment_method,
-            'provider' => $request->provider ?? $businessOrder->provider,
-            'destination' => $request->destination ?? $businessOrder->destination,
-            'paid_date' => $request->paidDate ?? $businessOrder->paid_date,
-            'invoice_id' => $request->invoiceId ?? $businessOrder->invoice_id,
-            'state' => $request->state ?? (($request->paidDate ?? $businessOrder->paid_date) ? 'RENDBEN' : 'KINT')
-        ]);
+        $sensitive = $this->crypto->businessOrderResolved($businessOrder, $household);
+        if (array_key_exists('customerName', $v)) {
+            $sensitive['customer_name'] = $v['customerName'];
+        }
+        if (array_key_exists('amount', $v)) {
+            $sensitive['amount'] = (float) $v['amount'];
+        }
+        if ($request->has('channel')) {
+            $sensitive['channel'] = $request->channel;
+        }
+        if ($request->has('paymentMethod')) {
+            $sensitive['payment_method'] = $request->paymentMethod;
+        }
+        if ($request->has('provider')) {
+            $sensitive['provider'] = $request->provider;
+        }
+        if ($request->has('destination')) {
+            $sensitive['destination'] = $request->destination;
+        }
+        if ($request->has('invoiceId')) {
+            $sensitive['invoice_id'] = $request->invoiceId;
+        }
+        if (array_key_exists('date', $v)) {
+            $businessOrder->date = $v['date'];
+        }
+        $businessOrder->paid_date = $request->paidDate ?? $businessOrder->paid_date;
+        $businessOrder->state = $request->state ?? ($businessOrder->paid_date ? 'RENDBEN' : 'KINT');
 
-        return response()->json($this->mapOrder($businessOrder));
+        $this->crypto->persistBusinessOrder($businessOrder, $household, $sensitive);
+        $businessOrder->save();
+
+        return response()->json($this->mapOrder($businessOrder, $household));
     }
 
-    private function mapOrder($o) {
-        return [
-            'id' => $o->id,
-            'date' => $o->date,
-            'customerName' => $o->customer_name,
-            'channel' => $o->channel,
-            'paymentMethod' => $o->payment_method,
-            'provider' => $o->provider,
-            'destination' => $o->destination,
-            'amount' => (float)$o->amount,
-            'paidDate' => $o->paid_date,
-            'invoiceId' => $o->invoice_id,
-            'shopifyOrderId' => (string)$o->shopify_order_id,
-            'shopifyOrderNumber' => $o->shopify_order_number,
-            'state' => $o->state
-        ];
+    private function mapOrder(BusinessOrder $o, $household)
+    {
+        return $this->crypto->formatBusinessOrder($o, $household);
     }
 
     public function destroy(BusinessOrder $businessOrder)
@@ -105,6 +125,7 @@ class BusinessOrderController extends Controller
         try {
             $user = $request->user();
             $household = $user->household;
+            $biz = $household ? $household->resolvedBusinessSettings() : BusinessSettings::defaults();
 
             if (!$household || !$household->shopify_shop_url || !$household->shopify_access_token) {
                 return response()->json([
@@ -138,7 +159,7 @@ class BusinessOrderController extends Controller
                 if (!$exists) {
                     // Smart Payment Method detection
                     $gateways = $so['payment_gateway_names'] ?? [];
-                    $method = 'Kártya';
+                    $method = $biz['payment_methods'][0] ?? 'Kártya';
                     
                     $isCod = false;
                     foreach ($gateways as $g) {
@@ -148,7 +169,12 @@ class BusinessOrderController extends Controller
                             break;
                         }
                     }
-                    if ($isCod) $method = 'Utánvét';
+                    if ($isCod) {
+                        $cod = collect($biz['payment_methods'])->first(
+                            fn ($m) => stripos($m, 'utánvét') !== false || stripos($m, 'utanvet') !== false
+                        );
+                        $method = $cod ?? 'Utánvét';
+                    }
 
                     // Invoice ID detection (look for E-LL-... or similar in note_attributes or tags)
                     $invoiceId = null;
@@ -182,34 +208,35 @@ class BusinessOrderController extends Controller
                     }
 
                     // Destination and State logic
-                    $destination = 'Szolgáltatónál parkol';
-                    $state = 'KINT_PARKOL'; // Default for webshop (parked at provider)
+                    $destination = $biz['destinations'][0] ?? 'Szolgáltatónál parkol';
+                    $state = 'KINT_PARKOL';
 
-                    if ($method === 'Utánvét') {
-                        $destination = 'Futárnál (GLS)';
-                        $state = 'KINT_PARKOL'; // Parked at courier
-                    }
+                    $providerLabel = count($gateways) > 0
+                        ? implode(', ', $gateways)
+                        : ($biz['providers'][0] ?? 'Nincs');
 
                     if ($so['financial_status'] !== 'paid') {
-                        $destination = 'Vevőnél';
-                        $state = 'KINT'; // Outstanding at customer
+                        $state = 'KINT';
                     }
 
-                    BusinessOrder::create([
+                    $o = new BusinessOrder([
                         'household_id' => $householdId,
-                        'customer_name' => ($so['customer']['first_name'] ?? '') . ' ' . ($so['customer']['last_name'] ?? 'Vásárló'),
-                        'amount' => $so['total_price'],
                         'date' => Carbon::parse($so['created_at'])->toDateString(),
-                        'channel' => 'Webshop',
-                        'payment_method' => $method,
-                        'provider' => count($gateways) > 0 ? implode(', ', $gateways) : 'Shopify',
-                        'destination' => $destination,
                         'paid_date' => $so['financial_status'] === 'paid' ? Carbon::parse($so['processed_at'])->toDateString() : null,
-                        'invoice_id' => $invoiceId,
                         'shopify_order_id' => $orderId,
                         'shopify_order_number' => $orderNumber,
-                        'state' => $state
+                        'state' => $state,
                     ]);
+                    $this->crypto->persistBusinessOrder($o, $household, [
+                        'customer_name' => ($so['customer']['first_name'] ?? '').' '.($so['customer']['last_name'] ?? 'Vásárló'),
+                        'amount' => (float) $so['total_price'],
+                        'channel' => BusinessSettings::shopifyChannelLabel($biz),
+                        'payment_method' => $method,
+                        'provider' => $providerLabel,
+                        'destination' => $destination,
+                        'invoice_id' => $invoiceId,
+                    ]);
+                    $o->save();
                     $importedCount++;
                 }
             }

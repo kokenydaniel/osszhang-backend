@@ -8,13 +8,28 @@ use App\Models\Meter;
 use App\Models\Saving;
 use App\Models\Transaction;
 use App\Models\Utility;
+use App\Models\Household;
+use App\Services\EncryptedRecordService;
+use App\Services\HouseholdCipherService;
 use App\Services\OpenAIService;
+use App\Services\TransactionSensitiveData;
 use Illuminate\Http\Request;
 
 class AIFinanceController extends Controller
 {
-    public function __construct(private OpenAIService $ai)
+    public function __construct(
+        private OpenAIService $ai,
+        private TransactionSensitiveData $sensitive,
+        private HouseholdCipherService $cipher,
+        private EncryptedRecordService $crypto,
+    ) {}
+
+    private function household(Request $request): Household
     {
+        $household = $request->user()->household;
+        $this->cipher->ensureCipherKey($household);
+
+        return $household;
     }
 
     private function envelope(array $data, bool $fallbackUsed = false, ?string $failureReason = null): array
@@ -115,43 +130,42 @@ class AIFinanceController extends Controller
             'month' => 'required|integer|min:1|max:12',
         ]);
 
-        $householdId = $request->user()->household_id;
+        $household = $this->household($request);
         $monthPrefix = sprintf('%04d-%02d', $validated['year'], $validated['month']);
 
-        $transactions = Transaction::where('household_id', $householdId)
+        $transactions = Transaction::where('household_id', $household->id)
             ->where('due_date', 'like', $monthPrefix.'%')
             ->with('items')
             ->get();
-        $utilities = Utility::where('household_id', $householdId)
+        $utilities = Utility::where('household_id', $household->id)
             ->where('due_date', 'like', $monthPrefix.'%')
             ->get();
 
-        $incomeReceived = $transactions->where('type', 'income')->where('is_reserve', false)->whereNotNull('paid_date')->sum('amount');
+        $incomeReceived = $transactions
+            ->where('type', 'income')
+            ->where('is_reserve', false)
+            ->whereNotNull('paid_date')
+            ->sum(fn ($t) => $this->sensitive->resolvedAmount($t, $household));
 
-        // For budget items with sub-items, use actual sub-item totals instead of budget amount
-        // Exclude reserve transactions from cashflow calculations
-        $expensePaid = $transactions->where('type', 'expense')->where('is_reserve', false)->sum(function ($t) {
-            if ($t->is_budget && $t->items->count() > 0) {
-                return $t->items->sum(fn ($i) => abs($i->amount));
-            }
-            return $t->paid_date ? (float)$t->amount : 0;
-        });
+        $expensePaid = $transactions
+            ->where('type', 'expense')
+            ->where('is_reserve', false)
+            ->sum(fn ($t) => $this->sensitive->paidExpenseTotal($t, $household));
 
-        $utilityPaid = $utilities->whereNotNull('paid_date')->sum(function ($u) {
-            return $u->split_rule === 'shared' ? $u->total / 2 : ($u->split_rule === 'dani-private' ? $u->total : 0);
+        $utilityPaid = $utilities->whereNotNull('paid_date')->sum(function ($u) use ($household) {
+            $s = $this->crypto->utilityResolved($u, $household);
+            $total = (float) ($s['total'] ?? 0);
+            $rule = $s['split_rule'] ?? 'shared';
+
+            return $rule === 'shared' ? $total / 2 : ($rule === 'dani-private' ? $total : 0);
         });
         $monthlyBalance = (float)$incomeReceived - (float)$expensePaid - (float)$utilityPaid;
         $overspendAmount = $monthlyBalance < 0 ? abs($monthlyBalance) : 0.0;
 
         // Category totals also use actual sub-item spending for budget items (exclude reserves)
-        $categoryTotals = $transactions->where('type', 'expense')->where('is_reserve', false)->groupBy('category')->map(function ($rows) {
-            return $rows->sum(function ($t) {
-                if ($t->is_budget && $t->items->count() > 0) {
-                    return (float)$t->items->sum(fn ($i) => abs($i->amount));
-                }
-                return (float)$t->amount;
-            });
-        });
+        $categoryTotals = $transactions->where('type', 'expense')->where('is_reserve', false)
+            ->groupBy(fn ($t) => $this->sensitive->resolvedCategory($t, $household))
+            ->map(fn ($rows) => $rows->sum(fn ($t) => $this->sensitive->expenseTotal($t, $household)));
         $topDrivers = collect($categoryTotals)
             ->sortDesc()
             ->take(3)
@@ -189,33 +203,44 @@ class AIFinanceController extends Controller
             'month' => 'required|integer|min:1|max:12',
         ]);
 
-        $householdId = $request->user()->household_id;
+        $household = $this->household($request);
         $monthPrefix = sprintf('%04d-%02d', $validated['year'], $validated['month']);
-        $transactions = Transaction::where('household_id', $householdId)
+        $transactions = Transaction::where('household_id', $household->id)
             ->where('due_date', 'like', $monthPrefix.'%')
             ->with('items')
             ->get();
-        $utilities = Utility::where('household_id', $householdId)
+        $utilities = Utility::where('household_id', $household->id)
             ->where('due_date', 'like', $monthPrefix.'%')
             ->get();
 
-        // Exclude reserve transactions from cashflow calculations
-        $receivedIncome = (float)$transactions->where('type', 'income')->where('is_reserve', false)->whereNotNull('paid_date')->sum('amount');
-        $pendingIncome = (float)$transactions->where('type', 'income')->where('is_reserve', false)->whereNull('paid_date')->sum('amount');
+        $receivedIncome = (float) $transactions
+            ->where('type', 'income')
+            ->where('is_reserve', false)
+            ->whereNotNull('paid_date')
+            ->sum(fn ($t) => $this->sensitive->resolvedAmount($t, $household));
+        $pendingIncome = (float) $transactions
+            ->where('type', 'income')
+            ->where('is_reserve', false)
+            ->whereNull('paid_date')
+            ->sum(fn ($t) => $this->sensitive->resolvedAmount($t, $household));
 
-        // For budget items with sub-items, use actual sub-item totals
-        $paidExpense = (float)$transactions->where('type', 'expense')->where('is_reserve', false)->sum(function ($t) {
-            if ($t->is_budget && $t->items->count() > 0) {
-                return $t->items->sum(fn ($i) => abs($i->amount));
-            }
-            return $t->paid_date ? (float)$t->amount : 0;
-        });
-        $pendingExpense = (float)$transactions->where('type', 'expense')->where('is_reserve', false)->whereNull('paid_date')
-            ->filter(fn ($t) => !$t->is_budget)
-            ->sum('amount');
+        $paidExpense = (float) $transactions
+            ->where('type', 'expense')
+            ->where('is_reserve', false)
+            ->sum(fn ($t) => $this->sensitive->paidExpenseTotal($t, $household));
+        $pendingExpense = (float) $transactions
+            ->where('type', 'expense')
+            ->where('is_reserve', false)
+            ->whereNull('paid_date')
+            ->filter(fn ($t) => ! $t->is_budget)
+            ->sum(fn ($t) => $this->sensitive->resolvedAmount($t, $household));
 
-        $pendingUtility = (float)$utilities->whereNull('paid_date')->sum(function ($u) {
-            return $u->split_rule === 'shared' ? $u->total / 2 : ($u->split_rule === 'dani-private' ? $u->total : 0);
+        $pendingUtility = (float) $utilities->whereNull('paid_date')->sum(function ($u) use ($household) {
+            $s = $this->crypto->utilityResolved($u, $household);
+            $total = (float) ($s['total'] ?? 0);
+            $rule = $s['split_rule'] ?? 'shared';
+
+            return $rule === 'shared' ? $total / 2 : ($rule === 'dani-private' ? $total : 0);
         });
 
         $p50 = $receivedIncome + ($pendingIncome * 0.8) - $paidExpense - ($pendingExpense * 0.85) - ($pendingUtility * 0.85);
@@ -242,16 +267,19 @@ class AIFinanceController extends Controller
             'month' => 'required|integer|min:1|max:12',
         ]);
 
-        $meters = Meter::where('household_id', $request->user()->household_id)->with('readings')->get();
+        $household = $this->household($request);
+        $meters = Meter::where('household_id', $household->id)->with('readings')->get();
         $anomalies = [];
         foreach ($meters as $meter) {
-            $target = $meter->readings->first(fn ($r) => (int)$r->year === (int)$validated['year'] && (int)$r->month === (int)$validated['month']);
-            if (!$target) {
+            $meterData = $this->crypto->meterResolved($meter, $household);
+            $target = $meter->readings->first(fn ($r) => (int) $r->year === (int) $validated['year'] && (int) $r->month === (int) $validated['month']);
+            if (! $target) {
                 continue;
             }
-            $historical = $meter->readings->filter(fn ($r) => !((int)$r->year === (int)$validated['year'] && (int)$r->month === (int)$validated['month']))
-                ->pluck('consumption')
-                ->map(fn ($x) => max(0, (float)$x))
+            $targetData = $this->crypto->readingResolved($target, $household);
+            $historical = $meter->readings
+                ->filter(fn ($r) => ! ((int) $r->year === (int) $validated['year'] && (int) $r->month === (int) $validated['month']))
+                ->map(fn ($r) => max(0, (float) ($this->crypto->readingResolved($r, $household)['consumption'] ?? 0)))
                 ->values();
 
             if ($historical->count() < 3) {
@@ -259,13 +287,14 @@ class AIFinanceController extends Controller
             }
             $avg = $historical->avg();
             $threshold = max(1, $avg * 0.35);
-            $diff = (float)$target->consumption - (float)$avg;
+            $actualConsumption = (float) ($targetData['consumption'] ?? 0);
+            $diff = $actualConsumption - (float) $avg;
             if (abs($diff) > $threshold) {
                 $anomalies[] = [
                     'meter_id' => $meter->id,
-                    'meter_name' => $meter->name,
+                    'meter_name' => (string) ($meterData['name'] ?? ''),
                     'expected' => round($avg, 2),
-                    'actual' => (float)$target->consumption,
+                    'actual' => $actualConsumption,
                     'severity' => abs($diff) > ($avg * 0.6) ? 'high' : 'medium',
                     'reason' => $diff > 0 ? 'Szokatlanul magas fogyasztás az átlaghoz képest.' : 'Szokatlanul alacsony fogyasztás az átlaghoz képest.',
                 ];
@@ -291,8 +320,11 @@ class AIFinanceController extends Controller
             'constraints.min_buffer' => 'nullable|numeric|min:0',
         ]);
 
-        $savings = Saving::where('household_id', $request->user()->household_id)->with('ledger')->get();
-        $currentTotal = (float)$savings->sum(fn ($s) => $s->ledger->sum('amount'));
+        $household = $this->household($request);
+        $savings = Saving::where('household_id', $household->id)->with('ledger')->get();
+        $currentTotal = (float) $savings->sum(function ($s) use ($household) {
+            return $s->ledger->sum(fn ($e) => (float) ($this->crypto->ledgerResolved($e, $household)['amount'] ?? 0));
+        });
         $goals = collect($validated['goals']);
         $totalTarget = (float)$goals->sum('target_amount');
         $gap = max(0, $totalTarget - $currentTotal);
@@ -323,24 +355,34 @@ class AIFinanceController extends Controller
     public function optimizeDebts(Request $request)
     {
         $strategy = $request->input('strategy', 'avalanche');
-        $debts = Debt::where('household_id', $request->user()->household_id)->get();
-        $active = $debts->filter(fn ($d) => ((float)$d->target_amount - (float)$d->paid_amount) > 0)->values();
+        $household = $this->household($request);
+        $debts = Debt::where('household_id', $household->id)->get();
+        $active = $debts->filter(function ($d) use ($household) {
+            $s = $this->crypto->debtResolved($d, $household);
 
-        $ordered = $active->sortBy(function ($debt) use ($strategy) {
-            if ($strategy === 'snowball') {
-                return ((float)$debt->target_amount - (float)$debt->paid_amount);
-            }
-            return -1 * (float)($debt->annual_interest_rate ?? 0);
+            return ((float) ($s['target_amount'] ?? 0) - (float) ($s['paid_amount'] ?? 0)) > 0;
         })->values();
 
-        $schedule = $ordered->map(function ($debt, $index) {
-            $remaining = (float)$debt->target_amount - (float)$debt->paid_amount;
+        $ordered = $active->sortBy(function ($debt) use ($strategy, $household) {
+            $s = $this->crypto->debtResolved($debt, $household);
+            $remaining = (float) ($s['target_amount'] ?? 0) - (float) ($s['paid_amount'] ?? 0);
+            if ($strategy === 'snowball') {
+                return $remaining;
+            }
+
+            return -1 * (float) ($s['annual_interest_rate'] ?? 0);
+        })->values();
+
+        $schedule = $ordered->map(function ($debt, $index) use ($household) {
+            $s = $this->crypto->debtResolved($debt, $household);
+            $remaining = (float) ($s['target_amount'] ?? 0) - (float) ($s['paid_amount'] ?? 0);
+
             return [
                 'rank' => $index + 1,
                 'debt_id' => $debt->id,
-                'name' => $debt->name,
+                'name' => (string) ($s['name'] ?? ''),
                 'remaining' => round($remaining, 2),
-                'recommended_extra_payment' => round(max((float)($debt->minimum_payment ?? 0), $remaining * 0.08), 2),
+                'recommended_extra_payment' => round(max((float) ($s['minimum_payment'] ?? 0), $remaining * 0.08), 2),
             ];
         })->all();
 
@@ -348,24 +390,34 @@ class AIFinanceController extends Controller
             'strategy' => in_array($strategy, ['avalanche', 'snowball'], true) ? $strategy : 'avalanche',
             'schedule' => $schedule,
             'payoff_date' => now()->addMonths(max(1, count($schedule) * 3))->toDateString(),
-            'total_interest' => round($active->sum(fn ($d) => ((float)($d->target_amount - $d->paid_amount)) * ((float)($d->annual_interest_rate ?? 0) / 100) * 0.5), 2),
+            'total_interest' => round($active->sum(function ($d) use ($household) {
+                $s = $this->crypto->debtResolved($d, $household);
+                $remaining = (float) ($s['target_amount'] ?? 0) - (float) ($s['paid_amount'] ?? 0);
+
+                return $remaining * ((float) ($s['annual_interest_rate'] ?? 0) / 100) * 0.5;
+            }), 2),
             'alternatives' => ['avalanche', 'snowball'],
         ]));
     }
 
     public function weeklyBriefing(Request $request)
     {
-        $householdId = $request->user()->household_id;
+        $household = $this->household($request);
         $weekStart = $request->query('week_start')
             ? \Carbon\Carbon::parse($request->query('week_start'))->startOfDay()
             : now()->startOfWeek();
         $weekEnd = $weekStart->copy()->endOfWeek();
 
-        $transactions = Transaction::where('household_id', $householdId)
+        $transactions = Transaction::where('household_id', $household->id)
             ->whereBetween('due_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->with('items')
             ->get();
-        $income = (float)$transactions->where('type', 'income')->sum('amount');
-        $expense = (float)$transactions->where('type', 'expense')->sum('amount');
+        $income = (float) $transactions
+            ->where('type', 'income')
+            ->sum(fn ($t) => $this->sensitive->resolvedAmount($t, $household));
+        $expense = (float) $transactions
+            ->where('type', 'expense')
+            ->sum(fn ($t) => $this->sensitive->expenseTotal($t, $household));
         $balance = $income - $expense;
 
         $payload = [
