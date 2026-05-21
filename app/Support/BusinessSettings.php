@@ -32,6 +32,10 @@ class BusinessSettings
 
     public static function normalizeList(?array $list, array $fallback): array
     {
+        if ($list === null) {
+            return $fallback;
+        }
+
         if (! is_array($list)) {
             return $fallback;
         }
@@ -41,7 +45,7 @@ class BusinessSettings
             $list
         ))));
 
-        return count($clean) > 0 ? $clean : $fallback;
+        return $clean;
     }
 
     public static function shopifyChannelLabel(array $settings): string
@@ -52,6 +56,6 @@ class BusinessSettings
             }
         }
 
-        return $settings['channels'][0] ?? 'Webshop (Shopify)';
+        return $settings['channels'][0] ?? '';
     }
 }
