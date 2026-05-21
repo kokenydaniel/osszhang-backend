@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HouseholdResource;
-use App\Services\EncryptedRecordService;
 use App\Http\Resources\UserResource;
+use App\Models\User;
+use App\Services\EncryptedRecordService;
 use App\Support\BusinessSettings;
 use App\Support\Username;
 use App\Support\UtilityTemplates;
@@ -197,9 +198,15 @@ class HouseholdController extends Controller
             return response()->json(['message' => 'A felhasználó nem tagja a háztartásodnak.'], 404);
         }
 
-        $member->update(['household_id' => null]);
+        $household = $request->user()->household;
+        if ($household->utility_split_partner_id === $member->id) {
+            $household->update(['utility_split_partner_id' => null]);
+        }
 
-        return response()->json(['message' => 'Tag eltávolítva.']);
+        $member->tokens()->delete();
+        $member->delete();
+
+        return response()->json(['message' => 'Tag fiókja törölve.']);
     }
 
     public function updateCategories(Request $request)
@@ -234,11 +241,13 @@ class HouseholdController extends Controller
         }
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($household) {
-            $users = $household->users()->get();
-            foreach ($users as $user) {
+            $household->update(['utility_split_partner_id' => null]);
+
+            $household->users()->each(function (User $user) {
                 $user->tokens()->delete();
-            }
-            $household->users()->delete();
+                $user->delete();
+            });
+
             $household->delete();
         });
 
