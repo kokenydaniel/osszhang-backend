@@ -19,14 +19,15 @@ class UtilityBalanceService
         return stripos($type, 'kiegyenlít') !== false;
     }
 
-    /** @param Collection<int, Utility> $bills */
-    public function compute(Collection $bills, User $viewer, bool $splitEnabled, Household $household, EncryptedRecordService $crypto): array
+    /**
+     * @param  Collection<int, Utility>  $bills
+     * @return array{household_receivable: float, household_payable: float, household_paid_total: float, partner_paid_total: float}
+     */
+    private function absoluteLedger(Collection $bills, bool $splitEnabled, Household $household, EncryptedRecordService $crypto): array
     {
-        $isAdmin = $viewer->role === 'admin';
-
-        $partnerOwesUs = 0.0;
-        $weOwePartner = 0.0;
-        $wePaidTotal = 0.0;
+        $householdReceivable = 0.0;
+        $householdPayable = 0.0;
+        $householdPaidTotal = 0.0;
         $partnerPaidTotal = 0.0;
 
         foreach ($bills as $bill) {
@@ -43,26 +44,64 @@ class UtilityBalanceService
             $paidBy = $s['paid_by'] ?? null;
             $splitRule = (string) ($s['split_rule'] ?? 'shared');
 
-            $wePaid = $isAdmin ? $paidBy === 'Mi' : $paidBy === 'Ildi';
-            $partnerPaid = $isAdmin ? $paidBy === 'Ildi' : $paidBy === 'Mi';
-            $isOurPrivate = $isAdmin ? $splitRule === 'dani-private' : $splitRule === 'ildi-private';
-            $isPartnerPrivate = $isAdmin ? $splitRule === 'ildi-private' : $splitRule === 'dani-private';
+            if ($paidBy === null) {
+                continue;
+            }
 
-            if ($wePaid) {
-                $wePaidTotal += $total;
-                if ($splitRule === 'shared') {
-                    $partnerOwesUs += $total / 2;
-                } elseif ($isPartnerPrivate) {
-                    $partnerOwesUs += $total;
-                }
-            } elseif ($partnerPaid) {
+            $householdPaid = $paidBy === 'Mi';
+            $partnerPaid = $paidBy === 'Ildi';
+
+            if ($householdPaid) {
+                $householdPaidTotal += $total;
+            }
+            if ($partnerPaid) {
                 $partnerPaidTotal += $total;
-                if ($splitRule === 'shared') {
-                    $weOwePartner += $total / 2;
-                } elseif ($isOurPrivate) {
-                    $weOwePartner += $total;
+            }
+
+            if ($splitRule === 'shared') {
+                if ($householdPaid) {
+                    $householdReceivable += $total / 2;
+                }
+                if ($partnerPaid) {
+                    $householdPayable += $total / 2;
+                }
+            } elseif ($splitRule === 'dani-private') {
+                if ($partnerPaid) {
+                    $householdPayable += $total;
+                }
+            } elseif ($splitRule === 'ildi-private') {
+                if ($householdPaid) {
+                    $householdReceivable += $total;
                 }
             }
+        }
+
+        return [
+            'household_receivable' => round($householdReceivable, 2),
+            'household_payable' => round($householdPayable, 2),
+            'household_paid_total' => round($householdPaidTotal, 2),
+            'partner_paid_total' => round($partnerPaidTotal, 2),
+        ];
+    }
+
+    /** @param Collection<int, Utility> $bills */
+    public function compute(Collection $bills, User $viewer, bool $splitEnabled, Household $household, EncryptedRecordService $crypto): array
+    {
+        $ledger = $this->absoluteLedger($bills, $splitEnabled, $household, $crypto);
+
+        $onHouseholdSide = $household->utility_split_partner_id === null
+            || (int) $viewer->id !== (int) $household->utility_split_partner_id;
+
+        if ($onHouseholdSide) {
+            $partnerOwesUs = $ledger['household_receivable'];
+            $weOwePartner = $ledger['household_payable'];
+            $wePaidTotal = $ledger['household_paid_total'];
+            $partnerPaidTotal = $ledger['partner_paid_total'];
+        } else {
+            $partnerOwesUs = $ledger['household_payable'];
+            $weOwePartner = $ledger['household_receivable'];
+            $wePaidTotal = $ledger['partner_paid_total'];
+            $partnerPaidTotal = $ledger['household_paid_total'];
         }
 
         $netBalance = round($partnerOwesUs - $weOwePartner, 2);
