@@ -150,7 +150,7 @@ class HouseholdController extends Controller
 
         $member->update($request->only(['role', 'permissions']));
 
-        return new UserResource($member->fresh());
+        return response()->json((new UserResource($member->fresh()))->resolve());
     }
 
     public function addMember(Request $request)
@@ -181,7 +181,7 @@ class HouseholdController extends Controller
             'permissions' => $request->permissions,
         ]);
 
-        return new UserResource($member);
+        return response()->json((new UserResource($member))->resolve(), 201);
     }
 
     public function deleteMember(Request $request, \App\Models\User $member)
