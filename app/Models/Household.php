@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Casts\LenientEncrypted;
 use App\Support\BusinessSettings as BusinessSettingsSupport;
+use App\Support\DebtsSettings as DebtsSettingsSupport;
+use App\Support\MetersSettings as MetersSettingsSupport;
+use App\Support\SavingsSettings as SavingsSettingsSupport;
 use App\Support\UtilityTemplates as UtilityTemplatesSupport;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +15,9 @@ class Household extends Model
 {
     protected $fillable = [
         'name', 'invite_code', 'categories', 'manual_balance',
-        'business_enabled', 'business_name', 'shopify_shop_url', 'shopify_access_token', 'utility_split_enabled',
+        'budget_enabled', 'savings_enabled', 'debts_enabled', 'utilities_enabled', 'meters_enabled',
+        'savings_settings', 'debts_settings', 'meters_settings', 'onboarding_completed',
+        'business_enabled', 'business_name', 'shopify_import_enabled', 'shopify_shop_url', 'shopify_access_token', 'utility_split_enabled',
         'utility_split_partner_id', 'utility_templates', 'cipher_key_encrypted', 'sensitive_encrypted',
     ];
 
@@ -28,7 +33,17 @@ class Household extends Model
     protected $casts = [
         'categories' => 'array',
         'manual_balance' => 'float',
+        'budget_enabled' => 'boolean',
+        'savings_enabled' => 'boolean',
+        'debts_enabled' => 'boolean',
+        'utilities_enabled' => 'boolean',
+        'meters_enabled' => 'boolean',
+        'savings_settings' => 'array',
+        'debts_settings' => 'array',
+        'meters_settings' => 'array',
+        'onboarding_completed' => 'boolean',
         'business_enabled' => 'boolean',
+        'shopify_import_enabled' => 'boolean',
         'utility_split_enabled' => 'boolean',
         'shopify_access_token' => LenientEncrypted::class,
         'business_settings' => 'array',
@@ -43,6 +58,21 @@ class Household extends Model
     public function resolvedUtilityTemplates(): array
     {
         return UtilityTemplatesSupport::resolve($this->utility_templates);
+    }
+
+    public function resolvedSavingsSettings(): array
+    {
+        return SavingsSettingsSupport::resolve($this->savings_settings);
+    }
+
+    public function resolvedDebtsSettings(): array
+    {
+        return DebtsSettingsSupport::resolve($this->debts_settings);
+    }
+
+    public function resolvedMetersSettings(): array
+    {
+        return MetersSettingsSupport::resolve($this->meters_settings);
     }
 
     protected static function booted(): void

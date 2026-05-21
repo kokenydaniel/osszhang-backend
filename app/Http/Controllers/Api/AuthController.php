@@ -38,18 +38,18 @@ class AuthController extends Controller
         $household = Household::create([
             'name' => $request->household_name,
             'invite_code' => $inviteCode,
+            'budget_enabled' => true,
+            'savings_enabled' => false,
+            'debts_enabled' => false,
+            'utilities_enabled' => false,
+            'meters_enabled' => false,
             'business_enabled' => false,
             'business_name' => '',
             'utility_split_enabled' => false,
             'categories' => [
                 'Fizetés',
-                'Kaja',
-                'Tankolás',
+                'Élelmiszer',
                 'Rezsi',
-                'Kölcsönök',
-                'Szórakozás',
-                'Megtakarítás',
-                'Vállalkozás',
             ],
         ]);
 
@@ -61,7 +61,7 @@ class AuthController extends Controller
             'must_change_password' => false,
             'household_id' => $household->id,
             'role' => 'admin',
-            'permissions' => ['budget', 'utilities', 'business', 'meters', 'debts', 'savings'],
+            'permissions' => ['budget'],
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
