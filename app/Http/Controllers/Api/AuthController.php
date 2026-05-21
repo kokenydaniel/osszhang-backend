@@ -38,6 +38,9 @@ class AuthController extends Controller
         $household = Household::create([
             'name' => $request->household_name,
             'invite_code' => $inviteCode,
+            'business_enabled' => false,
+            'business_name' => '',
+            'utility_split_enabled' => false,
             'categories' => [
                 'Fizetés',
                 'Kaja',
