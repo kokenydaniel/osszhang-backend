@@ -127,7 +127,14 @@ class BusinessOrderController extends Controller
             $household = $user->household;
             $biz = $household ? $household->resolvedBusinessSettings() : BusinessSettings::defaults();
 
-            if (!$household || !$household->shopify_shop_url || !$household->shopify_access_token) {
+            if (!$household || !$household->shopify_import_enabled) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'A Shopify import nincs engedélyezve. Kapcsold be a Beállítások → Modulok menüpontban.',
+                ], 400);
+            }
+
+            if (!$household->shopify_shop_url || !$household->shopify_access_token) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Nincsenek beállítva Shopify hozzáférési adatok ehhez a háztartáshoz!'

@@ -71,6 +71,7 @@ class AIFinanceController extends Controller
 
             $keywords = [
                 'Rezsi' => ['eon', 'mvm', 'villany', 'gáz', 'viz', 'víz', 'csatorna', 'rezsi'],
+                'Élelmiszer' => ['aldi', 'lidl', 'spar', 'tesco', 'auchan', 'kaja', 'etel', 'étel', 'food', 'élelmiszer'],
                 'Kaja' => ['aldi', 'lidl', 'spar', 'tesco', 'auchan', 'kaja', 'etel', 'étel', 'food'],
                 'Tankolás' => ['mol', 'omv', 'shell', 'tank'],
                 'Autó' => ['szerviz', 'gumi', 'parkol', 'auto', 'autó'],

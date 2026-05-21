@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $household = Household::create([
-            'name' => 'PénzPilot Otthon',
-            'invite_code' => 'PILOT123'
+            'name' => 'Összhang Otthon',
+            'invite_code' => 'OSSZH123'
         ]);
 
         User::create([
