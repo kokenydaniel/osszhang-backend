@@ -34,4 +34,4 @@ console_command = 'php /var/www/artisan tinker'
   cpus = 1
 
 [deploy]
-  release_command = "php /var/www/artisan migrate --force && php /var/www/artisan demo:seed"
+  release_command = "sh -c 'php /var/www/artisan migrate --force && php /var/www/artisan demo:seed'"
