@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for penzpilot-backend on 2026-05-14T17:11:47+02:00
+# fly.toml app configuration file generated for osszhang-backend
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'penzpilot-backend'
+app = 'osszhang-backend'
 primary_region = 'fra'
 console_command = 'php /var/www/artisan tinker'
 
