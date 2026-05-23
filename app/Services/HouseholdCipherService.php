@@ -5,10 +5,7 @@ namespace App\Services;
 use App\Models\Household;
 use Illuminate\Support\Facades\Crypt;
 
-/**
- * Háztartásonkénti titkosítás — az adatbázisban csak titkosított blob látszik.
- * A Laravel app (APP_KEY) oldja fel a háztartás kulcsát és szolgálja ki a tagoknak átlátszóan.
- */
+/** Per-household AES-256-GCM; household keys are wrapped with APP_KEY. */
 class HouseholdCipherService
 {
     public function ensureCipherKey(Household $household): void

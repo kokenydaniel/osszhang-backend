@@ -24,7 +24,6 @@ class TransactionSensitiveData
             try {
                 return $this->cipher->decrypt($household, $transaction->encrypted_payload);
             } catch (\Throwable) {
-                // Régi / hibás rekord — essünk vissza a nyílt oszlopokra
             }
         }
 

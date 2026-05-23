@@ -6,9 +6,7 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 
-/**
- * Titkosított mező — nem dob hibát, ha régi plain-text vagy hibás APP_KEY melletti adat van az DB-ben.
- */
+/** Tolerates legacy plain-text or APP_KEY-mismatched ciphertext without throwing. */
 class LenientEncrypted implements CastsAttributes
 {
     public function get($model, string $key, mixed $value, array $attributes): ?string

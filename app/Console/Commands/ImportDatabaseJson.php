@@ -22,7 +22,6 @@ class ImportDatabaseJson extends Command
 
         $data = json_decode(File::get($file), true);
 
-        // Order is important to respect foreign keys
         $tables = [
             'households',
             'users',
@@ -37,7 +36,6 @@ class ImportDatabaseJson extends Command
             'settings'
         ];
 
-        // Disable foreign key checks for the import
         $driver = DB::getDriverName();
         if ($driver === 'pgsql') {
             DB::statement('SET CONSTRAINTS ALL DEFERRED');
@@ -51,7 +49,6 @@ class ImportDatabaseJson extends Command
             if (isset($data[$table])) {
                 $this->info("Importing table: {$table}");
                 
-                // Convert objects to arrays if needed
                 $rows = array_map(function($row) {
                     return (array) $row;
                 }, $data[$table]);
@@ -64,12 +61,24 @@ class ImportDatabaseJson extends Command
             }
         }
 
-        if ($driver === 'mysql') {
+        if ($driver === 'pgsql') {
+            $this->syncPostgresSequences($tables);
+        } elseif ($driver === 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
         } elseif ($driver === 'sqlite') {
             DB::statement('PRAGMA foreign_keys = ON');
         }
 
         $this->info("Database imported successfully from {$file}");
+    }
+
+    private function syncPostgresSequences(array $tables): void
+    {
+        foreach ($tables as $table) {
+            DB::statement(
+                "SELECT setval(pg_get_serial_sequence('{$table}', 'id'), COALESCE((SELECT MAX(id) FROM \"{$table}\"), 1), true)",
+            );
+            $this->line("Synced sequence: {$table}_id_seq");
+        }
     }
 }

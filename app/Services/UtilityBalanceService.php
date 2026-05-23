@@ -19,10 +19,6 @@ class UtilityBalanceService
         return stripos($type, 'kiegyenlít') !== false;
     }
 
-    /**
-     * @param  Collection<int, Utility>  $bills
-     * @return array{household_receivable: float, household_payable: float, household_paid_total: float, partner_paid_total: float}
-     */
     private function absoluteLedger(Collection $bills, bool $splitEnabled, Household $household, EncryptedRecordService $crypto): array
     {
         $householdReceivable = 0.0;
@@ -84,7 +80,6 @@ class UtilityBalanceService
         ];
     }
 
-    /** @param Collection<int, Utility> $bills */
     public function compute(Collection $bills, User $viewer, bool $splitEnabled, Household $household, EncryptedRecordService $crypto): array
     {
         $ledger = $this->absoluteLedger($bills, $splitEnabled, $household, $crypto);

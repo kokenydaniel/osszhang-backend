@@ -20,9 +20,6 @@ use App\Services\Formatters\SavingRecordFormatter;
 use App\Services\Formatters\UtilityRecordFormatter;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Háztartásonkénti titkosítás — az adatbázisban csak blob + semleges placeholder látszik.
- */
 class EncryptedRecordService
 {
     public function __construct(

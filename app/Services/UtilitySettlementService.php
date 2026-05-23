@@ -12,9 +12,6 @@ class UtilitySettlementService
         private readonly EncryptedRecordService $crypto,
     ) {}
 
-    /**
-     * Visszavonja az elszámolást: egyenleg korrekció, opcionálisan kapcsolt tranzakció törlése.
-     */
     public function revert(UtilitySettlement $settlement, Household $household, bool $deleteTransaction = true): void
     {
         $resolved = $this->crypto->settlementResolved($settlement, $household);
