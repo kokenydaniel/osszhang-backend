@@ -32,6 +32,9 @@ final class AccessControl
     public const PREMIUM_MODULES = ['business'];
 
     /** @var list<string> */
+    public const PRO_FEATURES = ['private_wallet', 'utility_split'];
+
+    /** @var list<string> */
     public const PREMIUM_FEATURES = ['shopify_import', 'ai'];
 
     public static function isBetaMode(): bool
@@ -77,20 +80,22 @@ final class AccessControl
             return true;
         }
 
-        if (! in_array($featureId, self::PREMIUM_FEATURES, true)) {
-            return false;
+        $tier = self::effectiveTier($user);
+
+        if (in_array($featureId, self::PRO_FEATURES, true)) {
+            return in_array($tier, [self::TIER_PRO, self::TIER_PREMIUM], true);
         }
 
-        return self::effectiveTier($user) === self::TIER_PREMIUM;
+        if (in_array($featureId, self::PREMIUM_FEATURES, true)) {
+            return $tier === self::TIER_PREMIUM;
+        }
+
+        return false;
     }
 
     public static function canCreatePrivateWallet(User $user): bool
     {
-        if ($user->lifetime_admin || self::isBetaMode()) {
-            return true;
-        }
-
-        return in_array(self::effectiveTier($user), [self::TIER_PRO, self::TIER_PREMIUM], true);
+        return self::canUseFeature($user, 'private_wallet');
     }
 
     public static function maxWallets(User $user): ?int

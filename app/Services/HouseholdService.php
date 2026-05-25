@@ -10,6 +10,7 @@ use App\Http\Requests\Household\UpdateMemberRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Household;
 use App\Models\User;
+use App\Support\AccessControl;
 use App\Support\BusinessSettings;
 use App\Support\DebtsSettings;
 use App\Support\MetersSettings;
@@ -32,8 +33,10 @@ class HouseholdService
         return $household->load('users');
     }
 
-    public function update(Household $household, UpdateHouseholdRequest $request): Household
+    public function update(Household $household, UpdateHouseholdRequest $request, User $user): Household
     {
+        $this->assertTierAllowsModuleSettings($user, $request);
+
         if ($request->has('utility_split_partner_id') && $request->utility_split_partner_id !== null) {
             $partner = User::find($request->utility_split_partner_id);
             if (! $partner || $partner->household_id !== $household->id) {
@@ -116,6 +119,42 @@ class HouseholdService
         }
 
         return $household->fresh()->load('users');
+    }
+
+    private function assertTierAllowsModuleSettings(User $user, UpdateHouseholdRequest $request): void
+    {
+        $moduleLabels = [
+            'savings' => 'Megtakarítás',
+            'debts' => 'Tartozások',
+            'utilities' => 'Rezsi',
+            'meters' => 'Közműórák',
+            'business' => 'Vállalkozás',
+        ];
+
+        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business'] as $module) {
+            $key = "{$module}_enabled";
+            if ($request->has($key) && $request->boolean($key) && ! AccessControl::canAccessModule($user, $module)) {
+                $label = $moduleLabels[$module] ?? $module;
+                throw new HttpResponseException(response()->json([
+                    'message' => "A(z) {$label} modul nem érhető el a jelenlegi csomagodban.",
+                    'errors' => [$key => ['Előfizetés szükséges.']],
+                ], 422));
+            }
+        }
+
+        if ($request->has('shopify_import_enabled') && $request->boolean('shopify_import_enabled') && ! AccessControl::canUseFeature($user, 'shopify_import')) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'A Shopify import nem érhető el a jelenlegi csomagodban.',
+                'errors' => ['shopify_import_enabled' => ['Premium előfizetés szükséges.']],
+            ], 422));
+        }
+
+        if ($request->has('utility_split_enabled') && $request->boolean('utility_split_enabled') && ! AccessControl::canUseFeature($user, 'utility_split')) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'A rezsi megosztás nem érhető el a jelenlegi csomagodban.',
+                'errors' => ['utility_split_enabled' => ['Pro előfizetés szükséges.']],
+            ], 422));
+        }
     }
 
     public function updateInviteCode(User $actor, UpdateInviteCodeRequest $request): array

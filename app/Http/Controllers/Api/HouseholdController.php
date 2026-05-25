@@ -25,7 +25,7 @@ class HouseholdController extends Controller
     public function update(UpdateHouseholdRequest $request)
     {
         return new HouseholdResource(
-            $this->householdService->update($request->user()->household, $request),
+            $this->householdService->update($request->user()->household, $request, $request->user()),
         );
     }
 
