@@ -19,6 +19,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'permissions' => $this->permissions ?? [],
             'must_change_password' => (bool) $this->must_change_password,
+            'lifetime_admin' => (bool) $this->lifetime_admin,
         ];
     }
 }

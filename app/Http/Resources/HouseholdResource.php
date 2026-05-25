@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Services\EncryptedRecordService;
+use App\Services\WalletProvisioningService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,7 +19,9 @@ class HouseholdResource extends JsonResource
             'name' => $this->name,
             'invite_code' => $this->invite_code,
             'categories' => $this->categories,
-            'manual_balance' => (float) ($sensitive['manual_balance'] ?? 0),
+            'manual_balance' => (float) (app(WalletProvisioningService::class)
+                ->sharedWalletForHousehold($this->resource)
+                ->manual_balance ?? 0),
             'budget_enabled' => $this->budget_enabled,
             'savings_enabled' => $this->savings_enabled,
             'debts_enabled' => $this->debts_enabled,
@@ -28,6 +31,10 @@ class HouseholdResource extends JsonResource
             'debts_settings' => $this->resolvedDebtsSettings(),
             'meters_settings' => $this->resolvedMetersSettings(),
             'onboarding_completed' => (bool) $this->onboarding_completed,
+            'subscription_tier' => $this->subscription_tier ?? 'free',
+            'subscription_status' => $this->subscription_status ?? 'none',
+            'subscriptionTier' => $this->subscription_tier ?? 'free',
+            'subscriptionStatus' => $this->subscription_status ?? 'none',
             'business_enabled' => $this->business_enabled,
             'business_name' => $this->business_name,
             'shopify_import_enabled' => (bool) $this->shopify_import_enabled,

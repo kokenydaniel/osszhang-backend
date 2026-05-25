@@ -6,6 +6,9 @@ use App\Http\Resources\HouseholdResource;
 use App\Http\Resources\UserResource;
 use App\Models\Household;
 use App\Models\User;
+use App\Services\WalletService;
+use App\Support\AccessControl;
+use App\Support\PlatformSettings;
 use App\Support\Username;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +16,8 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
+    public function __construct(private readonly WalletService $walletService) {}
+
     public function register(array $validated): array
     {
         $username = Username::normalize($validated['username']);
@@ -60,7 +65,7 @@ class AuthService
         return [
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $this->buildAuthPayload($user->load('household')),
+            'user' => $this->buildAuthPayload($user),
         ];
     }
 
@@ -80,7 +85,7 @@ class AuthService
         return [
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $this->buildAuthPayload($user->load('household')),
+            'user' => $this->buildAuthPayload($user),
         ];
     }
 
@@ -91,7 +96,7 @@ class AuthService
 
     public function me(User $user): array
     {
-        return $this->buildAuthPayload($user->load('household.users'));
+        return $this->buildAuthPayload($user);
     }
 
     public function updateProfile(User $user, Request $request): array
@@ -133,9 +138,22 @@ class AuthService
 
     public function buildAuthPayload(User $user): array
     {
+        if ($user->household_id && ! $user->relationLoaded('household')) {
+            $user->load('household.users');
+        } elseif ($user->relationLoaded('household') && $user->household && ! $user->household->relationLoaded('users')) {
+            $user->household->load('users');
+        }
+
         return array_merge(
             (new UserResource($user))->resolve(),
             [
+                'lifetime_admin' => (bool) $user->lifetime_admin,
+                'lifetimeAdmin' => (bool) $user->lifetime_admin,
+                'effective_tier' => AccessControl::effectiveTier($user),
+                'effectiveTier' => AccessControl::effectiveTier($user),
+                'beta_mode' => PlatformSettings::isBetaMode(),
+                'betaMode' => PlatformSettings::isBetaMode(),
+                'wallets' => $this->walletService->listAccessible($user),
                 'household' => $user->household
                     ? (new HouseholdResource($user->household))->resolve()
                     : null,
