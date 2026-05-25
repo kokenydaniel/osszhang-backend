@@ -28,13 +28,11 @@ class OpenAIService
         return $this->client->chat($messages);
     }
 
-    public function parseTransaction(string $description): array
+    /** @return array<string, mixed> */
+    public function askJson(string $prompt, string $systemPrompt): array
     {
-        $prompt = "Parse this transaction description and return a JSON object with 'category', 'description' (clean), and 'is_budget' (boolean). 
-        Description: \"{$description}\"";
-
         return $this->client->chatJson([
-            ['role' => 'system', 'content' => 'You are a data parser. Return ONLY valid JSON.'],
+            ['role' => 'system', 'content' => $systemPrompt],
             ['role' => 'user', 'content' => $prompt],
         ]);
     }

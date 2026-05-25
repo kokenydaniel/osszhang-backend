@@ -25,6 +25,10 @@ class DemoHouseholdSeeder extends Seeder
 
     public const PASSWORD = 'demo1234';
 
+    public const ADMIN_USERNAME = 'dani';
+
+    public const MEMBER_USERNAME = 'viki';
+
     public function __construct(
         private readonly BudgetService $budget,
         private readonly UtilityService $utilities,

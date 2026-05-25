@@ -16,6 +16,7 @@ class MonthYearRequest extends FormRequest
         return [
             'year' => 'required|integer|min:2000|max:2100',
             'month' => 'required|integer|min:1|max:12',
+            'wallet_id' => 'sometimes|integer|exists:wallets,id',
         ];
     }
 }

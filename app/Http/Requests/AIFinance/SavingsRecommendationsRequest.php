@@ -20,6 +20,7 @@ class SavingsRecommendationsRequest extends FormRequest
             'goals.*.target_date' => 'required|date',
             'goals.*.priority' => 'nullable|integer|min:1|max:5',
             'constraints.min_buffer' => 'nullable|numeric|min:0',
+            'wallet_id' => 'sometimes|integer|exists:wallets,id',
         ];
     }
 }

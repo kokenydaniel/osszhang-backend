@@ -187,7 +187,43 @@ curl -X POST http://localhost:8000/api/household/members \
 | `SHOPIFY_STORE_URL` | No | Shopify import |
 | `SHOPIFY_ACCESS_TOKEN` | No | Shopify import |
 
+| `FRONTEND_URL` | Yes (billing) | Next.js app URL for Stripe redirects (e.g. `https://osszhang.vercel.app`) |
+| `STRIPE_KEY` | Yes (billing) | Stripe publishable key (`pk_live_...` or `pk_test_...`) |
+| `STRIPE_SECRET` | Yes (billing) | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | Yes (billing) | Webhook signing secret from Stripe Dashboard |
+| `CASHIER_CURRENCY` | Yes (billing) | e.g. `HUF` |
+| `STRIPE_PRICE_*` | Yes (billing) | Stripe Price IDs for Pro/Premium monthly/yearly plans |
+
 On Fly.io, set secrets with `fly secrets set KEY=value`.
+
+### Stripe in production
+
+1. Create **live** products/prices in Stripe (or reuse test prices while testing).
+2. Set Fly secrets:
+
+```bash
+fly secrets set \
+  APP_URL=https://osszhang-backend.fly.dev \
+  FRONTEND_URL=https://osszhang.vercel.app \
+  STRIPE_KEY=pk_live_... \
+  STRIPE_SECRET=sk_live_... \
+  STRIPE_WEBHOOK_SECRET=whsec_... \
+  CASHIER_CURRENCY=HUF \
+  STRIPE_PRICE_PRO_MONTHLY=price_... \
+  STRIPE_PRICE_PRO_YEARLY=price_... \
+  STRIPE_PRICE_PREMIUM_MONTHLY=price_... \
+  STRIPE_PRICE_PREMIUM_YEARLY=price_...
+```
+
+3. In [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks), add endpoint:
+
+   `https://osszhang-backend.fly.dev/stripe/webhook`
+
+   Events: `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`.
+
+4. Deploy — migrations create Cashier tables automatically.
+
+**Beta mode:** Super admins can enable **Platform → Beta version** in Settings. While beta mode is on, tier restrictions and Stripe checkout are disabled; all features stay usable without payment. Turn beta off to enforce live subscriptions.
 
 ---
 

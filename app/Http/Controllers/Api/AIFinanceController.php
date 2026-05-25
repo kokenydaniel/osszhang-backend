@@ -23,14 +23,22 @@ class AIFinanceController extends Controller
     public function overspendRootCause(MonthYearRequest $request)
     {
         return response()->json(
-            $this->aiFinanceService->overspendRootCause($request->user()->household, $request->validated()),
+            $this->aiFinanceService->overspendRootCause(
+                $request->user()->household,
+                $request->user(),
+                $request->validated(),
+            ),
         );
     }
 
     public function cashflowForecast(MonthYearRequest $request)
     {
         return response()->json(
-            $this->aiFinanceService->cashflowForecast($request->user()->household, $request->validated()),
+            $this->aiFinanceService->cashflowForecast(
+                $request->user()->household,
+                $request->user(),
+                $request->validated(),
+            ),
         );
     }
 
@@ -44,26 +52,40 @@ class AIFinanceController extends Controller
     public function savingsRecommendations(SavingsRecommendationsRequest $request)
     {
         return response()->json(
-            $this->aiFinanceService->savingsRecommendations($request->user()->household, $request->validated()),
+            $this->aiFinanceService->savingsRecommendations(
+                $request->user()->household,
+                $request->user(),
+                $request->validated(),
+            ),
         );
     }
 
     public function optimizeDebts(Request $request)
     {
+        $walletId = $request->input('wallet_id');
+        $walletId = $walletId !== null && $walletId !== '' ? (int) $walletId : null;
+
         return response()->json(
             $this->aiFinanceService->optimizeDebts(
                 $request->user()->household,
+                $request->user(),
                 $request->input('strategy', 'avalanche'),
+                $walletId,
             ),
         );
     }
 
     public function weeklyBriefing(Request $request)
     {
+        $walletId = $request->query('wallet_id');
+        $walletId = $walletId !== null && $walletId !== '' ? (int) $walletId : null;
+
         return response()->json(
             $this->aiFinanceService->weeklyBriefing(
                 $request->user()->household,
+                $request->user(),
                 $request->query('week_start'),
+                $walletId,
             ),
         );
     }

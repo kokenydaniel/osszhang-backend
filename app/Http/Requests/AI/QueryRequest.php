@@ -16,6 +16,7 @@ class QueryRequest extends FormRequest
         return [
             'prompt' => 'required|string|max:1000',
             'include_context' => 'boolean',
+            'wallet_id' => 'sometimes|integer|exists:wallets,id',
         ];
     }
 }

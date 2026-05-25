@@ -12,11 +12,15 @@ class AIController extends Controller
 
     public function query(QueryRequest $request)
     {
+        $walletId = $request->input('wallet_id');
+        $walletId = $walletId !== null && $walletId !== '' ? (int) $walletId : null;
+
         return response()->json(
             $this->aiFinanceService->query(
                 $request->user(),
                 $request->input('prompt'),
                 (bool) $request->input('include_context', false),
+                $walletId,
             ),
         );
     }

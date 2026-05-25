@@ -80,15 +80,16 @@ class EncryptedRecordService
 
     public function resolvedManualBalance(Household $household): float
     {
-        return (float) ($this->householdSensitive($household)['manual_balance'] ?? 0);
+        $shared = app(WalletProvisioningService::class)->sharedWalletForHousehold($household);
+
+        return (float) ($shared->manual_balance ?? 0);
     }
 
     public function adjustManualBalance(Household $household, float $delta): void
     {
-        $sensitive = $this->householdSensitive($household);
-        $sensitive['manual_balance'] = (float) ($sensitive['manual_balance'] ?? 0) + $delta;
-        $this->persistHouseholdSensitive($household, $sensitive);
-        $household->saveQuietly();
+        $wallet = app(WalletProvisioningService::class)->sharedWalletForHousehold($household);
+        $wallet->manual_balance = (float) ($wallet->manual_balance ?? 0) + $delta;
+        $wallet->save();
     }
 
     public function utilityLegacy(Utility $u): array

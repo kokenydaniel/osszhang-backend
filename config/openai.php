@@ -46,4 +46,14 @@ return [
     */
 
     'request_timeout' => env('OPENAI_REQUEST_TIMEOUT', 30),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Model & Temperature
+    |--------------------------------------------------------------------------
+    */
+
+    'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+
+    'temperature' => (float) env('OPENAI_TEMPERATURE', 0.7),
 ];
