@@ -49,11 +49,10 @@ class HouseholdService
         if ($request->has('name')) {
             $data['name'] = $request->name;
         }
-        if ($request->has('manual_balance') || $request->exists('utility_templates')) {
-            $householdSensitive = $this->crypto->householdSensitive($household);
-        }
         if ($request->has('manual_balance')) {
-            $householdSensitive['manual_balance'] = (float) $request->manual_balance;
+            app(WalletProvisioningService::class)
+                ->sharedWalletForHousehold($household)
+                ->update(['manual_balance' => (float) $request->manual_balance]);
         }
         foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business'] as $module) {
             $key = "{$module}_enabled";
