@@ -14,38 +14,59 @@ class TransactionController extends Controller
 
     public function index(Request $request)
     {
+        $walletId = $request->filled('walletId') ? (int) $request->query('walletId') : null;
+        $month = $request->filled('month') ? (int) $request->query('month') : null;
+        $year = $request->filled('year') ? (int) $request->query('year') : null;
+
+        if ($month !== null && $year !== null) {
+            return response()->json(
+                $this->budgetService->listForUser($request->user(), $walletId, $month, $year),
+            );
+        }
+
+        return response()->json([
+            'transactions' => $this->budgetService->listTransactionsForUser($request->user(), $walletId),
+            'goalRows' => [],
+        ]);
+    }
+
+    public function goalRows(Request $request)
+    {
+        $walletId = $request->filled('walletId') ? (int) $request->query('walletId') : null;
+
         return response()->json(
-            $this->budgetService->listForHousehold($request->user()->household),
+            $this->budgetService->goalRowsForMonth(
+                $request->user(),
+                $walletId,
+                (int) $request->query('month'),
+                (int) $request->query('year'),
+            ),
         );
     }
 
     public function store(StoreTransactionRequest $request)
     {
         return response()->json(
-            $this->budgetService->create(
-                $request->user()->household,
-                $request->user(),
-                $request->validated(),
-            ),
+            $this->budgetService->create($request->user(), $request->validated()),
             201,
         );
     }
 
     public function update(Request $request, $id)
     {
-        $input = collect(['description', 'type', 'amount', 'category', 'dueDate', 'paidDate', 'isBudget', 'isReserve'])
+        $input = collect(['description', 'type', 'amount', 'category', 'dueDate', 'paidDate', 'isBudget', 'isReserve', 'walletId'])
             ->filter(fn ($key) => $request->has($key))
             ->mapWithKeys(fn ($key) => [$key => $request->input($key)])
             ->all();
 
         return response()->json(
-            $this->budgetService->update($request->user()->household, $id, $input),
+            $this->budgetService->update($request->user(), $id, $input),
         );
     }
 
     public function destroy(Request $request, $id)
     {
-        $this->budgetService->delete($request->user()->household, $id);
+        $this->budgetService->delete($request->user(), $id);
 
         return response()->json(null, 204);
     }
@@ -53,32 +74,34 @@ class TransactionController extends Controller
     public function addItem(AddTransactionItemRequest $request, $id)
     {
         return response()->json(
-            $this->budgetService->addItem($request->user()->household, $id, $request->validated()),
+            $this->budgetService->addItem($request->user(), $id, $request->validated()),
         );
     }
 
     public function deleteItem(Request $request, $txId, $itemId)
     {
         return response()->json(
-            $this->budgetService->deleteItem($request->user()->household, $txId, $itemId),
+            $this->budgetService->deleteItem($request->user(), $txId, $itemId),
         );
     }
 
     public function show(Request $request, $id)
     {
         return response()->json(
-            $this->budgetService->show($request->user()->household, $id),
+            $this->budgetService->show($request->user(), $id),
         );
     }
 
     public function cloneMonth(Request $request)
     {
+        $walletId = $request->filled('walletId') ? (int) $request->input('walletId') : null;
+
         return response()->json(
             $this->budgetService->cloneMonth(
-                $request->user()->household,
-                $request->user()->id,
+                $request->user(),
                 (int) $request->month,
                 (int) $request->year,
+                $walletId,
             ),
         );
     }

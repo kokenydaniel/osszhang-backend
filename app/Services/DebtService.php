@@ -4,24 +4,42 @@ namespace App\Services;
 
 use App\Models\Debt;
 use App\Models\Household;
+use App\Models\User;
+use App\Models\Wallet;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Builder;
 
 class DebtService
 {
     public function __construct(
         private readonly EncryptedRecordService $crypto,
+        private readonly WalletProvisioningService $wallets,
     ) {}
 
-    public function listForHousehold(Household $household): array
+    /** @return list<array<string, mixed>> */
+    public function listForUser(User $user, ?int $walletId = null): array
     {
-        return Debt::where('household_id', $household->id)
+        $household = $this->requireHousehold($user);
+
+        return $this->accessibleDebtsQuery($user, $walletId)
             ->get()
             ->map(fn ($d) => $this->crypto->formatDebt($d, $household))
             ->all();
     }
 
-    public function create(Household $household, array $validated): array
+    /** @return array<string, mixed> */
+    public function create(User $user, array $validated): array
     {
-        $d = new Debt(['household_id' => $household->id]);
+        $household = $this->requireHousehold($user);
+        $wallet = $this->resolveWalletForMutation(
+            $user,
+            isset($validated['walletId']) ? (int) $validated['walletId'] : null,
+        );
+
+        $d = new Debt([
+            'household_id' => $household->id,
+            'wallet_id' => $wallet->id,
+        ]);
         $this->crypto->persistDebt($d, $household, [
             'name' => $validated['name'],
             'target_amount' => (float) $validated['targetAmount'],
@@ -36,9 +54,11 @@ class DebtService
         return $this->crypto->formatDebt($d, $household);
     }
 
-    public function update(Household $household, int|string $id, array $validated): array
+    /** @return array<string, mixed> */
+    public function update(User $user, int|string $id, array $validated): array
     {
-        $d = Debt::where('household_id', $household->id)->findOrFail($id);
+        $household = $this->requireHousehold($user);
+        $d = $this->findAccessibleDebt($user, $id);
 
         $sensitive = $this->crypto->debtResolved($d, $household);
         if (array_key_exists('name', $validated)) {
@@ -69,8 +89,46 @@ class DebtService
         return $this->crypto->formatDebt($d, $household);
     }
 
-    public function delete(int $householdId, int|string $id): void
+    public function delete(User $user, int|string $id): void
     {
-        Debt::where('household_id', $householdId)->findOrFail($id)->delete();
+        $this->findAccessibleDebt($user, $id)->delete();
+    }
+
+    private function requireHousehold(User $user): Household
+    {
+        if ($user->household === null) {
+            throw new AuthorizationException('Nincs háztartás a felhasználóhoz rendelve.');
+        }
+
+        return $user->household;
+    }
+
+    /** @return Builder<Debt> */
+    private function accessibleDebtsQuery(User $user, ?int $walletId = null): Builder
+    {
+        $query = Debt::query()->accessibleTo($user);
+
+        if ($walletId !== null) {
+            $query->where('wallet_id', $walletId);
+        }
+
+        return $query;
+    }
+
+    private function findAccessibleDebt(User $user, int|string $id): Debt
+    {
+        return $this->accessibleDebtsQuery($user)->findOrFail($id);
+    }
+
+    private function resolveWalletForMutation(User $user, ?int $walletId): Wallet
+    {
+        if ($walletId !== null) {
+            return Wallet::query()
+                ->accessibleTo($user)
+                ->where('household_id', $user->household_id)
+                ->findOrFail($walletId);
+        }
+
+        return $this->wallets->ensureSharedWallet($this->requireHousehold($user));
     }
 }

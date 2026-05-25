@@ -48,6 +48,7 @@ class TransactionSensitiveData
 
         return [
             'id' => $transaction->id,
+            'walletId' => $transaction->wallet_id,
             'type' => $transaction->type,
             'description' => (string) ($sensitive['description'] ?? ''),
             'category' => (string) ($sensitive['category'] ?? ''),

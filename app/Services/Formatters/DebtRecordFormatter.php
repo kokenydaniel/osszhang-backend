@@ -44,6 +44,8 @@ class DebtRecordFormatter extends AbstractEncryptedRecordFormatter
 
         return [
             'id' => $d->id,
+            'walletId' => $d->wallet_id,
+            'wallet_id' => $d->wallet_id,
             'name' => (string) ($s['name'] ?? ''),
             'targetAmount' => (float) ($s['target_amount'] ?? 0),
             'paidAmount' => (float) ($s['paid_amount'] ?? 0),

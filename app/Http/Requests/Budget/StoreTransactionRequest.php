@@ -22,6 +22,7 @@ class StoreTransactionRequest extends FormRequest
             'paidDate' => 'nullable|date',
             'isBudget' => 'boolean',
             'isReserve' => 'boolean',
+            'walletId' => 'nullable|integer|exists:wallets,id',
         ];
     }
 }

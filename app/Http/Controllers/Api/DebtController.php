@@ -12,7 +12,11 @@ class DebtController extends Controller
 
     public function index(Request $request)
     {
-        return response()->json($this->debtService->listForHousehold($request->user()->household));
+        $walletId = $request->filled('walletId') ? (int) $request->query('walletId') : null;
+
+        return response()->json(
+            $this->debtService->listForUser($request->user(), $walletId),
+        );
     }
 
     public function store(Request $request)
@@ -25,9 +29,13 @@ class DebtController extends Controller
             'minimumPayment' => 'nullable|numeric|min:0',
             'dueDay' => 'nullable|integer|min:1|max:31',
             'status' => 'nullable|string',
+            'walletId' => 'sometimes|integer|exists:wallets,id',
         ]);
 
-        return response()->json($this->debtService->create($request->user()->household, $v), 201);
+        return response()->json(
+            $this->debtService->create($request->user(), $v),
+            201,
+        );
     }
 
     public function update(Request $request, $id)
@@ -42,12 +50,14 @@ class DebtController extends Controller
             'status' => 'sometimes|string',
         ]);
 
-        return response()->json($this->debtService->update($request->user()->household, $id, $v));
+        return response()->json(
+            $this->debtService->update($request->user(), $id, $v),
+        );
     }
 
     public function destroy(Request $request, $id)
     {
-        $this->debtService->delete($request->user()->household_id, $id);
+        $this->debtService->delete($request->user(), $id);
 
         return response()->json(null, 204);
     }
