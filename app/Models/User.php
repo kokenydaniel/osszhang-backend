@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Cashier\Billable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -21,14 +22,20 @@ class User extends Authenticatable
         'household_id',
         'role',
         'permissions',
+        'lifetime_admin',
     ];
     protected $hidden = ['password', 'remember_token'];
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Billable, HasFactory, Notifiable;
 
     public function household()
     {
         return $this->belongsTo(Household::class);
+    }
+
+    public function ownedWallets()
+    {
+        return $this->hasMany(Wallet::class, 'owner_id');
     }
 
     protected function casts(): array
@@ -38,6 +45,7 @@ class User extends Authenticatable
             'must_change_password' => 'boolean',
             'permissions' => 'array',
             'role' => 'string',
+            'lifetime_admin' => 'boolean',
         ];
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\HouseholdController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\Api\SavingController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\AIController;
 use App\Http\Controllers\Api\AIFinanceController;
+use App\Http\Controllers\Api\PlatformController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\InvestmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +26,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::put('/platform/beta-mode', [PlatformController::class, 'updateBetaMode']);
+});
+
+Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/me', [AuthController::class, 'update']);
     Route::post('/me/change-password', [AuthController::class, 'changePassword']);
@@ -38,7 +45,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/household/members', [HouseholdController::class, 'addMember']);
     Route::put('/household/members/{member}', [HouseholdController::class, 'updateMember']);
     Route::delete('/household/members/{member}', [HouseholdController::class, 'deleteMember']);
+
+    // Wallets
+    Route::apiResource('wallets', WalletController::class)->except(['show']);
+    Route::put('/wallets/{wallet}/manual-balance', [WalletController::class, 'updateManualBalance']);
+
+    // Subscription / billing (dummy data until payment provider)
+    Route::get('/subscription/billing', [SubscriptionController::class, 'billing']);
+    Route::get('/subscription/invoices/{invoice}/download', [SubscriptionController::class, 'downloadInvoice']);
+    Route::post('/subscription/checkout', [SubscriptionController::class, 'checkout']);
+    Route::get('/subscription/portal', [SubscriptionController::class, 'portal']);
+
     // Transactions / Budget
+    Route::get('/transactions/goal-rows', [TransactionController::class, 'goalRows']);
     Route::apiResource('transactions', TransactionController::class);
     Route::post('/transactions/clone', [TransactionController::class, 'cloneMonth']);
     Route::post('/transactions/{transaction}/items', [TransactionController::class, 'addItem']);
@@ -68,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/savings/{saving}/entries', [SavingController::class, 'addEntry']);
     Route::put('/savings/{saving}/entries/{entry}', [SavingController::class, 'updateEntry']);
     Route::delete('/savings/{saving}/entries/{entry}', [SavingController::class, 'deleteEntry']);
+    Route::put('/savings/{saving}/monthly-contribution', [SavingController::class, 'upsertMonthlyContribution']);
     
     // Investments
     Route::apiResource('investments', InvestmentController::class);
@@ -75,17 +95,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Invitations
     Route::apiResource('invitations', InvitationController::class);
 
-    // AI Integration
-    Route::post('/ai/query', [AIController::class, 'query']);
+    // AI Integration (Premium tier or lifetime_admin only)
+    Route::middleware('premium.ai')->group(function () {
+        Route::post('/ai/query', [AIController::class, 'query']);
 
-    // AI v1 finance features (strict_ai mode)
-    Route::prefix('ai/v1')->group(function () {
-        Route::post('/transactions/auto-categorize', [AIFinanceController::class, 'autoCategorizeTransaction']);
-        Route::get('/budget/overspend-root-cause', [AIFinanceController::class, 'overspendRootCause']);
-        Route::get('/budget/cashflow-forecast', [AIFinanceController::class, 'cashflowForecast']);
-        Route::get('/utilities/anomalies', [AIFinanceController::class, 'utilityAnomalies']);
-        Route::post('/savings/recommendations', [AIFinanceController::class, 'savingsRecommendations']);
-        Route::post('/debts/optimize', [AIFinanceController::class, 'optimizeDebts']);
-        Route::get('/dashboard/weekly-briefing', [AIFinanceController::class, 'weeklyBriefing']);
+        Route::prefix('ai/v1')->group(function () {
+            Route::post('/transactions/auto-categorize', [AIFinanceController::class, 'autoCategorizeTransaction']);
+            Route::get('/budget/overspend-root-cause', [AIFinanceController::class, 'overspendRootCause']);
+            Route::get('/budget/cashflow-forecast', [AIFinanceController::class, 'cashflowForecast']);
+            Route::get('/utilities/anomalies', [AIFinanceController::class, 'utilityAnomalies']);
+            Route::post('/savings/recommendations', [AIFinanceController::class, 'savingsRecommendations']);
+            Route::post('/debts/optimize', [AIFinanceController::class, 'optimizeDebts']);
+            Route::get('/dashboard/weekly-briefing', [AIFinanceController::class, 'weeklyBriefing']);
+        });
     });
 });
