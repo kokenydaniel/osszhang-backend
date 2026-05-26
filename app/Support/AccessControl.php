@@ -51,6 +51,19 @@ final class AccessControl
         return $user->household?->subscription_tier ?? self::TIER_FREE;
     }
 
+    /**
+     * Tier shown in admin/support UIs — reflects actual feature access
+     * (béta mód = Premium hozzáférés minden háztartásnak).
+     */
+    public static function resolvedAccessTier(User $user): string
+    {
+        if ($user->lifetime_admin || self::isBetaMode()) {
+            return self::TIER_PREMIUM;
+        }
+
+        return self::effectiveTier($user);
+    }
+
     public static function canAccessModule(User $user, string $moduleId): bool
     {
         if ($user->lifetime_admin || self::isBetaMode()) {

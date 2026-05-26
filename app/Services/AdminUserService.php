@@ -24,7 +24,7 @@ class AdminUserService
         $perPage = min(max((int) $request->query('per_page', 25), 1), 100);
 
         $query = User::query()
-            ->with('household:id,business_name')
+            ->with('household:id,name,business_name,subscription_tier,subscription_status')
             ->orderByDesc('id');
 
         if ($search !== '') {
