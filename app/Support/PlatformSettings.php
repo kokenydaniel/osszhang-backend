@@ -2,38 +2,32 @@
 
 namespace App\Support;
 
-use App\Models\AppSetting;
+use App\Models\FeatureFlag;
 
 final class PlatformSettings
 {
     public const KEY_BETA_MODE = 'beta_mode';
 
-    private static ?bool $betaMode = null;
-
     public static function isBetaMode(): bool
     {
-        if (self::$betaMode !== null) {
-            return self::$betaMode;
-        }
-
-        $stored = AppSetting::query()->where('key', self::KEY_BETA_MODE)->value('value');
-        self::$betaMode = filter_var($stored, FILTER_VALIDATE_BOOLEAN);
-
-        return self::$betaMode;
+        return FeatureFlags::isEnabled(self::KEY_BETA_MODE, false);
     }
 
     public static function setBetaMode(bool $enabled): void
     {
-        AppSetting::updateOrCreate(
+        FeatureFlag::query()->updateOrCreate(
             ['key' => self::KEY_BETA_MODE],
-            ['value' => $enabled ? '1' : '0'],
+            [
+                'value' => $enabled,
+                'description' => 'Béta mód — tier korlátozások és Stripe számlázás kikapcsolása minden háztartásra.',
+            ],
         );
 
-        self::$betaMode = $enabled;
+        FeatureFlags::clearCache();
     }
 
     public static function clearCache(): void
     {
-        self::$betaMode = null;
+        // Kept for backward compatibility with callers that reset platform caches.
     }
 }

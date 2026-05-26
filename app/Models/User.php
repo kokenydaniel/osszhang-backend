@@ -23,6 +23,8 @@ class User extends Authenticatable
         'role',
         'permissions',
         'lifetime_admin',
+        'is_active',
+        'last_login_at',
     ];
     protected $hidden = ['password', 'remember_token'];
     /** @use HasFactory<UserFactory> */
@@ -46,6 +48,8 @@ class User extends Authenticatable
             'permissions' => 'array',
             'role' => 'string',
             'lifetime_admin' => 'boolean',
+            'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
     }
 }

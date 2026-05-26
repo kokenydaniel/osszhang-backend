@@ -395,6 +395,220 @@ class AIFinanceService
         ]);
     }
 
+    public function aiCfo(Household $household, User $user, array $validated): array
+    {
+        $this->ensureHousehold($household);
+        $this->resolveWallet($user, $validated['wallet_id'] ?? null);
+
+        $monthPrefix = sprintf('%04d-%02d', $validated['year'], $validated['month']);
+        $metrics = $validated;
+        $snapshot = $this->buildAiCfoHumanSnapshot($monthPrefix, $metrics);
+
+        $monthlyBalance = (float) ($metrics['monthly_balance'] ?? 0);
+        $disposableRemaining = (float) ($metrics['disposable_remaining'] ?? 0);
+        $lockedSavings = (float) ($metrics['locked_savings'] ?? 0);
+        $totalPending = (float) ($metrics['total_pending'] ?? 0);
+        $totalDebts = (float) ($metrics['total_debts'] ?? 0);
+        $spentThisMonth = (float) ($metrics['spent_this_month'] ?? 0);
+
+        $fallback = function () use ($monthPrefix, $monthlyBalance, $disposableRemaining, $lockedSavings, $totalPending, $totalDebts, $spentThisMonth, $metrics) {
+            $fmt = fn (float $n) => number_format($n, 0, ',', ' ').' Ft';
+
+            $summary = sprintf(
+                'A %s hónapban a havi egyenleged %s, a biztonságosan elkölthető összeg (Marad) pedig %s.',
+                $monthPrefix,
+                $fmt($monthlyBalance),
+                $fmt($disposableRemaining),
+            );
+
+            $tips = [];
+            if ($disposableRemaining < 0) {
+                $tips[] = sprintf(
+                    'A Marad értéked %s — csökkentsd a fizetendő %s összegű tételeit, vagy halaszd az alacsony prioritású kiadásokat.',
+                    $fmt($disposableRemaining),
+                    $fmt($totalPending),
+                );
+            } elseif ($disposableRemaining > 0) {
+                $tips[] = sprintf(
+                    'Ebben a hónapban biztonságosan még %s költhetsz — tartsd szem előtt, hogy %s zárolt megtakarítás.',
+                    $fmt($disposableRemaining),
+                    $fmt($lockedSavings),
+                );
+            }
+            foreach ($metrics['savings_goals'] ?? [] as $goal) {
+                if (($goal['remaining_amount'] ?? 0) > 0) {
+                    $tips[] = sprintf(
+                        'A „%s” célhoz még %s kell (eddig %s a %s-ból).',
+                        $goal['title'],
+                        $fmt((float) $goal['remaining_amount']),
+                        $fmt((float) $goal['current_amount']),
+                        $fmt((float) $goal['target_amount']),
+                    );
+                    break;
+                }
+            }
+            if ($totalDebts > 0 && $disposableRemaining > 0) {
+                $tips[] = sprintf(
+                    'A fennmaradó tartozásod %s — csak a Marad (%s) keretén belül emeld a törlesztést.',
+                    $fmt($totalDebts),
+                    $fmt($disposableRemaining),
+                );
+            }
+            if (count($tips) === 0) {
+                $tips[] = sprintf('A Marad értéked %s — tartsd ezt a tempót.', $fmt($disposableRemaining));
+            }
+
+            $warnings = [];
+            if ($disposableRemaining < 0) {
+                $warnings[] = sprintf('A biztonságosan elkölthető összeg negatív: %s.', $fmt($disposableRemaining));
+            }
+            if ($monthlyBalance < 0) {
+                $warnings[] = sprintf('A havi egyenleged negatív: %s.', $fmt($monthlyBalance));
+            }
+            if ((float) ($metrics['overdue_total'] ?? 0) > 0) {
+                $warnings[] = sprintf('Lejárt fizetnivalód: %s.', $fmt((float) $metrics['overdue_total']));
+            }
+            foreach ($metrics['top_spending_categories'] ?? [] as $cat) {
+                if (($cat['amount'] ?? 0) > max(50000, $spentThisMonth * 0.35)) {
+                    $warnings[] = sprintf(
+                        'Magas kiadás a „%s” kategóriában: %s.',
+                        $cat['category'] ?? 'Ismeretlen',
+                        $fmt((float) ($cat['amount'] ?? 0)),
+                    );
+                    break;
+                }
+            }
+
+            return [
+                'summary' => $summary,
+                'tips' => array_slice($tips, 0, 3),
+                'warnings' => $warnings,
+            ];
+        };
+
+        $systemPrompt = implode("\n", [
+            'ACT AS A STRICT, DATA-DRIVEN FINANCIAL ADVISOR.',
+            'WRITE IN NATURAL, HUMAN-SOUNDING HUNGARIAN. NEVER output JSON keys, variable names, or underscores.',
+            'Format all numbers with spaces for thousands and " Ft" (e.g., "227 491 Ft"). NEVER use "HUF".',
+            'YOU MUST ONLY USE THE EXACT NUMBERS PROVIDED IN THE CONTEXT. DO NOT INVENT OR GUESS ANY FINANCIAL DATA.',
+            'The user total bank balance includes locked savings — DO NOT suggest spending locked savings.',
+            'The disposable remaining (Marad) is the EXACT amount they can safely spend this month. Base actionable advice heavily on this number.',
+            'DO NOT GIVE GENERIC ADVICE like "create a budget" or "track your spending".',
+            'Return ONLY valid JSON with fields: summary (string, exactly 2 sentences), tips (string array, 2-3 items), warnings (string array, empty if none).',
+        ]);
+
+        try {
+            $prompt = "Elemezd az alábbi pénzügyi pillanatképet, és készíts JSON választ.\n".
+                "Használj természetes magyar fogalmakat, és KIZÁRÓLAG a megadott számokat.\n\n".
+                json_encode($snapshot, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+            $decoded = $this->ai->askJson(
+                $prompt,
+                $systemPrompt,
+            );
+
+            $result = [
+                'summary' => trim((string) ($decoded['summary'] ?? '')),
+                'tips' => array_values(array_filter(array_map('strval', $decoded['tips'] ?? []))),
+                'warnings' => array_values(array_filter(array_map('strval', $decoded['warnings'] ?? []))),
+            ];
+
+            if ($result['summary'] === '') {
+                throw new \RuntimeException('Empty AI CFO summary');
+            }
+
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelope($fallback(), true, $e->getMessage());
+        }
+    }
+
+    private function buildAiCfoHumanSnapshot(string $monthPrefix, array $metrics): array
+    {
+        $fmt = fn (float $n) => number_format($n, 0, ',', ' ').' Ft';
+
+        $goals = collect($metrics['savings_goals'] ?? [])->map(fn (array $goal) => [
+            'Cél neve' => (string) ($goal['title'] ?? ''),
+            'Célösszeg' => $fmt((float) ($goal['target_amount'] ?? 0)),
+            'Eddig félretett' => $fmt((float) ($goal['current_amount'] ?? 0)),
+            'Hátralévő' => $fmt((float) ($goal['remaining_amount'] ?? 0)),
+            'Határidő' => (string) ($goal['target_date'] ?? 'nincs megadva'),
+        ])->values()->all();
+
+        $debts = collect($metrics['debts'] ?? [])->map(fn (array $debt) => [
+            'Tartozás neve' => (string) ($debt['name'] ?? ''),
+            'Fennmaradó összeg' => $fmt((float) ($debt['remaining'] ?? 0)),
+        ])->values()->all();
+
+        $categories = collect($metrics['top_spending_categories'] ?? [])->map(fn (array $cat) => [
+            'Kategória' => (string) ($cat['category'] ?? ''),
+            'Összeg' => $fmt((float) ($cat['amount'] ?? 0)),
+        ])->values()->all();
+
+        return [
+            'Hónap' => $monthPrefix,
+            'Bankszámla egyenleg (zárolt megtakarítással együtt)' => $fmt((float) ($metrics['total_balance'] ?? 0)),
+            'Zárolt megtakarítás (nem költhető el)' => $fmt((float) ($metrics['locked_savings'] ?? 0)),
+            'Fizetendő összesen' => $fmt((float) ($metrics['total_pending'] ?? 0)),
+            'Marad (biztonságosan elkölthető)' => $fmt((float) ($metrics['disposable_remaining'] ?? 0)),
+            'Havi egyenleg (bevétel − kiadás)' => $fmt((float) ($metrics['monthly_balance'] ?? 0)),
+            'Lejárt fizetnivaló' => $fmt((float) ($metrics['overdue_total'] ?? 0)),
+            'Bevétel ebben a hónapban' => $fmt((float) ($metrics['income_received'] ?? 0)),
+            'Kiadás ebben a hónapban' => $fmt((float) ($metrics['spent_this_month'] ?? 0)),
+            'Összes tartozás' => $fmt((float) ($metrics['total_debts'] ?? 0)),
+            'Legnagyobb kiadási kategóriák' => $categories,
+            'Megtakarítási célok' => $goals,
+            'Tartozások' => $debts,
+        ];
+    }
+
+
+    public function travelPlan(array $validated): array
+    {
+        $destination = trim($validated['destination']);
+        $durationDays = max(1, (int) $validated['duration_days']);
+        $totalBudget = round((float) $validated['total_budget'], 2);
+
+        $travelSystemPrompt = 'Te egy utazástervező és pénzügyi tanácsadó vagy. Adj vissza KIZÁRÓLAG érvényes JSON-t a kért mezőkkel, magyar nyelven. '.
+            'NE találj ki irreálisan alacsony árakat, hogy illeszkedjen a felhasználó költségkeretéhez. '.
+            'Ha a total_budget matematikailag vagy realitás alapján lehetetlen az adott destination és duration_days mellett '.
+            '(pl. 10 000 Ft ötsz napos londoni utazásra), NE hamisíts olcsó árakat. '.
+            'Ehelyett számíts ki egy REALISZTIKUS MINIMUM költségvetést az úti célhoz, és a terv total_estimated_cost mezője ezt tükrözze. '.
+            'Ilyenkor kötelező warning (string) mező: udvarias magyar magyarázat, hogy a kért keret túl alacsony volt, ezért a terv reális minimum költségeket mutat. '.
+            'Ha a keret reális, a warning mezőt hagyd el vagy null legyen.';
+
+        try {
+            $prompt = "Tervezz egy személyre szabott utazást magyar nyelven. Adj vissza KIZÁRÓLAG érvényes JSON-t ezekkel a mezőkkel:\n".
+                "- destination (string)\n".
+                "- duration_days (integer)\n".
+                "- total_budget (number, HUF) — a felhasználó által megadott keret, ne módosítsd\n".
+                "- daily_itinerary (array): minden elem { day (int), title (string), activities (string[]), estimated_daily_cost (number) }\n".
+                "- cost_breakdown (object): { accommodation, food, activities, transport } — mind number, HUF\n".
+                "- total_estimated_cost (number): a cost_breakdown összege, reális piaci árak alapján\n".
+                "- summary (string): 1 rövid mondat az utazásról\n".
+                "- warning (string, opcionális): ha a megadott keret irreálisan alacsony, udvarias magyar figyelmeztetés\n".
+                "FONTOS: Ha a keret lehetetlen, a total_estimated_cost legyen a reális minimum, NE a megadott keret.\n".
+                "Úti cél: {$destination}\n".
+                "Időtartam: {$durationDays} nap\n".
+                "Felhasználó költségkerete: {$totalBudget} HUF";
+
+            $decoded = $this->ai->askJson($prompt, $travelSystemPrompt);
+            $result = $this->normalizeTravelPlanPayload($decoded, $destination, $durationDays, $totalBudget);
+
+            if (count($result['daily_itinerary']) === 0) {
+                throw new \RuntimeException('Empty travel itinerary');
+            }
+
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelope(
+                $this->buildTravelPlanFallback($destination, $durationDays, $totalBudget),
+                true,
+                $e->getMessage(),
+            );
+        }
+    }
+
     public function weeklyBriefing(Household $household, User $user, ?string $weekStart, ?int $walletId = null): array
     {
         $this->ensureHousehold($household);
@@ -530,6 +744,153 @@ class AIFinanceService
         $rule = $s['split_rule'] ?? 'shared';
 
         return $rule === 'shared' ? $total / 2 : ($rule === 'dani-private' ? $total : 0);
+    }
+
+    private function normalizeTravelPlanPayload(
+        array $decoded,
+        string $destination,
+        int $durationDays,
+        float $requestedBudget,
+    ): array {
+        $breakdown = $decoded['cost_breakdown'] ?? [];
+        $result = [
+            'destination' => (string) ($decoded['destination'] ?? $destination),
+            'duration_days' => max(1, (int) ($decoded['duration_days'] ?? $durationDays)),
+            'total_budget' => round($requestedBudget, 2),
+            'daily_itinerary' => collect($decoded['daily_itinerary'] ?? [])
+                ->map(function ($row, $index) {
+                    return [
+                        'day' => (int) ($row['day'] ?? ($index + 1)),
+                        'title' => (string) ($row['title'] ?? 'Nap '.($index + 1)),
+                        'activities' => array_values(array_filter(array_map('strval', $row['activities'] ?? []))),
+                        'estimated_daily_cost' => round((float) ($row['estimated_daily_cost'] ?? 0), 2),
+                    ];
+                })
+                ->values()
+                ->all(),
+            'cost_breakdown' => [
+                'accommodation' => round((float) ($breakdown['accommodation'] ?? 0), 2),
+                'food' => round((float) ($breakdown['food'] ?? 0), 2),
+                'activities' => round((float) ($breakdown['activities'] ?? 0), 2),
+                'transport' => round((float) ($breakdown['transport'] ?? 0), 2),
+            ],
+            'total_estimated_cost' => round((float) ($decoded['total_estimated_cost'] ?? 0), 2),
+            'summary' => trim((string) ($decoded['summary'] ?? '')),
+        ];
+
+        if ($result['total_estimated_cost'] <= 0) {
+            $result['total_estimated_cost'] = round(array_sum($result['cost_breakdown']), 2);
+        }
+
+        $warning = trim((string) ($decoded['warning'] ?? ''));
+        $realisticMinimum = $this->estimateRealisticMinimumTripBudget($destination, $durationDays);
+        if ($warning === '' && $requestedBudget < $realisticMinimum * 0.75) {
+            $warning = $this->buildUnrealisticBudgetWarning($destination, $durationDays, $requestedBudget, $realisticMinimum);
+        }
+
+        if ($warning !== '') {
+            $result['warning'] = $warning;
+        }
+
+        return $result;
+    }
+
+    /** @return array<string, mixed> */
+    private function buildTravelPlanFallback(string $destination, int $durationDays, float $requestedBudget): array
+    {
+        $realisticMinimum = $this->estimateRealisticMinimumTripBudget($destination, $durationDays);
+        $planTotal = $requestedBudget;
+        $warning = null;
+
+        if ($requestedBudget < $realisticMinimum * 0.75) {
+            $planTotal = $realisticMinimum;
+            $warning = $this->buildUnrealisticBudgetWarning($destination, $durationDays, $requestedBudget, $realisticMinimum);
+        }
+
+        $dailyBudget = $durationDays > 0 ? round($planTotal / $durationDays, 2) : $planTotal;
+        $accommodation = round($planTotal * 0.35, 2);
+        $food = round($planTotal * 0.25, 2);
+        $activities = round($planTotal * 0.25, 2);
+        $transport = round($planTotal * 0.15, 2);
+        $itinerary = [];
+
+        for ($day = 1; $day <= $durationDays; $day++) {
+            $itinerary[] = [
+                'day' => $day,
+                'title' => $day === 1 ? 'Érkezés és bemelegítés' : ($day === $durationDays ? 'Búcsú és hazautazás' : "Felfedezés — {$day}. nap"),
+                'activities' => $day === 1
+                    ? ['Szállás elfoglalása', 'Környék felfedezése']
+                    : ['Helyi látnivalók', 'Étkezés helyi specialitásokkal'],
+                'estimated_daily_cost' => $dailyBudget,
+            ];
+        }
+
+        $result = [
+            'destination' => $destination,
+            'duration_days' => $durationDays,
+            'total_budget' => round($requestedBudget, 2),
+            'daily_itinerary' => $itinerary,
+            'cost_breakdown' => [
+                'accommodation' => $accommodation,
+                'food' => $food,
+                'activities' => $activities,
+                'transport' => $transport,
+            ],
+            'total_estimated_cost' => round($accommodation + $food + $activities + $transport, 2),
+            'summary' => "Reális minimum alapú {$durationDays} napos terv {$destination} úti célhoz.",
+        ];
+
+        if ($warning !== null) {
+            $result['warning'] = $warning;
+        }
+
+        return $result;
+    }
+
+    private function estimateRealisticMinimumTripBudget(string $destination, int $durationDays): float
+    {
+        $daily = $this->estimateRealisticMinimumDailyHuf($destination);
+
+        return round($daily * max(1, $durationDays), 2);
+    }
+
+    private function estimateRealisticMinimumDailyHuf(string $destination): float
+    {
+        $dest = mb_strtolower($destination);
+        $premium = ['london', 'párizs', 'paris', 'zürich', 'zurich', 'new york', 'tokió', 'tokyo', 'dubai', 'ibiza'];
+        $mid = ['berlin', 'bécs', 'vienna', 'bécs', 'róma', 'rome', 'barcelona', 'amsterdam', 'prága', 'prague'];
+        $local = ['budapest', 'balaton', 'debrecen', 'szeged', 'pecs', 'pécs', 'magyarország', 'hungary'];
+
+        foreach ($premium as $city) {
+            if (str_contains($dest, $city)) {
+                return 55000;
+            }
+        }
+        foreach ($mid as $city) {
+            if (str_contains($dest, $city)) {
+                return 35000;
+            }
+        }
+        foreach ($local as $city) {
+            if (str_contains($dest, $city)) {
+                return 18000;
+            }
+        }
+
+        return 28000;
+    }
+
+    private function buildUnrealisticBudgetWarning(
+        string $destination,
+        int $durationDays,
+        float $requestedBudget,
+        float $realisticMinimum,
+    ): string {
+        $requestedFormatted = number_format($requestedBudget, 0, '', ' ');
+        $minimumFormatted = number_format($realisticMinimum, 0, '', ' ');
+
+        return "A megadott {$requestedFormatted} Ft költségkeret túl alacsony egy {$durationDays} napos utazáshoz ({$destination}). "
+            ."A terv ezért a reális minimum költségeket mutatja (kb. {$minimumFormatted} Ft), nem a megadott összeget.";
     }
 
     private function resolveWallet(User $user, ?int $walletId): Wallet

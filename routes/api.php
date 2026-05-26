@@ -15,6 +15,11 @@ use App\Http\Controllers\Api\AIFinanceController;
 use App\Http\Controllers\Api\PlatformController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\InvestmentController;
+use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AdminFeatureController;
+use App\Http\Controllers\Api\AdminAnnouncementController;
+use App\Http\Controllers\Api\DashboardAiCfoController;
+use App\Http\Controllers\Api\AiTravelController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,8 +31,18 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::put('/platform/beta-mode', [PlatformController::class, 'updateBetaMode']);
+Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(function () {
+    Route::get('/users', [AdminUserController::class, 'index']);
+    Route::patch('/users/{user}/activate', [AdminUserController::class, 'activate']);
+    Route::patch('/users/{user}/deactivate', [AdminUserController::class, 'deactivate']);
+    Route::post('/users/{user}/impersonate', [AdminUserController::class, 'impersonate']);
+
+    Route::get('/features', [AdminFeatureController::class, 'index']);
+    Route::patch('/features/{key}', [AdminFeatureController::class, 'update']);
+
+    Route::get('/announcements', [AdminAnnouncementController::class, 'index']);
+    Route::post('/announcements', [AdminAnnouncementController::class, 'store']);
+    Route::patch('/announcements/{announcement}/toggle', [AdminAnnouncementController::class, 'toggle']);
 });
 
 Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
@@ -107,6 +122,12 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
             Route::post('/savings/recommendations', [AIFinanceController::class, 'savingsRecommendations']);
             Route::post('/debts/optimize', [AIFinanceController::class, 'optimizeDebts']);
             Route::get('/dashboard/weekly-briefing', [AIFinanceController::class, 'weeklyBriefing']);
+        });
+
+        Route::middleware('platform.feature:enable_ai_cfo')->post('/dashboard/ai-cfo', DashboardAiCfoController::class);
+
+        Route::middleware('platform.feature:enable_ai_travel_planner')->prefix('tools/travel')->group(function () {
+            Route::post('/plan', [AiTravelController::class, 'plan']);
         });
     });
 });

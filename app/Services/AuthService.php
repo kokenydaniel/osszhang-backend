@@ -8,7 +8,9 @@ use App\Models\Household;
 use App\Models\User;
 use App\Services\WalletService;
 use App\Support\AccessControl;
+use App\Support\FeatureFlags;
 use App\Support\PlatformSettings;
+use App\Support\SystemAnnouncements;
 use App\Support\Username;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -79,6 +81,14 @@ class AuthService
                 'username' => ['A megadott adatok nem egyeznek.'],
             ]);
         }
+
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'username' => ['A fiók inaktív.'],
+            ]);
+        }
+
+        $user->update(['last_login_at' => now()]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -153,6 +163,16 @@ class AuthService
                 'effectiveTier' => AccessControl::effectiveTier($user),
                 'beta_mode' => PlatformSettings::isBetaMode(),
                 'betaMode' => PlatformSettings::isBetaMode(),
+                'platform_feature_flags' => [
+                    'enable_ai_cfo' => FeatureFlags::isEnabled('enable_ai_cfo'),
+                    'enable_ai_travel_planner' => FeatureFlags::isEnabled('enable_ai_travel_planner'),
+                ],
+                'platformFeatureFlags' => [
+                    'enable_ai_cfo' => FeatureFlags::isEnabled('enable_ai_cfo'),
+                    'enable_ai_travel_planner' => FeatureFlags::isEnabled('enable_ai_travel_planner'),
+                ],
+                'system_announcement' => SystemAnnouncements::active(),
+                'systemAnnouncement' => SystemAnnouncements::active(),
                 'wallets' => $this->walletService->listAccessible($user),
                 'household' => $user->household
                     ? (new HouseholdResource($user->household))->resolve()
