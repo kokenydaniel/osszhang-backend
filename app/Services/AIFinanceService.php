@@ -137,47 +137,79 @@ class AIFinanceService
             ->where('is_reserve', false)
             ->sum(fn ($t) => $this->sensitive->paidExpenseTotal($t, $household));
 
-        $utilityPaid = $wallet->is_shared
-            ? (float) $utilities->whereNotNull('paid_date')->sum(
-                fn ($u) => $this->utilityHouseholdPortion($u, $household),
-            )
-            : 0.0;
-        $monthlyBalance = (float) $incomeReceived - (float) $expensePaid - (float) $utilityPaid;
-        $overspendAmount = $monthlyBalance < 0 ? abs($monthlyBalance) : 0.0;
+        $utilityPaid = (float) $utilities
+            ->whereNotNull('paid_date')
+            ->sum(fn ($u) => $this->utilityHouseholdPortion($u, $household));
+
+        $monthlyBalance = round((float) $incomeReceived - (float) $expensePaid - (float) $utilityPaid, 2);
+        $overspendAmount = $monthlyBalance < 0 ? round(abs($monthlyBalance), 2) : 0.0;
 
         $categoryTotals = $transactions->where('type', 'expense')->where('is_reserve', false)
             ->groupBy(fn ($t) => $this->sensitive->resolvedCategory($t, $household))
             ->map(fn ($rows) => $rows->sum(fn ($t) => $this->sensitive->expenseTotal($t, $household)));
-        $topDrivers = collect($categoryTotals)
+
+        $rezsiTotal = (float) $utilities->sum(
+            fn ($u) => $this->utilityHouseholdPortion($u, $household),
+        );
+        if ($rezsiTotal > 0) {
+            $categoryTotals = $categoryTotals->put(
+                'Rezsi',
+                ($categoryTotals['Rezsi'] ?? 0) + $rezsiTotal,
+            );
+        }
+
+        $topDrivers = $categoryTotals
             ->sortDesc()
             ->take(3)
-            ->map(fn ($amount, $category) => ['category' => $category, 'amount' => $amount])
+            ->map(fn ($amount, $category) => [
+                'category' => $category,
+                'amount' => round((float) $amount, 2),
+            ])
             ->values()
             ->all();
 
-        $fallbackPayload = [
+        $payload = [
             'status' => $overspendAmount > 0 ? 'overspent' : 'ok',
             'overspend_amount' => $overspendAmount,
+            'monthly_balance' => $monthlyBalance,
+            'income_received' => round((float) $incomeReceived, 2),
+            'spent_this_month' => round((float) $expensePaid + (float) $utilityPaid, 2),
             'top_drivers' => $topDrivers,
             'actions' => $overspendAmount > 0
                 ? ['Fagyaszd a legnagyobb kiadási kategóriát 7 napra.', 'Nézd át a függő tételeket és halassz 1-2 alacsony prioritásút.']
                 : ['A havi kereted kontroll alatt van, tartsd az aktuális tempót.'],
-            'confidence' => 0.6,
+            'confidence' => 0.85,
         ];
 
         try {
-            $prompt = "Adj vissza KIZÁRÓLAG JSON-t: status (overspent|ok), overspend_amount (number), top_drivers (array of {category,amount}), actions (max 3 rövid magyar teendő), confidence (0..1).\n".
+            $prompt = "Adj vissza KIZÁRÓLAG JSON-t egyetlen mezővel: actions (max 3 rövid magyar teendő).\n".
                 "Hónap: {$monthPrefix}\n".
-                "Havi egyenleg: {$monthlyBalance}\n".
-                'Top kategóriák: '.json_encode($topDrivers);
+                "Havi egyenleg (befolyt bevétel − kifizetett kiadások): {$monthlyBalance} Ft\n".
+                "Státusz: ".($overspendAmount > 0 ? 'túlköltés' : 'rendben')."\n".
+                'Top kiadási kategóriák: '.json_encode($topDrivers, JSON_UNESCAPED_UNICODE);
             $decoded = $this->ai->askJson(
                 $prompt,
-                'Te egy pénzügyi elemző vagy. Adj vissza KIZÁRÓLAG érvényes JSON-t a kért mezőkkel.',
+                'Te egy pénzügyi tanácsadó vagy. A számokat már kiszámoltuk — csak gyakorlati teendőket adj vissza érvényes JSON-ban.',
             );
 
-            return $this->envelope($decoded);
+            $actions = $decoded['actions'] ?? $payload['actions'];
+            if (! is_array($actions)) {
+                $actions = $payload['actions'];
+            }
+            $actions = array_values(array_filter(array_map(
+                static fn ($action) => trim((string) $action),
+                array_slice($actions, 0, 3),
+            )));
+
+            if ($actions === []) {
+                $actions = $payload['actions'];
+            }
+
+            $payload['actions'] = $actions;
+
+            return $this->envelope($payload);
         } catch (\Throwable $e) {
-            return $this->envelope($fallbackPayload, true, $e->getMessage());
+            return $this->envelope($payload, true, $e->getMessage());
         }
     }
 
