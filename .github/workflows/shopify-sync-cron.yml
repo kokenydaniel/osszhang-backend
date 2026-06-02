@@ -1,0 +1,24 @@
+# Wakes the Fly app briefly (~1–2 min) every 15 minutes for Shopify import.
+# Set repository secret CRON_SECRET to the same value as Fly: fly secrets set CRON_SECRET=...
+name: Shopify sync cron
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger backend Shopify sync
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set — skipping."
+            exit 0
+          fi
+          curl -fsS -X POST "https://osszhang-backend.fly.dev/api/cron/shopify-sync" \
+            -H "X-Cron-Secret: ${CRON_SECRET}" \
+            -H "Accept: application/json"

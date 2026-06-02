@@ -186,6 +186,7 @@ curl -X POST http://localhost:8000/api/household/members \
 | `OPENAI_API_KEY` | No | AI features |
 | `SHOPIFY_STORE_URL` | No | Shopify import |
 | `SHOPIFY_ACCESS_TOKEN` | No | Shopify import |
+| `CRON_SECRET` | No | Shared secret for `POST /api/cron/shopify-sync` (GitHub Actions cron) |
 | `FRONTEND_URL` | No | Next.js app URL (e.g. `https://osszhang.vercel.app`) |
 
 On Fly.io, set secrets with `fly secrets set KEY=value`.

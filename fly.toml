@@ -20,6 +20,8 @@ console_command = 'php /var/www/artisan tinker'
   SESSION_DRIVER = 'cookie'
   SESSION_SECURE_COOKIE = 'true'
 
+# Single machine, scale-to-zero when idle (no compute charge while stopped).
+# Shopify auto-sync: GitHub Actions cron hits /api/cron/shopify-sync (see .github/workflows).
 [http_service]
   internal_port = 8080
   force_https = true

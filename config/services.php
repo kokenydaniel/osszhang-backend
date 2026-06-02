@@ -40,4 +40,8 @@ return [
         'token' => env('SHOPIFY_ACCESS_TOKEN'),
     ],
 
+    'cron' => [
+        'secret' => env('CRON_SECRET'),
+    ],
+
 ];

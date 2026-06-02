@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform.feature' => \App\Http\Middleware\EnsurePlatformFeature::class,
             'tier.module' => \App\Http\Middleware\EnsureTierModuleAccess::class,
             'tier.feature' => \App\Http\Middleware\EnsureTierFeatureAccess::class,
+            'cron.secret' => \App\Http\Middleware\VerifyCronSecret::class,
         ]);
 
         $middleware->api(prepend: [

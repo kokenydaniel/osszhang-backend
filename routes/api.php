@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\AdminFeatureController;
 use App\Http\Controllers\Api\AdminAnnouncementController;
 use App\Http\Controllers\Api\DashboardAiCfoController;
 use App\Http\Controllers\Api\AiTravelController;
+use App\Http\Controllers\Api\CronController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,6 +31,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+
+Route::post('/cron/shopify-sync', [CronController::class, 'shopifySync'])
+    ->middleware('cron.secret');
 
 Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(function () {
     Route::get('/users', [AdminUserController::class, 'index']);
