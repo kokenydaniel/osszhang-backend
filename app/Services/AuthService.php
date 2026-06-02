@@ -88,8 +88,6 @@ class AuthService
             ]);
         }
 
-        $this->ensureNotBlockedByMaintenance($user);
-
         $user->update(['last_login_at' => now()]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
