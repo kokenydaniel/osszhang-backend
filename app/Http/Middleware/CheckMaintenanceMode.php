@@ -14,7 +14,7 @@ class CheckMaintenanceMode
     /** @param  Closure(Request): Response  $next */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->is('api/cron/shopify-sync', 'up')) {
+        if ($request->is('api/login', 'api/register', 'api/logout', 'api/me', 'api/cron/shopify-sync', 'up')) {
             return $next($request);
         }
 

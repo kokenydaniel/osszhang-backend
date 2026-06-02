@@ -62,8 +62,6 @@ class AuthService
             'permissions' => ['budget'],
         ]);
 
-        $this->ensureNotBlockedByMaintenance($user);
-
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -148,24 +146,6 @@ class AuthService
             'message' => 'Jelszó sikeresen megváltoztatva.',
             'must_change_password' => false,
         ];
-    }
-
-    private function ensureNotBlockedByMaintenance(User $user): void
-    {
-        if (! FeatureFlags::isEnabled('maintenance_mode')) {
-            return;
-        }
-
-        if ($user->lifetime_admin) {
-            return;
-        }
-
-        throw new \Illuminate\Http\Exceptions\HttpResponseException(
-            response()->json([
-                'message' => 'Karbantartás alatt. Az alkalmazás pillanatnyilag nem elérhető.',
-                'code' => 'MAINTENANCE_MODE',
-            ], 503)
-        );
     }
 
     public function buildAuthPayload(User $user): array
