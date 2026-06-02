@@ -161,6 +161,8 @@ class AuthService
                 'lifetimeAdmin' => (bool) $user->lifetime_admin,
                 'effective_tier' => AccessControl::effectiveTier($user),
                 'effectiveTier' => AccessControl::effectiveTier($user),
+                'billing_tier' => AccessControl::billingTier($user),
+                'billingTier' => AccessControl::billingTier($user),
                 'beta_mode' => PlatformSettings::isBetaMode(),
                 'betaMode' => PlatformSettings::isBetaMode(),
                 'platform_feature_flags' => [

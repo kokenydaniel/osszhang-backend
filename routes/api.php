@@ -36,12 +36,15 @@ Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(fu
     Route::patch('/users/{user}/activate', [AdminUserController::class, 'activate']);
     Route::patch('/users/{user}/deactivate', [AdminUserController::class, 'deactivate']);
     Route::post('/users/{user}/impersonate', [AdminUserController::class, 'impersonate']);
+    Route::patch('/users/{user}/tier-grant', [AdminUserController::class, 'updateTierGrant']);
 
     Route::get('/features', [AdminFeatureController::class, 'index']);
     Route::patch('/features/{key}', [AdminFeatureController::class, 'update']);
 
     Route::get('/announcements', [AdminAnnouncementController::class, 'index']);
     Route::post('/announcements', [AdminAnnouncementController::class, 'store']);
+    Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update']);
+    Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy']);
     Route::patch('/announcements/{announcement}/toggle', [AdminAnnouncementController::class, 'toggle']);
 });
 
@@ -76,36 +79,46 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
     Route::apiResource('transactions', TransactionController::class);
     Route::post('/transactions/clone', [TransactionController::class, 'cloneMonth']);
     Route::post('/transactions/{transaction}/items', [TransactionController::class, 'addItem']);
+    Route::put('/transactions/{transaction}/items/{item}', [TransactionController::class, 'updateItem']);
     Route::delete('/transactions/{transaction}/items/{item}', [TransactionController::class, 'deleteItem']);
     
-    // Utilities (specifikus útvonalak előbb — különben a {utility} elnyeli a „settlement” szegmenst)
-    Route::post('/utilities/clone', [UtilityController::class, 'cloneMonth']);
-    Route::post('/utilities/settlement', [UtilityController::class, 'settleMonth']);
-    Route::delete('/utilities/settlement', [UtilityController::class, 'unsettleMonth']);
-    Route::apiResource('utilities', UtilityController::class);
-    
-    // Meters
-    Route::apiResource('meters', MeterController::class);
-    Route::post('/meters/{meter}/readings', [MeterController::class, 'addReading']);
-    Route::put('/meters/{meter}/readings/{reading}', [MeterController::class, 'updateReading']);
-    Route::delete('/meters/{meter}/readings/{reading}', [MeterController::class, 'deleteReading']);
-    
-    // Business (Little Loom)
-    Route::post('/business-orders/shopify-import', [BusinessOrderController::class, 'shopifyImport']);
-    Route::apiResource('business-orders', BusinessOrderController::class);
-    
-    // Debts
-    Route::apiResource('debts', DebtController::class);
-    
-    // Savings
-    Route::apiResource('savings', SavingController::class);
-    Route::post('/savings/{saving}/entries', [SavingController::class, 'addEntry']);
-    Route::put('/savings/{saving}/entries/{entry}', [SavingController::class, 'updateEntry']);
-    Route::delete('/savings/{saving}/entries/{entry}', [SavingController::class, 'deleteEntry']);
-    Route::put('/savings/{saving}/monthly-contribution', [SavingController::class, 'upsertMonthlyContribution']);
-    
-    // Investments
-    Route::apiResource('investments', InvestmentController::class);
+    // Utilities (Pro+)
+    Route::middleware('tier.module:utilities')->group(function () {
+        Route::post('/utilities/clone', [UtilityController::class, 'cloneMonth']);
+        Route::post('/utilities/settlement', [UtilityController::class, 'settleMonth']);
+        Route::delete('/utilities/settlement', [UtilityController::class, 'unsettleMonth']);
+        Route::apiResource('utilities', UtilityController::class);
+    });
+
+    // Meters (Pro+)
+    Route::middleware('tier.module:meters')->group(function () {
+        Route::apiResource('meters', MeterController::class);
+        Route::post('/meters/{meter}/readings', [MeterController::class, 'addReading']);
+        Route::put('/meters/{meter}/readings/{reading}', [MeterController::class, 'updateReading']);
+        Route::delete('/meters/{meter}/readings/{reading}', [MeterController::class, 'deleteReading']);
+    });
+
+    // Business (Premium)
+    Route::middleware('tier.module:business')->group(function () {
+        Route::post('/business-orders/shopify-import', [BusinessOrderController::class, 'shopifyImport'])
+            ->middleware('tier.feature:shopify_import');
+        Route::apiResource('business-orders', BusinessOrderController::class);
+    });
+
+    // Debts (Pro+)
+    Route::middleware('tier.module:debts')->group(function () {
+        Route::apiResource('debts', DebtController::class);
+    });
+
+    // Savings + investments (Pro+)
+    Route::middleware('tier.module:savings')->group(function () {
+        Route::apiResource('savings', SavingController::class);
+        Route::post('/savings/{saving}/entries', [SavingController::class, 'addEntry']);
+        Route::put('/savings/{saving}/entries/{entry}', [SavingController::class, 'updateEntry']);
+        Route::delete('/savings/{saving}/entries/{entry}', [SavingController::class, 'deleteEntry']);
+        Route::put('/savings/{saving}/monthly-contribution', [SavingController::class, 'upsertMonthlyContribution']);
+        Route::apiResource('investments', InvestmentController::class);
+    });
     
     // Invitations
     Route::apiResource('invitations', InvitationController::class);

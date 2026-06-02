@@ -24,10 +24,13 @@ class HouseholdSubscriptionSync
         $subscription = self::resolveSubscription($user);
 
         if ($subscription === null || ! self::subscriptionGrantsAccess($subscription)) {
-            $household->update([
-                'subscription_tier' => AccessControl::TIER_FREE,
-                'subscription_status' => AccessControl::STATUS_NONE,
-            ]);
+            // Csak Stripe ügyfeleknél nullázunk — kézi DB / admin grant nélküli tier megmarad.
+            if ($user->stripe_id !== null) {
+                $household->update([
+                    'subscription_tier' => AccessControl::TIER_FREE,
+                    'subscription_status' => AccessControl::STATUS_NONE,
+                ]);
+            }
 
             return;
         }

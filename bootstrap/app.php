@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'premium.ai' => \App\Http\Middleware\EnsurePremiumAiFeature::class,
             'platform.admin' => \App\Http\Middleware\EnsurePlatformAdmin::class,
             'platform.feature' => \App\Http\Middleware\EnsurePlatformFeature::class,
+            'tier.module' => \App\Http\Middleware\EnsureTierModuleAccess::class,
+            'tier.feature' => \App\Http\Middleware\EnsureTierFeatureAccess::class,
         ]);
 
         $middleware->api(prepend: [

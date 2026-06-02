@@ -41,6 +41,31 @@ class AdminAnnouncementController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, SystemAnnouncement $announcement): JsonResponse
+    {
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'min:3', 'max:2000'],
+            'type' => ['required', 'string', 'in:info,warning,danger'],
+        ]);
+
+        $this->adminAnnouncementService->validateType($validated['type']);
+
+        return response()->json([
+            'data' => $this->adminAnnouncementService->updateAnnouncement(
+                $announcement,
+                $validated['message'],
+                $validated['type'],
+            ),
+        ]);
+    }
+
+    public function destroy(SystemAnnouncement $announcement): JsonResponse
+    {
+        $this->adminAnnouncementService->deleteAnnouncement($announcement);
+
+        return response()->json(['data' => null]);
+    }
+
     public function toggle(SystemAnnouncement $announcement): JsonResponse
     {
         return response()->json([

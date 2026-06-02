@@ -25,11 +25,18 @@ class BusinessOrderService
     {
         $biz = $household->resolvedBusinessSettings() ?? BusinessSettings::defaults();
 
+        $defaultStatus = $biz['order_statuses'][0] ?? 'Függőben';
+        $orderStatus = trim((string) ($validated['orderStatus'] ?? $validated['order_status'] ?? $defaultStatus));
+        if ($orderStatus === '') {
+            $orderStatus = $defaultStatus;
+        }
+
         $o = new BusinessOrder([
             'household_id' => $household->id,
             'date' => $validated['date'],
             'paid_date' => $validated['paidDate'] ?? null,
             'state' => ($validated['paidDate'] ?? null) ? 'RENDBEN' : 'KINT',
+            'order_status' => $orderStatus,
         ]);
         $this->crypto->persistBusinessOrder($o, $household, [
             'customer_name' => $validated['customerName'],
@@ -74,6 +81,12 @@ class BusinessOrderService
         }
         $businessOrder->paid_date = $input['paidDate'] ?? $businessOrder->paid_date;
         $businessOrder->state = $input['state'] ?? ($businessOrder->paid_date ? 'RENDBEN' : 'KINT');
+        if (array_key_exists('orderStatus', $input) || array_key_exists('order_status', $input)) {
+            $status = trim((string) ($input['orderStatus'] ?? $input['order_status'] ?? ''));
+            if ($status !== '') {
+                $businessOrder->order_status = $status;
+            }
+        }
 
         $this->crypto->persistBusinessOrder($businessOrder, $household, $sensitive);
         $businessOrder->save();

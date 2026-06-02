@@ -7,6 +7,8 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\UtilitySettlement;
+use App\Support\AccessControl;
+use App\Support\MonthDates;
 
 class UtilityService
 {
@@ -16,6 +18,7 @@ class UtilityService
         private readonly HouseholdCipherService $cipher,
         private readonly UtilitySettlementService $settlements,
         private readonly EncryptedRecordService $crypto,
+        private readonly WalletProvisioningService $wallets,
     ) {}
 
     public function formatSettlement(UtilitySettlement $s, Household $household, ?User $partner): array
@@ -138,6 +141,10 @@ class UtilityService
             throw new \InvalidArgumentException('A rezsi megosztás nincs bekapcsolva.');
         }
 
+        if (! AccessControl::canUseFeature($user, 'utility_split')) {
+            throw new \InvalidArgumentException(AccessControl::featureAccessDeniedMessage('utility_split'));
+        }
+
         $exists = UtilitySettlement::where('household_id', $household->id)
             ->where('year', $validated['year'])
             ->where('month', $validated['month'])
@@ -166,7 +173,9 @@ class UtilityService
         $partner = $household->utilitySplitPartner;
         $partnerName = $partner?->first_name ?? 'Partner';
         $settledAt = now()->format('Y-m-d');
+        $dueDate = MonthDates::shiftToMonth($settledAt, (int) $validated['year'], (int) $validated['month']);
         $amount = abs($net);
+        $sharedWallet = $this->wallets->ensureSharedWallet($household);
 
         if ($net > 0) {
             $direction = 'partner_pays_household';
@@ -180,9 +189,10 @@ class UtilityService
 
         $transaction = new Transaction([
             'household_id' => $household->id,
+            'wallet_id' => $sharedWallet->id,
             'user_id' => $user->id,
             'type' => $txType,
-            'due_date' => $settledAt,
+            'due_date' => $dueDate,
             'paid_date' => $settledAt,
             'is_budget' => false,
             'is_reserve' => false,
@@ -276,7 +286,7 @@ class UtilityService
 
         $created = 0;
         foreach ($toClone as $bill) {
-            $newDate = str_replace($prevMonthStr, $targetMonthStr, $bill->due_date);
+            $newDate = MonthDates::shiftToMonth($bill->due_date, $year, $month);
             $source = $this->crypto->utilityResolved($bill, $household);
 
             $exists = Utility::where('household_id', $householdId)

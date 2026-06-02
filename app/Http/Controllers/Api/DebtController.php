@@ -30,6 +30,11 @@ class DebtController extends Controller
             'dueDay' => 'nullable|integer|min:1|max:31',
             'status' => 'nullable|string',
             'walletId' => 'sometimes|integer|exists:wallets,id',
+            'budgetSyncEnabled' => 'sometimes|boolean',
+            'budgetStartYear' => 'nullable|integer|min:2000|max:2100',
+            'budgetStartMonth' => 'nullable|integer|min:1|max:12',
+            'paidInstallmentMonths' => 'sometimes|array',
+            'paidInstallmentMonths.*' => 'string|regex:/^\d{4}-\d{2}$/',
         ]);
 
         return response()->json(
@@ -48,6 +53,11 @@ class DebtController extends Controller
             'minimumPayment' => 'nullable|numeric|min:0',
             'dueDay' => 'nullable|integer|min:1|max:31',
             'status' => 'sometimes|string',
+            'budgetSyncEnabled' => 'sometimes|boolean',
+            'budgetStartYear' => 'nullable|integer|min:2000|max:2100',
+            'budgetStartMonth' => 'nullable|integer|min:1|max:12',
+            'paidInstallmentMonths' => 'sometimes|array',
+            'paidInstallmentMonths.*' => 'string|regex:/^\d{4}-\d{2}$/',
         ]);
 
         return response()->json(

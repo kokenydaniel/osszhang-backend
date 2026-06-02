@@ -6,8 +6,10 @@ use App\Http\Resources\AdminUserResource;
 use App\Models\ImpersonationAudit;
 use App\Models\User;
 use App\Services\AuthService;
+use App\Support\AccessControl;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class AdminUserService
@@ -24,7 +26,7 @@ class AdminUserService
         $perPage = min(max((int) $request->query('per_page', 25), 1), 100);
 
         $query = User::query()
-            ->with('household:id,name,business_name,subscription_tier,subscription_status')
+            ->with('household:id,name,business_name,subscription_tier,subscription_status,tier_grant,tier_grant_expires_at,tier_grant_note')
             ->orderByDesc('id');
 
         if ($search !== '') {
@@ -127,5 +129,68 @@ class AdminUserService
             'user' => $this->authService->buildAuthPayload($target->fresh(['household.users'])),
             'target' => (new AdminUserResource($target->fresh('household')))->resolve(),
         ];
+    }
+
+    /** @return array<string, mixed> */
+    public function updateTierGrant(User $actor, User $target, Request $request): array
+    {
+        if ($target->lifetime_admin) {
+            throw ValidationException::withMessages([
+                'user' => ['Platform admin háztartásán nem állítható be grant.'],
+            ]);
+        }
+
+        $household = $target->household;
+        if ($household === null) {
+            throw ValidationException::withMessages([
+                'user' => ['A felhasználónak nincs háztartása.'],
+            ]);
+        }
+
+        $grantTier = $request->input('grant_tier');
+
+        if ($grantTier === null || $grantTier === '') {
+            $household->update([
+                'tier_grant' => null,
+                'tier_grant_expires_at' => null,
+                'tier_grant_note' => null,
+                'tier_grant_granted_by' => null,
+            ]);
+
+            return (new AdminUserResource($target->fresh('household')))->resolve();
+        }
+
+        if (! in_array($grantTier, [AccessControl::TIER_PRO, AccessControl::TIER_PREMIUM], true)) {
+            throw ValidationException::withMessages([
+                'grant_tier' => ['Érvénytelen grant szint.'],
+            ]);
+        }
+
+        $permanent = $request->boolean('permanent');
+        $expiresAt = null;
+
+        if (! $permanent) {
+            $expiresRaw = $request->input('expires_at');
+            if ($expiresRaw === null || $expiresRaw === '') {
+                throw ValidationException::withMessages([
+                    'expires_at' => ['Adj meg lejárati dátumot, vagy jelöld be az örökös grantot.'],
+                ]);
+            }
+            $expiresAt = Carbon::parse($expiresRaw)->endOfDay();
+            if ($expiresAt->isPast()) {
+                throw ValidationException::withMessages([
+                    'expires_at' => ['A lejárat csak jövőbeli dátum lehet.'],
+                ]);
+            }
+        }
+
+        $household->update([
+            'tier_grant' => $grantTier,
+            'tier_grant_expires_at' => $expiresAt,
+            'tier_grant_note' => $request->input('note'),
+            'tier_grant_granted_by' => $actor->id,
+        ]);
+
+        return (new AdminUserResource($target->fresh('household')))->resolve();
     }
 }

@@ -19,14 +19,20 @@ class HouseholdController extends Controller
 
     public function show(Request $request)
     {
-        return new HouseholdResource($this->householdService->show($request->user()->household));
+        $household = $this->householdService->show($request->user()->household);
+
+        return response()->json((new HouseholdResource($household))->resolve());
     }
 
     public function update(UpdateHouseholdRequest $request)
     {
-        return new HouseholdResource(
-            $this->householdService->update($request->user()->household, $request, $request->user()),
+        $household = $this->householdService->update(
+            $request->user()->household,
+            $request,
+            $request->user(),
         );
+
+        return response()->json((new HouseholdResource($household))->resolve());
     }
 
     public function updateInviteCode(UpdateInviteCodeRequest $request)

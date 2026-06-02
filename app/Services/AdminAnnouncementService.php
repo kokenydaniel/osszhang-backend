@@ -30,6 +30,32 @@ class AdminAnnouncementService
         return (new SystemAnnouncementResource($announcement))->resolve();
     }
 
+    public function updateAnnouncement(SystemAnnouncement $announcement, string $message, string $type): array
+    {
+        $this->validateType($type);
+
+        $announcement->update([
+            'message' => $message,
+            'type' => $type,
+        ]);
+
+        if ($announcement->is_active) {
+            SystemAnnouncements::clearCache();
+        }
+
+        return (new SystemAnnouncementResource($announcement->fresh()))->resolve();
+    }
+
+    public function deleteAnnouncement(SystemAnnouncement $announcement): void
+    {
+        $wasActive = $announcement->is_active;
+        $announcement->delete();
+
+        if ($wasActive) {
+            SystemAnnouncements::clearCache();
+        }
+    }
+
     public function toggleActive(SystemAnnouncement $announcement): array
     {
         return DB::transaction(function () use ($announcement): array {

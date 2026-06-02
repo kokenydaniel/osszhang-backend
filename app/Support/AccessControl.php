@@ -42,13 +42,24 @@ final class AccessControl
         return PlatformSettings::isBetaMode();
     }
 
+    /** Stripe / fizetős előfizetés — admin grant nem módosítja. */
+    public static function billingTier(User $user): string
+    {
+        return HouseholdTierAccess::billingTier($user->household);
+    }
+
+    /** Funkció-hozzáférés (fizetős + aktív admin grant). */
     public static function effectiveTier(User $user): string
     {
         if ($user->lifetime_admin) {
             return self::TIER_PREMIUM;
         }
 
-        return $user->household?->subscription_tier ?? self::TIER_FREE;
+        if (self::isBetaMode()) {
+            return self::TIER_PREMIUM;
+        }
+
+        return HouseholdTierAccess::accessTier($user->household);
     }
 
     /**
@@ -109,6 +120,30 @@ final class AccessControl
     public static function canCreatePrivateWallet(User $user): bool
     {
         return self::canUseFeature($user, 'private_wallet');
+    }
+
+    public static function moduleAccessDeniedMessage(string $moduleId): string
+    {
+        if (in_array($moduleId, self::PREMIUM_MODULES, true)) {
+            return 'A Vállalkozás modul csak Premium előfizetéssel érhető el.';
+        }
+
+        if (in_array($moduleId, self::PRO_MODULES, true)) {
+            return 'Ez a modul csak Pro vagy Premium előfizetéssel érhető el.';
+        }
+
+        return 'Ehhez a modulhoz magasabb előfizetési csomag szükséges.';
+    }
+
+    public static function featureAccessDeniedMessage(string $featureId): string
+    {
+        return match ($featureId) {
+            'ai' => 'Az AI funkciók csak Premium előfizetéssel érhetők el.',
+            'shopify_import' => 'A Shopify import csak Premium előfizetéssel érhető el.',
+            'private_wallet' => 'A privát kassza csak Pro vagy Premium előfizetéssel érhető el.',
+            'utility_split' => 'A rezsimegosztás csak Pro vagy Premium előfizetéssel érhető el.',
+            default => 'Ehhez a funkcióhoz magasabb előfizetési csomag szükséges.',
+        };
     }
 
     public static function maxWallets(User $user): ?int

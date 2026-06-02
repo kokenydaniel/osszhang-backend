@@ -7,16 +7,16 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsurePremiumAiFeature
+class EnsureTierFeatureAccess
 {
     /** @param  Closure(Request): Response  $next */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $feature): Response
     {
         $user = $request->user();
 
-        if ($user === null || ! AccessControl::canUseFeature($user, 'ai')) {
+        if ($user === null || ! AccessControl::canUseFeature($user, $feature)) {
             return response()->json([
-                'message' => AccessControl::featureAccessDeniedMessage('ai'),
+                'message' => AccessControl::featureAccessDeniedMessage($feature),
                 'code' => 'SUBSCRIPTION_FEATURE_REQUIRED',
             ], 403);
         }

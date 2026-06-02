@@ -53,6 +53,10 @@ class DebtRecordFormatter extends AbstractEncryptedRecordFormatter
             'minimumPayment' => isset($s['minimum_payment']) ? (float) $s['minimum_payment'] : null,
             'dueDay' => isset($s['due_day']) ? (int) $s['due_day'] : null,
             'status' => (string) ($s['status'] ?? ''),
+            'budgetSyncEnabled' => (bool) ($s['budget_sync_enabled'] ?? false),
+            'budgetStartYear' => isset($s['budget_start_year']) ? (int) $s['budget_start_year'] : null,
+            'budgetStartMonth' => isset($s['budget_start_month']) ? (int) $s['budget_start_month'] : null,
+            'paidInstallmentMonths' => array_values($s['paid_installment_months'] ?? []),
         ];
     }
 }

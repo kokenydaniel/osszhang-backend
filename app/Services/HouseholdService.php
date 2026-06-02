@@ -11,10 +11,13 @@ use App\Http\Resources\UserResource;
 use App\Models\Household;
 use App\Models\User;
 use App\Support\AccessControl;
+use App\Support\BudgetSettings;
 use App\Support\BusinessSettings;
+use App\Support\DashboardSettings;
 use App\Support\DebtsSettings;
 use App\Support\MetersSettings;
 use App\Support\SavingsSettings;
+use App\Support\UtilitiesSettings;
 use App\Support\UtilityTemplates;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -81,8 +84,22 @@ class HouseholdService
         if ($request->has('utility_split_partner_id')) {
             $data['utility_split_partner_id'] = $request->utility_split_partner_id;
         }
+        if ($request->has('budget_settings')) {
+            $data['budget_settings'] = BudgetSettings::resolve($request->budget_settings);
+        }
+        if ($request->has('utilities_settings')) {
+            $data['utilities_settings'] = UtilitiesSettings::resolve($request->utilities_settings);
+        }
+        if ($request->has('dashboard_settings')) {
+            $data['dashboard_settings'] = DashboardSettings::resolve($request->dashboard_settings);
+        }
         if ($request->has('business_settings')) {
-            $data['business_settings'] = BusinessSettings::resolve($request->business_settings);
+            $existing = $household->resolvedBusinessSettings();
+            $incoming = $request->business_settings;
+            if (is_array($incoming) && ! array_key_exists('shopify_last_synced_at', $incoming)) {
+                $incoming['shopify_last_synced_at'] = $existing['shopify_last_synced_at'] ?? null;
+            }
+            $data['business_settings'] = BusinessSettings::resolve($incoming);
         }
         if ($request->has('savings_settings')) {
             $data['savings_settings'] = SavingsSettings::resolve($request->savings_settings);

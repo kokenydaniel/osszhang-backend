@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BusinessOrder;
 use App\Models\Household;
 use App\Models\User;
+use App\Support\AccessControl;
 use App\Support\BusinessSettings;
 use Carbon\Carbon;
 
@@ -17,6 +18,14 @@ class ShopifyImportService
 
     public function import(User $user): array
     {
+        if (! AccessControl::canUseFeature($user, 'shopify_import')) {
+            return [
+                'success' => false,
+                'error' => AccessControl::featureAccessDeniedMessage('shopify_import'),
+                'status' => 403,
+            ];
+        }
+
         $household = $user->household;
         $biz = $household ? $household->resolvedBusinessSettings() : BusinessSettings::defaults();
 
@@ -96,6 +105,7 @@ class ShopifyImportService
                 'shopify_order_id' => $orderId,
                 'shopify_order_number' => $orderNumber,
                 'state' => $state,
+                'order_status' => $biz['order_statuses'][0] ?? 'Függőben',
             ]);
             $this->crypto->persistBusinessOrder($o, $household, [
                 'customer_name' => ($so['customer']['first_name'] ?? '').' '.($so['customer']['last_name'] ?? 'Vásárló'),

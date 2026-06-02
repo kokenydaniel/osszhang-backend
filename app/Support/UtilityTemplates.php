@@ -30,12 +30,19 @@ class UtilityTemplates
             if (! in_array($split, ['shared', 'dani-private', 'ildi-private'], true)) {
                 $split = 'shared';
             }
-            $out[] = [
+            $provider = trim((string) ($row['provider'] ?? ''));
+            $paymentMethod = trim((string) ($row['payment_method'] ?? $row['paymentMethod'] ?? ''));
+            $budgetCategory = trim((string) ($row['budget_category'] ?? $row['budgetCategory'] ?? ''));
+
+            $out[] = array_filter([
                 'type' => $type,
                 'total' => max(0, (float) ($row['total'] ?? 0)),
                 'due_day' => $dueDay,
                 'split_rule' => $split,
-            ];
+                'provider' => $provider !== '' ? $provider : null,
+                'payment_method' => $paymentMethod !== '' ? $paymentMethod : null,
+                'budget_category' => $budgetCategory !== '' ? $budgetCategory : null,
+            ], fn ($v) => $v !== null);
         }
 
         return $out;

@@ -23,6 +23,8 @@ class StoreBusinessOrderRequest extends FormRequest
             'destination' => 'nullable|string',
             'paidDate' => 'nullable|date',
             'invoiceId' => 'nullable|string',
+            'orderStatus' => 'nullable|string|max:100',
+            'order_status' => 'nullable|string|max:100',
         ];
     }
 }

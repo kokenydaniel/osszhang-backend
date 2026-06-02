@@ -78,6 +78,13 @@ class TransactionController extends Controller
         );
     }
 
+    public function updateItem(AddTransactionItemRequest $request, $txId, $itemId)
+    {
+        return response()->json(
+            $this->budgetService->updateItem($request->user(), $txId, $itemId, $request->validated()),
+        );
+    }
+
     public function deleteItem(Request $request, $txId, $itemId)
     {
         return response()->json(

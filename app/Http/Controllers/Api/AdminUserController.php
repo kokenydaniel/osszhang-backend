@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateAdminUserTierGrantRequest;
 use App\Http\Resources\AdminUserResource;
 use App\Models\User;
 use App\Services\AdminUserService;
@@ -49,5 +50,12 @@ class AdminUserController extends Controller
         return response()->json(
             $this->adminUserService->impersonate($request->user(), $user, $request),
         );
+    }
+
+    public function updateTierGrant(UpdateAdminUserTierGrantRequest $request, User $user): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->adminUserService->updateTierGrant($request->user(), $user, $request),
+        ]);
     }
 }

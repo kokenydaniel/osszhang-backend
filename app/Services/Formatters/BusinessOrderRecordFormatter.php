@@ -55,6 +55,7 @@ class BusinessOrderRecordFormatter extends AbstractEncryptedRecordFormatter
             'hasInvoice' => (bool) $o->has_invoice,
             'invoiceId' => $s['invoice_id'] ?? null,
             'state' => $o->state,
+            'orderStatus' => $o->order_status ?: 'Függőben',
             'shopifyOrderId' => $o->shopify_order_id,
             'shopifyOrderNumber' => $o->shopify_order_number,
         ];

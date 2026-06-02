@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Services\EncryptedRecordService;
 use App\Services\WalletProvisioningService;
 use Illuminate\Http\Request;
+use App\Support\HouseholdTierAccess;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class HouseholdResource extends JsonResource
@@ -19,6 +20,7 @@ class HouseholdResource extends JsonResource
             'name' => $this->name,
             'invite_code' => $this->invite_code,
             'categories' => $this->categories,
+            'budget_settings' => $this->resolvedBudgetSettings(),
             'manual_balance' => (float) (app(WalletProvisioningService::class)
                 ->sharedWalletForHousehold($this->resource)
                 ->manual_balance ?? 0),
@@ -30,11 +32,19 @@ class HouseholdResource extends JsonResource
             'savings_settings' => $this->resolvedSavingsSettings(),
             'debts_settings' => $this->resolvedDebtsSettings(),
             'meters_settings' => $this->resolvedMetersSettings(),
+            'utilities_settings' => $this->resolvedUtilitiesSettings(),
+            'dashboard_settings' => $this->resolvedDashboardSettings(),
             'onboarding_completed' => (bool) $this->onboarding_completed,
-            'subscription_tier' => $this->subscription_tier ?? 'free',
+            'subscription_tier' => HouseholdTierAccess::billingTier($this->resource),
             'subscription_status' => $this->subscription_status ?? 'none',
-            'subscriptionTier' => $this->subscription_tier ?? 'free',
+            'subscriptionTier' => HouseholdTierAccess::billingTier($this->resource),
             'subscriptionStatus' => $this->subscription_status ?? 'none',
+            'billing_tier' => HouseholdTierAccess::billingTier($this->resource),
+            'billingTier' => HouseholdTierAccess::billingTier($this->resource),
+            'access_tier' => HouseholdTierAccess::accessTier($this->resource),
+            'accessTier' => HouseholdTierAccess::accessTier($this->resource),
+            'tier_grant' => HouseholdTierAccess::grantPayload($this->resource),
+            'tierGrant' => HouseholdTierAccess::grantPayload($this->resource),
             'business_enabled' => $this->business_enabled,
             'business_name' => $this->business_name,
             'shopify_import_enabled' => (bool) $this->shopify_import_enabled,

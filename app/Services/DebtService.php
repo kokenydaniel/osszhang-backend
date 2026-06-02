@@ -40,7 +40,7 @@ class DebtService
             'household_id' => $household->id,
             'wallet_id' => $wallet->id,
         ]);
-        $this->crypto->persistDebt($d, $household, [
+        $this->crypto->persistDebt($d, $household, $this->sensitiveFromValidated($validated, [
             'name' => $validated['name'],
             'target_amount' => (float) $validated['targetAmount'],
             'paid_amount' => (float) ($validated['paidAmount'] ?? 0),
@@ -48,7 +48,7 @@ class DebtService
             'minimum_payment' => $validated['minimumPayment'] ?? null,
             'due_day' => $validated['dueDay'] ?? null,
             'status' => $validated['status'] ?? 'Még fizetendő',
-        ]);
+        ]));
         $d->save();
 
         return $this->crypto->formatDebt($d, $household);
@@ -82,6 +82,7 @@ class DebtService
         if (array_key_exists('status', $validated)) {
             $sensitive['status'] = $validated['status'];
         }
+        $sensitive = $this->mergeBudgetFields($sensitive, $validated);
 
         $this->crypto->persistDebt($d, $household, $sensitive);
         $d->save();
@@ -118,6 +119,31 @@ class DebtService
     private function findAccessibleDebt(User $user, int|string $id): Debt
     {
         return $this->accessibleDebtsQuery($user)->findOrFail($id);
+    }
+
+    /** @param array<string, mixed> $base */
+    private function sensitiveFromValidated(array $validated, array $base): array
+    {
+        return $this->mergeBudgetFields($base, $validated);
+    }
+
+    /** @param array<string, mixed> $sensitive @param array<string, mixed> $validated */
+    private function mergeBudgetFields(array $sensitive, array $validated): array
+    {
+        if (array_key_exists('budgetSyncEnabled', $validated)) {
+            $sensitive['budget_sync_enabled'] = (bool) $validated['budgetSyncEnabled'];
+        }
+        if (array_key_exists('budgetStartYear', $validated)) {
+            $sensitive['budget_start_year'] = $validated['budgetStartYear'];
+        }
+        if (array_key_exists('budgetStartMonth', $validated)) {
+            $sensitive['budget_start_month'] = $validated['budgetStartMonth'];
+        }
+        if (array_key_exists('paidInstallmentMonths', $validated)) {
+            $sensitive['paid_installment_months'] = array_values($validated['paidInstallmentMonths']);
+        }
+
+        return $sensitive;
     }
 
     private function resolveWalletForMutation(User $user, ?int $walletId): Wallet

@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Casts\LenientEncrypted;
+use App\Support\BudgetSettings as BudgetSettingsSupport;
 use App\Support\BusinessSettings as BusinessSettingsSupport;
+use App\Support\DashboardSettings as DashboardSettingsSupport;
 use App\Support\DebtsSettings as DebtsSettingsSupport;
 use App\Support\MetersSettings as MetersSettingsSupport;
 use App\Support\SavingsSettings as SavingsSettingsSupport;
+use App\Support\UtilitiesSettings as UtilitiesSettingsSupport;
 use App\Support\UtilityTemplates as UtilityTemplatesSupport;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Services\WalletProvisioningService;
@@ -15,12 +18,14 @@ use Illuminate\Database\Eloquent\Model;
 class Household extends Model
 {
     protected $fillable = [
-        'name', 'invite_code', 'categories', 'manual_balance',
+        'name', 'invite_code', 'categories', 'budget_settings', 'manual_balance',
         'budget_enabled', 'savings_enabled', 'debts_enabled', 'utilities_enabled', 'meters_enabled',
         'savings_settings', 'debts_settings', 'meters_settings', 'onboarding_completed',
-        'business_enabled', 'business_name', 'shopify_import_enabled', 'shopify_shop_url', 'shopify_access_token', 'utility_split_enabled',
-        'utility_split_partner_id', 'utility_templates', 'cipher_key_encrypted', 'sensitive_encrypted',
+        'business_enabled', 'business_name', 'business_settings', 'shopify_import_enabled', 'shopify_shop_url', 'shopify_access_token', 'utility_split_enabled',
+        'utility_split_partner_id', 'utility_templates', 'utilities_settings', 'dashboard_settings',
+        'cipher_key_encrypted', 'sensitive_encrypted',
         'subscription_tier', 'subscription_status',
+        'tier_grant', 'tier_grant_expires_at', 'tier_grant_note', 'tier_grant_granted_by',
     ];
 
     protected $hidden = [
@@ -34,6 +39,9 @@ class Household extends Model
 
     protected $casts = [
         'categories' => 'array',
+        'budget_settings' => 'array',
+        'utilities_settings' => 'array',
+        'dashboard_settings' => 'array',
         'manual_balance' => 'float',
         'budget_enabled' => 'boolean',
         'savings_enabled' => 'boolean',
@@ -46,6 +54,8 @@ class Household extends Model
         'onboarding_completed' => 'boolean',
         'subscription_tier' => 'string',
         'subscription_status' => 'string',
+        'tier_grant' => 'string',
+        'tier_grant_expires_at' => 'datetime',
         'business_enabled' => 'boolean',
         'shopify_import_enabled' => 'boolean',
         'utility_split_enabled' => 'boolean',
@@ -54,9 +64,24 @@ class Household extends Model
         'utility_templates' => 'array',
     ];
 
+    public function resolvedBudgetSettings(): array
+    {
+        return BudgetSettingsSupport::resolve($this->budget_settings);
+    }
+
     public function resolvedBusinessSettings(): array
     {
         return BusinessSettingsSupport::resolve($this->business_settings);
+    }
+
+    public function resolvedDashboardSettings(): array
+    {
+        return DashboardSettingsSupport::resolve($this->dashboard_settings);
+    }
+
+    public function resolvedUtilitiesSettings(): array
+    {
+        return UtilitiesSettingsSupport::resolve($this->utilities_settings);
     }
 
     public function resolvedUtilityTemplates(): array

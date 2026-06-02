@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UtilitySettlement;
 use App\Models\Wallet;
+use App\Support\MonthDates;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Auth\Access\AuthorizationException;
 
@@ -196,6 +197,45 @@ class BudgetService
     }
 
     /** @return array<string, mixed> */
+    public function updateItem(User $user, int|string $txId, int|string $itemId, array $validated): array
+    {
+        if (SavingService::parseGoalVirtualId($txId) !== null) {
+            abort(404);
+        }
+
+        $household = $this->requireHousehold($user);
+        $this->ensureHousehold($household);
+        $transaction = $this->findAccessibleTransaction($user, $txId);
+
+        $current = $this->sensitive->resolve($transaction, $household);
+        $current['subItems'] = collect($current['subItems'] ?? [])
+            ->map(function (array $item) use ($itemId, $validated) {
+                if ((int) ($item['id'] ?? 0) !== (int) $itemId) {
+                    return $item;
+                }
+
+                if (array_key_exists('amount', $validated)) {
+                    $item['amount'] = (float) $validated['amount'];
+                }
+                if (array_key_exists('reason', $validated)) {
+                    $item['reason'] = $validated['reason'];
+                }
+                if (array_key_exists('date', $validated)) {
+                    $item['date'] = $validated['date'];
+                }
+
+                return $item;
+            })
+            ->values()
+            ->all();
+
+        $this->sensitive->persistSensitive($transaction, $household, $current);
+        $transaction->save();
+
+        return $this->sensitive->formatApi($transaction->load('items'), $household);
+    }
+
+    /** @return array<string, mixed> */
     public function deleteItem(User $user, int|string $txId, int|string $itemId): array
     {
         $savingId = SavingService::parseGoalVirtualId($txId);
@@ -247,14 +287,23 @@ class BudgetService
         $prevMonthStr = $prevYear.'-'.str_pad((string) $prevMonth, 2, '0', STR_PAD_LEFT);
         $targetMonthStr = $year.'-'.str_pad((string) $month, 2, '0', STR_PAD_LEFT);
 
+        $cloneMode = $household->resolvedBudgetSettings()['clone_mode'] ?? 'all';
+
         $toClone = $this->accessibleTransactionsQuery($user, $targetWallet->id)
             ->where('due_date', 'like', $prevMonthStr.'%')
             ->with('items')
-            ->get();
+            ->get()
+            ->filter(function (Transaction $tx) use ($cloneMode) {
+                return match ($cloneMode) {
+                    'budget_only' => (bool) $tx->is_budget,
+                    'fixed_recurring' => (bool) $tx->is_budget && ! $tx->is_reserve,
+                    default => true,
+                };
+            });
 
         foreach ($toClone as $tx) {
             $sensitive = $this->sensitive->resolve($tx, $household);
-            $newDate = str_replace($prevMonthStr, $targetMonthStr, $tx->due_date);
+            $newDate = MonthDates::shiftToMonth($tx->due_date, $year, $month);
 
             $exists = $this->accessibleTransactionsQuery($user, $targetWallet->id)
                 ->where('due_date', $newDate)

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Support\AccessControl;
+use App\Support\HouseholdTierAccess;
 use App\Support\PlatformSettings;
 use App\Support\StripePlans;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -46,22 +47,31 @@ class BillingService
         HouseholdSubscriptionSync::syncUserHousehold($user);
         $user->load('household');
 
-        $tier = AccessControl::effectiveTier($user);
         $household = $user->household;
+        $billingTier = AccessControl::billingTier($user);
+        $accessTier = AccessControl::effectiveTier($user);
         $dbStatus = $household?->subscription_status ?? AccessControl::STATUS_NONE;
 
         $subscription = $this->resolveSubscription($user);
-        $subscriptionStatus = $this->resolveSubscriptionStatus($tier, $dbStatus, $subscription);
+        $subscriptionStatus = $this->resolveSubscriptionStatus($billingTier, $dbStatus, $subscription);
 
-        $summary = in_array($tier, [AccessControl::TIER_PRO, AccessControl::TIER_PREMIUM], true)
-            ? $this->paidSummary($user, $tier, $subscription)
-            : $this->freeSummary($tier);
+        $summary = in_array($billingTier, [AccessControl::TIER_PRO, AccessControl::TIER_PREMIUM], true)
+            ? $this->paidSummary($user, $billingTier, $subscription)
+            : $this->freeSummary($billingTier);
 
         $accessEndsAt = $subscriptionStatus === AccessControl::STATUS_CANCELED
             ? ($subscription?->ends_at?->toDateString() ?? $summary['nextBillingDate'] ?? null)
             : null;
 
+        $tierGrant = HouseholdTierAccess::grantPayload($household);
+
         return array_merge($summary, [
+            'billingTier' => $billingTier,
+            'billing_tier' => $billingTier,
+            'accessTier' => $accessTier,
+            'access_tier' => $accessTier,
+            'tierGrant' => $tierGrant,
+            'tier_grant' => $tierGrant,
             'subscriptionStatus' => $subscriptionStatus,
             'subscription_status' => $subscriptionStatus,
             'cancelAtPeriodEnd' => $subscriptionStatus === AccessControl::STATUS_CANCELED,
