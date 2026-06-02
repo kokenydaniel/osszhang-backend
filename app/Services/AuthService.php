@@ -62,6 +62,8 @@ class AuthService
             'permissions' => ['budget'],
         ]);
 
+        $this->ensureNotBlockedByMaintenance($user);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
@@ -87,6 +89,8 @@ class AuthService
                 'username' => ['A fiók inaktív.'],
             ]);
         }
+
+        $this->ensureNotBlockedByMaintenance($user);
 
         $user->update(['last_login_at' => now()]);
 
@@ -146,6 +150,24 @@ class AuthService
         ];
     }
 
+    private function ensureNotBlockedByMaintenance(User $user): void
+    {
+        if (! FeatureFlags::isEnabled('maintenance_mode')) {
+            return;
+        }
+
+        if ($user->lifetime_admin) {
+            return;
+        }
+
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            response()->json([
+                'message' => 'Karbantartás alatt. Az alkalmazás pillanatnyilag nem elérhető.',
+                'code' => 'MAINTENANCE_MODE',
+            ], 503)
+        );
+    }
+
     public function buildAuthPayload(User $user): array
     {
         if ($user->household_id && ! $user->relationLoaded('household')) {
@@ -168,10 +190,12 @@ class AuthService
                 'platform_feature_flags' => [
                     'enable_ai_cfo' => FeatureFlags::isEnabled('enable_ai_cfo'),
                     'enable_ai_travel_planner' => FeatureFlags::isEnabled('enable_ai_travel_planner'),
+                    'maintenance_mode' => FeatureFlags::isEnabled('maintenance_mode'),
                 ],
                 'platformFeatureFlags' => [
                     'enable_ai_cfo' => FeatureFlags::isEnabled('enable_ai_cfo'),
                     'enable_ai_travel_planner' => FeatureFlags::isEnabled('enable_ai_travel_planner'),
+                    'maintenance_mode' => FeatureFlags::isEnabled('maintenance_mode'),
                 ],
                 'system_announcement' => SystemAnnouncements::active(),
                 'systemAnnouncement' => SystemAnnouncements::active(),
