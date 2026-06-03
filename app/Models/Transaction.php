@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Transaction extends Model
 {
     protected $fillable = [
-        'household_id', 'wallet_id', 'user_id', 'type', 'description', 'category', 'amount',
+        'household_id', 'wallet_id', 'user_id', 'type', 'description', 'category', 'amount', 'currency',
         'due_date', 'paid_date', 'is_budget', 'is_reserve', 'encrypted_payload',
     ];
 

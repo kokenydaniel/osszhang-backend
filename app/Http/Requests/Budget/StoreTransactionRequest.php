@@ -23,6 +23,7 @@ class StoreTransactionRequest extends FormRequest
             'isBudget' => 'boolean',
             'isReserve' => 'boolean',
             'walletId' => 'nullable|integer|exists:wallets,id',
+            'currency' => 'sometimes|string|max:8',
         ];
     }
 }

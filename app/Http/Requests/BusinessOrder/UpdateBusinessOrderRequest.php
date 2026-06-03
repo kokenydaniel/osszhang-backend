@@ -23,6 +23,7 @@ class UpdateBusinessOrderRequest extends FormRequest
             'destination' => 'sometimes|nullable|string',
             'paidDate' => 'sometimes|nullable|date',
             'invoiceId' => 'sometimes|nullable|string',
+            'hasInvoice' => 'sometimes|boolean',
             'orderStatus' => 'sometimes|nullable|string|max:100',
             'order_status' => 'sometimes|nullable|string|max:100',
         ];

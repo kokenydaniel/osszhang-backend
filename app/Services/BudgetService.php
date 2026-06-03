@@ -9,8 +9,8 @@ use App\Models\User;
 use App\Models\UtilitySettlement;
 use App\Models\Wallet;
 use App\Support\MonthDates;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Builder;
 
 class BudgetService
 {
@@ -94,6 +94,7 @@ class BudgetService
             'paid_date' => $validated['paidDate'] ?? null,
             'is_budget' => $validated['isBudget'] ?? false,
             'is_reserve' => $validated['isReserve'] ?? false,
+            'currency' => strtoupper((string) ($validated['currency'] ?? 'HUF')),
         ]);
 
         $this->sensitive->persistSensitive($transaction, $household, [
@@ -143,6 +144,9 @@ class BudgetService
         if (array_key_exists('walletId', $input) && $input['walletId'] !== null) {
             $wallet = $this->resolveWalletForMutation($user, (int) $input['walletId']);
             $transaction->wallet_id = $wallet->id;
+        }
+        if (array_key_exists('currency', $input)) {
+            $transaction->currency = strtoupper((string) ($input['currency'] ?: 'HUF'));
         }
 
         $this->sensitive->persistSensitive($transaction, $household, $current);

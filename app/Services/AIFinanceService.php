@@ -11,7 +11,8 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\Wallet;
-use App\Services\WalletProvisioningService;
+use App\Services\Finance\PaymentPriorityCalculator;
+use App\Services\Finance\VatEstimationCalculator;
 use Carbon\Carbon;
 
 class AIFinanceService
@@ -22,6 +23,8 @@ class AIFinanceService
         private HouseholdCipherService $cipher,
         private EncryptedRecordService $crypto,
         private WalletProvisioningService $wallets,
+        private PaymentPriorityCalculator $paymentPriorityCalculator,
+        private VatEstimationCalculator $vatEstimationCalculator,
     ) {}
 
     public function ensureHousehold(Household $household): Household
@@ -185,7 +188,7 @@ class AIFinanceService
             $prompt = "Adj vissza KIZÁRÓLAG JSON-t egyetlen mezővel: actions (max 3 rövid magyar teendő).\n".
                 "Hónap: {$monthPrefix}\n".
                 "Havi egyenleg (befolyt bevétel − kifizetett kiadások): {$monthlyBalance} Ft\n".
-                "Státusz: ".($overspendAmount > 0 ? 'túlköltés' : 'rendben')."\n".
+                'Státusz: '.($overspendAmount > 0 ? 'túlköltés' : 'rendben')."\n".
                 'Top kiadási kategóriák: '.json_encode($topDrivers, JSON_UNESCAPED_UNICODE);
             $decoded = $this->ai->askJson(
                 $prompt,
@@ -594,7 +597,6 @@ class AIFinanceService
         ];
     }
 
-
     public function travelPlan(array $validated): array
     {
         $destination = trim($validated['destination']);
@@ -937,4 +939,101 @@ class AIFinanceService
         return $this->wallets->sharedWalletForHousehold($user->household);
     }
 
+    public function paymentPriority(Household $household, User $user, array $validated): array
+    {
+        $this->ensureHousehold($household);
+        $wallet = $this->resolveWallet($user, $validated['wallet_id'] ?? null);
+        $year = (int) $validated['year'];
+        $month = (int) $validated['month'];
+        $queue = $this->paymentPriorityCalculator->buildQueue($household, $user, $wallet, $year, $month);
+        $total = round(array_sum(array_column($queue, 'amount')), 2);
+
+        return $this->envelope([
+            'year' => $year,
+            'month' => $month,
+            'total_amount' => $total,
+            'item_count' => count($queue),
+            'items' => $queue,
+            'note' => 'A sorrend a rögzített határidők és összegek alapján készült.',
+        ]);
+    }
+
+    public function vatEstimate(Household $household, array $validated): array
+    {
+        $this->ensureHousehold($household);
+
+        return $this->envelope(
+            $this->vatEstimationCalculator->calculate(
+                $household,
+                (int) $validated['year'],
+                (int) $validated['month'],
+            ),
+        );
+    }
+
+    public function costReductionSuggestions(Household $household, User $user, array $validated): array
+    {
+        $this->ensureHousehold($household);
+        $wallet = $this->resolveWallet($user, $validated['wallet_id'] ?? null);
+        $year = (int) $validated['year'];
+        $month = (int) $validated['month'];
+
+        $monthPrefix = sprintf('%04d-%02d', $year, $month);
+        $transactions = Transaction::query()
+            ->where('household_id', $household->id)
+            ->where('wallet_id', $wallet->id)
+            ->where('type', 'expense')
+            ->whereNotNull('paid_date')
+            ->where('paid_date', 'like', $monthPrefix.'%')
+            ->get();
+
+        $byCategory = [];
+        foreach ($transactions as $tx) {
+            $cat = $this->sensitive->resolvedCategory($tx, $household);
+            $amount = $this->sensitive->paidExpenseTotal($tx, $household);
+            if ($amount <= 0) {
+                continue;
+            }
+            $byCategory[$cat] = ($byCategory[$cat] ?? 0) + $amount;
+        }
+        arsort($byCategory);
+        $categories = [];
+        foreach ($byCategory as $name => $amount) {
+            $categories[] = ['category' => $name, 'spent' => round($amount, 2)];
+        }
+
+        $fallback = fn () => [
+            'suggestions' => array_map(
+                fn ($row) => "A „{$row['category']}” kategóriában {$row['spent']} Ft ment el ebben a hónapban — érdemes átnézni a tételeket.",
+                array_slice($categories, 0, 3),
+            ),
+            'categories' => $categories,
+        ];
+
+        if (count($categories) === 0) {
+            return $this->envelope([
+                'suggestions' => [],
+                'categories' => [],
+                'note' => 'Nincs kifizetett kiadás ebben a hónapban — nincs miből javaslatot készíteni.',
+            ]);
+        }
+
+        try {
+            $systemPrompt = implode("\n", [
+                'Te egy spórolási tanácsadó vagy magyar nyelven.',
+                'KIZÁRÓLAG a megadott kategória-összegeket használhatod — ne találj ki új számokat.',
+                'Adj 2-4 rövid, konkrét javaslatot JSON-ben: { "suggestions": string[] }',
+            ]);
+            $prompt = "Havi kiadások kategóriánként (Ft):\n".json_encode($categories, JSON_UNESCAPED_UNICODE);
+            $decoded = $this->ai->askJson($prompt, $systemPrompt);
+            $suggestions = array_values(array_filter(array_map('strval', $decoded['suggestions'] ?? [])));
+
+            return $this->envelope([
+                'suggestions' => $suggestions ?: $fallback()['suggestions'],
+                'categories' => $categories,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->envelope($fallback(), true, $e->getMessage());
+        }
+    }
 }

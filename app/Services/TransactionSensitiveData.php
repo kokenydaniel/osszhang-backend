@@ -57,6 +57,7 @@ class TransactionSensitiveData
             'paidDate' => $transaction->paid_date,
             'isBudget' => (bool) $transaction->is_budget,
             'isReserve' => (bool) $transaction->is_reserve,
+            'currency' => (string) ($transaction->currency ?? 'HUF'),
             'subItems' => collect($sensitive['subItems'] ?? [])->map(fn ($i) => [
                 'id' => $i['id'] ?? 0,
                 'date' => $i['date'],

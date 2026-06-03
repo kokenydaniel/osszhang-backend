@@ -6,7 +6,6 @@ use App\Http\Resources\HouseholdResource;
 use App\Http\Resources\UserResource;
 use App\Models\Household;
 use App\Models\User;
-use App\Services\WalletService;
 use App\Support\AccessControl;
 use App\Support\FeatureFlags;
 use App\Support\PlatformSettings;
@@ -165,16 +164,8 @@ class AuthService
                 'billingTier' => AccessControl::billingTier($user),
                 'beta_mode' => PlatformSettings::isBetaMode(),
                 'betaMode' => PlatformSettings::isBetaMode(),
-                'platform_feature_flags' => [
-                    'enable_ai_cfo' => FeatureFlags::isEnabled('enable_ai_cfo'),
-                    'enable_ai_travel_planner' => FeatureFlags::isEnabled('enable_ai_travel_planner'),
-                    'maintenance_mode' => FeatureFlags::isEnabled('maintenance_mode'),
-                ],
-                'platformFeatureFlags' => [
-                    'enable_ai_cfo' => FeatureFlags::isEnabled('enable_ai_cfo'),
-                    'enable_ai_travel_planner' => FeatureFlags::isEnabled('enable_ai_travel_planner'),
-                    'maintenance_mode' => FeatureFlags::isEnabled('maintenance_mode'),
-                ],
+                'platform_feature_flags' => FeatureFlags::allEnabled(),
+                'platformFeatureFlags' => FeatureFlags::allEnabled(),
                 'system_announcement' => SystemAnnouncements::active(),
                 'systemAnnouncement' => SystemAnnouncements::active(),
                 'wallets' => $this->walletService->listAccessible($user),

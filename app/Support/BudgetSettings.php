@@ -81,6 +81,14 @@ class BudgetSettings
                 ? (bool) $stored['missed_income_enabled']
                 : (bool) $defaults['missed_income_enabled'],
             'missed_income_grace_days' => $graceDays,
+            'default_currency' => self::normalizeCurrency($stored['default_currency'] ?? $defaults['default_currency'] ?? 'HUF'),
         ];
+    }
+
+    private static function normalizeCurrency(mixed $value): string
+    {
+        $currency = strtoupper(trim((string) $value));
+
+        return in_array($currency, ['HUF', 'EUR', 'USD'], true) ? $currency : 'HUF';
     }
 }

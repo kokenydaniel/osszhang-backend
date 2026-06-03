@@ -54,7 +54,7 @@ class TransactionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $input = collect(['description', 'type', 'amount', 'category', 'dueDate', 'paidDate', 'isBudget', 'isReserve', 'walletId'])
+        $input = collect(['description', 'type', 'amount', 'category', 'dueDate', 'paidDate', 'isBudget', 'isReserve', 'walletId', 'currency'])
             ->filter(fn ($key) => $request->has($key))
             ->mapWithKeys(fn ($key) => [$key => $request->input($key)])
             ->all();

@@ -26,4 +26,17 @@ final class FeatureFlags
     {
         self::$cache = [];
     }
+
+    /** @return array<string, bool> */
+    public static function allEnabled(): array
+    {
+        $flags = FeatureFlag::query()->orderBy('key')->get();
+        $out = [];
+        foreach ($flags as $flag) {
+            $out[$flag->key] = (bool) $flag->value;
+            self::$cache[$flag->key] = (bool) $flag->value;
+        }
+
+        return $out;
+    }
 }

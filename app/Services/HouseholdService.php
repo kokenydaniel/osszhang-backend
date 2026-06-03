@@ -16,6 +16,9 @@ use App\Support\BusinessSettings;
 use App\Support\DashboardSettings;
 use App\Support\DebtsSettings;
 use App\Support\MetersSettings;
+use App\Support\InsuranceSettings;
+use App\Support\RentalSettings;
+use App\Support\PocketMoneySettings;
 use App\Support\SavingsSettings;
 use App\Support\UtilitiesSettings;
 use App\Support\UtilityTemplates;
@@ -60,7 +63,7 @@ class HouseholdService
                 ->sharedWalletForHousehold($household)
                 ->update(['manual_balance' => (float) $request->manual_balance]);
         }
-        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business'] as $module) {
+        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental'] as $module) {
             $key = "{$module}_enabled";
             if ($request->has($key)) {
                 $data[$key] = $request->boolean($key);
@@ -77,6 +80,36 @@ class HouseholdService
         }
         if ($request->has('shopify_shop_url')) {
             $data['shopify_shop_url'] = $request->shopify_shop_url;
+        }
+        if ($request->has('woocommerce_import_enabled')) {
+            $data['woocommerce_import_enabled'] = $request->boolean('woocommerce_import_enabled');
+        }
+        if ($request->has('woocommerce_shop_url')) {
+            $data['woocommerce_shop_url'] = $request->woocommerce_shop_url;
+        }
+        if ($request->filled('woocommerce_consumer_key')) {
+            $data['woocommerce_consumer_key'] = trim($request->woocommerce_consumer_key);
+        }
+        if ($request->filled('woocommerce_consumer_secret')) {
+            $data['woocommerce_consumer_secret'] = trim($request->woocommerce_consumer_secret);
+        }
+        if ($request->has('unas_import_enabled')) {
+            $data['unas_import_enabled'] = $request->boolean('unas_import_enabled');
+        }
+        if ($request->has('unas_shop_id')) {
+            $data['unas_shop_id'] = $request->unas_shop_id;
+        }
+        if ($request->filled('unas_api_key')) {
+            $data['unas_api_key'] = trim($request->unas_api_key);
+        }
+        if ($request->has('sumup_import_enabled')) {
+            $data['sumup_import_enabled'] = $request->boolean('sumup_import_enabled');
+        }
+        if ($request->has('sumup_merchant_code')) {
+            $data['sumup_merchant_code'] = $request->sumup_merchant_code ? trim($request->sumup_merchant_code) : null;
+        }
+        if ($request->filled('sumup_api_key')) {
+            $data['sumup_api_key'] = trim($request->sumup_api_key);
         }
         if ($request->has('utility_split_enabled')) {
             $data['utility_split_enabled'] = $request->boolean('utility_split_enabled');
@@ -99,6 +132,9 @@ class HouseholdService
             if (is_array($incoming) && ! array_key_exists('shopify_last_synced_at', $incoming)) {
                 $incoming['shopify_last_synced_at'] = $existing['shopify_last_synced_at'] ?? null;
             }
+            if (is_array($incoming) && ! array_key_exists('sumup_last_synced_at', $incoming)) {
+                $incoming['sumup_last_synced_at'] = $existing['sumup_last_synced_at'] ?? null;
+            }
             $data['business_settings'] = BusinessSettings::resolve($incoming);
         }
         if ($request->has('savings_settings')) {
@@ -106,6 +142,15 @@ class HouseholdService
         }
         if ($request->has('debts_settings')) {
             $data['debts_settings'] = DebtsSettings::resolve($request->debts_settings);
+        }
+        if ($request->has('pocket_money_settings')) {
+            $data['pocket_money_settings'] = PocketMoneySettings::resolve($request->pocket_money_settings);
+        }
+        if ($request->has('insurance_settings')) {
+            $data['insurance_settings'] = InsuranceSettings::resolve($request->insurance_settings);
+        }
+        if ($request->has('rental_settings')) {
+            $data['rental_settings'] = RentalSettings::resolve($request->rental_settings);
         }
         if ($request->has('meters_settings')) {
             $data['meters_settings'] = MetersSettings::resolve($request->meters_settings);
@@ -146,9 +191,12 @@ class HouseholdService
             'utilities' => 'Rezsi',
             'meters' => 'Közműórák',
             'business' => 'Vállalkozás',
+            'pocket_money' => 'Zsebpénz',
+            'insurance' => 'Biztosítások',
+            'rental' => 'Bérbeadás',
         ];
 
-        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business'] as $module) {
+        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental'] as $module) {
             $key = "{$module}_enabled";
             if ($request->has($key) && $request->boolean($key) && ! AccessControl::canAccessModule($user, $module)) {
                 $label = $moduleLabels[$module] ?? $module;
@@ -163,6 +211,27 @@ class HouseholdService
             throw new HttpResponseException(response()->json([
                 'message' => 'A Shopify import nem érhető el a jelenlegi csomagodban.',
                 'errors' => ['shopify_import_enabled' => ['Premium előfizetés szükséges.']],
+            ], 422));
+        }
+
+        if ($request->has('woocommerce_import_enabled') && $request->boolean('woocommerce_import_enabled') && ! AccessControl::canUseFeature($user, 'woocommerce_import')) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'A WooCommerce import nem érhető el a jelenlegi csomagodban.',
+                'errors' => ['woocommerce_import_enabled' => ['Premium előfizetés szükséges.']],
+            ], 422));
+        }
+
+        if ($request->has('unas_import_enabled') && $request->boolean('unas_import_enabled') && ! AccessControl::canUseFeature($user, 'unas_import')) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'Az UNAS import nem érhető el a jelenlegi csomagodban.',
+                'errors' => ['unas_import_enabled' => ['Premium előfizetés szükséges.']],
+            ], 422));
+        }
+
+        if ($request->has('sumup_import_enabled') && $request->boolean('sumup_import_enabled') && ! AccessControl::canUseFeature($user, 'sumup_import')) {
+            throw new HttpResponseException(response()->json([
+                'message' => 'A SumUp import nem érhető el a jelenlegi csomagodban.',
+                'errors' => ['sumup_import_enabled' => ['Premium előfizetés szükséges.']],
             ], 422));
         }
 

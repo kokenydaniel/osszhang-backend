@@ -23,10 +23,10 @@ final class AccessControl
     public const STATUS_TRIALING = 'trialing';
 
     /** @var list<string> */
-    public const MODULES = ['budget', 'savings', 'debts', 'utilities', 'meters', 'business'];
+    public const MODULES = ['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental'];
 
     /** @var list<string> */
-    public const PRO_MODULES = ['savings', 'debts', 'utilities', 'meters'];
+    public const PRO_MODULES = ['savings', 'debts', 'utilities', 'meters', 'pocket_money', 'insurance', 'rental'];
 
     /** @var list<string> */
     public const PREMIUM_MODULES = ['business'];
@@ -35,7 +35,7 @@ final class AccessControl
     public const PRO_FEATURES = ['private_wallet', 'utility_split'];
 
     /** @var list<string> */
-    public const PREMIUM_FEATURES = ['shopify_import', 'ai'];
+    public const PREMIUM_FEATURES = ['shopify_import', 'woocommerce_import', 'unas_import', 'ai', 'attachments', 'sumup_import'];
 
     public static function isBetaMode(): bool
     {
@@ -140,6 +140,8 @@ final class AccessControl
         return match ($featureId) {
             'ai' => 'Az AI funkciók csak Premium előfizetéssel érhetők el.',
             'shopify_import' => 'A Shopify import csak Premium előfizetéssel érhető el.',
+            'sumup_import' => 'A SumUp könyvelési import csak Premium előfizetéssel érhető el.',
+            'attachments' => 'A dokumentum és nyugta csatolás csak Premium előfizetéssel érhető el.',
             'private_wallet' => 'A privát kassza csak Pro vagy Premium előfizetéssel érhető el.',
             'utility_split' => 'A rezsimegosztás csak Pro vagy Premium előfizetéssel érhető el.',
             default => 'Ehhez a funkcióhoz magasabb előfizetési csomag szükséges.',

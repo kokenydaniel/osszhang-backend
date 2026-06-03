@@ -89,4 +89,36 @@ class AIFinanceController extends Controller
             ),
         );
     }
+
+    public function paymentPriority(MonthYearRequest $request)
+    {
+        return response()->json(
+            $this->aiFinanceService->paymentPriority(
+                $request->user()->household,
+                $request->user(),
+                $request->validated(),
+            ),
+        );
+    }
+
+    public function vatEstimate(MonthYearRequest $request)
+    {
+        return response()->json(
+            $this->aiFinanceService->vatEstimate(
+                $request->user()->household,
+                $request->validated(),
+            ),
+        );
+    }
+
+    public function costReductionSuggestions(MonthYearRequest $request)
+    {
+        return response()->json(
+            $this->aiFinanceService->costReductionSuggestions(
+                $request->user()->household,
+                $request->user(),
+                $request->validated(),
+            ),
+        );
+    }
 }

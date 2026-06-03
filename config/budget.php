@@ -7,5 +7,6 @@ return [
         'clone_mode' => 'all',
         'missed_income_enabled' => true,
         'missed_income_grace_days' => 0,
+        'default_currency' => 'HUF',
     ],
 ];

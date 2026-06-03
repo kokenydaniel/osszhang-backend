@@ -28,7 +28,7 @@ class AdminFeatureController extends Controller
         ]);
 
         return response()->json([
-            'data' => $this->adminFeatureService->updateFlag($key, (bool) $validated['value']),
+            'data' => $this->adminFeatureService->updateFlag($key, (bool) $validated['value'], $request),
         ]);
     }
 }

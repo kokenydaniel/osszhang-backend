@@ -31,10 +31,14 @@ class BusinessOrderService
             $orderStatus = $defaultStatus;
         }
 
+        $invoiceId = trim((string) ($validated['invoiceId'] ?? ''));
+        $hasInvoice = (bool) ($validated['hasInvoice'] ?? ($invoiceId !== ''));
+
         $o = new BusinessOrder([
             'household_id' => $household->id,
             'date' => $validated['date'],
             'paid_date' => $validated['paidDate'] ?? null,
+            'has_invoice' => $hasInvoice,
             'state' => ($validated['paidDate'] ?? null) ? 'RENDBEN' : 'KINT',
             'order_status' => $orderStatus,
         ]);
@@ -45,7 +49,7 @@ class BusinessOrderService
             'payment_method' => $validated['paymentMethod'] ?? ($biz['payment_methods'][0] ?? 'Kártya'),
             'provider' => $validated['provider'] ?? ($biz['providers'][0] ?? 'Nincs'),
             'destination' => $validated['destination'] ?? ($biz['destinations'][0] ?? 'Szolgáltatónál parkol'),
-            'invoice_id' => $validated['invoiceId'] ?? null,
+            'invoice_id' => $invoiceId !== '' ? $invoiceId : null,
         ]);
         $o->save();
 
@@ -75,6 +79,14 @@ class BusinessOrderService
         }
         if (array_key_exists('invoiceId', $input)) {
             $sensitive['invoice_id'] = $input['invoiceId'];
+        }
+        if (array_key_exists('hasInvoice', $input)) {
+            $businessOrder->has_invoice = (bool) $input['hasInvoice'];
+        } elseif (array_key_exists('invoiceId', $input)) {
+            $invoiceTrim = trim((string) ($input['invoiceId'] ?? ''));
+            if ($invoiceTrim !== '') {
+                $businessOrder->has_invoice = true;
+            }
         }
         if (array_key_exists('date', $validated)) {
             $businessOrder->date = $validated['date'];
