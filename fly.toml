@@ -8,6 +8,7 @@ primary_region = 'fra'
 console_command = 'php /var/www/artisan tinker'
 
 [build]
+  dockerfile = "Dockerfile"
   [build.args]
     NODE_VERSION = '18'
     PHP_VERSION = '8.3'
