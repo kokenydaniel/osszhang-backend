@@ -10,9 +10,8 @@ final class StorageLocator
     public static function forPath(string $storedDisk, string $path): Filesystem
     {
         foreach (self::candidateDisks($storedDisk) as $name) {
-            $disk = Storage::disk($name);
-            if ($disk->exists($path)) {
-                return $disk;
+            if (self::safeExists($name, $path)) {
+                return Storage::disk($name);
             }
         }
 
@@ -22,12 +21,21 @@ final class StorageLocator
     public static function exists(string $storedDisk, string $path): bool
     {
         foreach (self::candidateDisks($storedDisk) as $name) {
-            if (Storage::disk($name)->exists($path)) {
+            if (self::safeExists($name, $path)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static function safeExists(string $diskName, string $path): bool
+    {
+        try {
+            return Storage::disk($diskName)->exists($path);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /** @return list<string> */

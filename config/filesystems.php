@@ -59,7 +59,7 @@ return [
                 env('SUPABASE_STORAGE_USE_PATH_STYLE', env('AWS_USE_PATH_STYLE_ENDPOINT', true)),
                 FILTER_VALIDATE_BOOL,
             ),
-            'throw' => true,
+            'throw' => false,
             'report' => false,
         ],
 

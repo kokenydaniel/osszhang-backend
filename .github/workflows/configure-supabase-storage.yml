@@ -34,3 +34,7 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: flyctl deploy --remote-only --yes --ha=false -a osszhang-backend
+      - name: Migrate local files to object storage
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl ssh console -a osszhang-backend -C "php /var/www/artisan storage:migrate-local-to-s3"

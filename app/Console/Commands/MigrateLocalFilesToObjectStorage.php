@@ -34,7 +34,13 @@ class MigrateLocalFilesToObjectStorage extends Command
             $path = $record['path'];
             $storedDisk = $record['disk'];
 
-            if ($target->exists($path)) {
+            try {
+                $alreadyOnTarget = $target->exists($path);
+            } catch (\Throwable) {
+                $alreadyOnTarget = false;
+            }
+
+            if ($alreadyOnTarget) {
                 if ($record['model']->disk !== $targetDisk) {
                     $record['model']->update(['disk' => $targetDisk]);
                 }
@@ -43,26 +49,50 @@ class MigrateLocalFilesToObjectStorage extends Command
                 continue;
             }
 
-            $source = StorageLocator::forPath($storedDisk, $path);
-            if (! $source->exists($path)) {
+            if (! StorageLocator::exists($storedDisk, $path)) {
                 $skipped++;
 
                 continue;
             }
 
-            $stream = $source->readStream($path);
+            $source = StorageLocator::forPath($storedDisk, $path);
+
+            try {
+                $stream = $source->readStream($path);
+            } catch (\Throwable) {
+                $skipped++;
+
+                continue;
+            }
+
             if ($stream === false) {
                 $skipped++;
 
                 continue;
             }
 
-            $target->writeStream($path, $stream);
+            try {
+                $target->writeStream($path, $stream);
+            } catch (\Throwable) {
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                $skipped++;
+
+                continue;
+            }
+
             if (is_resource($stream)) {
                 fclose($stream);
             }
 
-            if (! $target->exists($path)) {
+            try {
+                $stored = $target->exists($path);
+            } catch (\Throwable) {
+                $stored = false;
+            }
+
+            if (! $stored) {
                 $skipped++;
 
                 continue;
