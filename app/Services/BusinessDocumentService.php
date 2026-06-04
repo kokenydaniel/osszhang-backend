@@ -8,6 +8,7 @@ use App\Models\Household;
 use App\Models\User;
 use App\Support\BusinessDocumentTypes;
 use App\Support\StorageDisk;
+use App\Support\StorageLocator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -147,9 +148,8 @@ class BusinessDocumentService
 
     public function downloadResponse(BusinessDocument $document): BinaryFileResponse|StreamedResponse
     {
-        $disk = Storage::disk($document->disk);
-
-        abort_unless($disk->exists($document->path), 404);
+        abort_unless(StorageLocator::exists($document->disk, $document->path), 404);
+        $disk = StorageLocator::forPath($document->disk, $document->path);
 
         return $disk->download($document->path, $document->original_name, [
             'Content-Type' => $document->mime ?? 'application/octet-stream',
@@ -181,13 +181,12 @@ class BusinessDocumentService
         abort_unless($zip->open($tempPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true, 500);
 
         foreach ($documents as $index => $doc) {
-            $disk = Storage::disk($doc->disk);
-            if (! $disk->exists($doc->path)) {
+            if (! StorageLocator::exists($doc->disk, $doc->path)) {
                 continue;
             }
             $folder = $this->zipFolderForType($doc->document_type);
             $entryName = $this->uniqueZipEntryName($folder, $doc->original_name, $index);
-            $zip->addFromString($entryName, $disk->get($doc->path));
+            $zip->addFromString($entryName, StorageLocator::forPath($doc->disk, $doc->path)->get($doc->path));
         }
 
         $zip->close();

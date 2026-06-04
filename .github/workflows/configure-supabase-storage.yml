@@ -1,8 +1,3 @@
-# Egyszeri / ismételt: Supabase S3 kulcsok → Fly secrets (osszhang-backend).
-# GitHub repo secrets (penzpilot-backend):
-#   SUPABASE_STORAGE_ACCESS_KEY, SUPABASE_STORAGE_SECRET_KEY
-# Opcionális: SUPABASE_STORAGE_BUCKET (default: attachments)
-
 name: Configure Supabase Storage
 on:
   workflow_dispatch:
@@ -12,6 +7,7 @@ jobs:
     name: Sync storage secrets to Fly
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - name: Apply Fly secrets
         env:
@@ -22,10 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${ACCESS_KEY:-}" ] || [ -z "${SECRET_KEY:-}" ]; then
-            echo "::error::Hiányzik a SUPABASE_STORAGE_ACCESS_KEY vagy SUPABASE_STORAGE_SECRET_KEY GitHub secret."
-            echo "Supabase → Storage → S3 Access Keys → új kulcs, majd:"
-            echo "  gh secret set SUPABASE_STORAGE_ACCESS_KEY -R kokenydaniel/penzpilot-backend"
-            echo "  gh secret set SUPABASE_STORAGE_SECRET_KEY -R kokenydaniel/penzpilot-backend"
+            echo "::error::Missing SUPABASE_STORAGE_ACCESS_KEY or SUPABASE_STORAGE_SECRET_KEY"
             exit 1
           fi
           BUCKET_NAME="${BUCKET:-attachments}"
@@ -37,7 +30,6 @@ jobs:
             SUPABASE_STORAGE_USE_PATH_STYLE=true \
             SUPABASE_STORAGE_ACCESS_KEY="${ACCESS_KEY}" \
             SUPABASE_STORAGE_SECRET_KEY="${SECRET_KEY}"
-
       - name: Redeploy backend
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

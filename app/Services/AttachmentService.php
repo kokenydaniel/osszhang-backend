@@ -10,6 +10,7 @@ use App\Models\LedgerEntry;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Support\StorageDisk;
+use App\Support\StorageLocator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -71,8 +72,8 @@ class AttachmentService
 
     public function downloadResponse(Attachment $attachment): BinaryFileResponse|StreamedResponse
     {
-        $disk = Storage::disk($attachment->disk);
-        abort_unless($disk->exists($attachment->path), 404);
+        abort_unless(StorageLocator::exists($attachment->disk, $attachment->path), 404);
+        $disk = StorageLocator::forPath($attachment->disk, $attachment->path);
 
         return $disk->download($attachment->path, $attachment->original_name, [
             'Content-Type' => $attachment->mime ?? 'application/octet-stream',

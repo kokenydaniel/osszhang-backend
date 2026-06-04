@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Support\FeedbackConfig;
 use App\Support\StorageDisk;
+use App\Support\StorageLocator;
 use App\Models\User;
 use App\Models\UserFeedbackReport;
 use App\Models\UserFeedbackReportAttachment;
@@ -208,8 +209,8 @@ class UserFeedbackService
 
     private function streamAttachment(UserFeedbackReportAttachment $attachment): BinaryFileResponse|StreamedResponse
     {
-        $disk = Storage::disk($attachment->disk);
-        abort_unless($disk->exists($attachment->path), 404);
+        abort_unless(StorageLocator::exists($attachment->disk, $attachment->path), 404);
+        $disk = StorageLocator::forPath($attachment->disk, $attachment->path);
 
         return $disk->download($attachment->path, $attachment->original_name, [
             'Content-Type' => $attachment->mime ?? 'application/octet-stream',

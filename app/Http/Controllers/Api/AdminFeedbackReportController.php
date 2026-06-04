@@ -82,8 +82,8 @@ class AdminFeedbackReportController extends Controller
     {
         abort_unless($feedbackReport->path && $feedbackReport->disk, 404);
 
-        $disk = \Illuminate\Support\Facades\Storage::disk($feedbackReport->disk);
-        abort_unless($disk->exists($feedbackReport->path), 404);
+        abort_unless(\App\Support\StorageLocator::exists($feedbackReport->disk, $feedbackReport->path), 404);
+        $disk = \App\Support\StorageLocator::forPath($feedbackReport->disk, $feedbackReport->path);
 
         return $disk->download($feedbackReport->path, $feedbackReport->original_name ?? 'csatolmany', [
             'Content-Type' => $feedbackReport->mime ?? 'application/octet-stream',
