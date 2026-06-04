@@ -13,7 +13,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use ZipArchive;
 
@@ -153,7 +152,7 @@ class BusinessDocumentService
         );
     }
 
-    public function bundleZipResponse(Household $household, int $year, int $month): BinaryFileResponse
+    public function bundleZipResponse(Household $household, int $year, int $month): Response
     {
         /** @var Collection<int, BusinessDocument> $documents */
         $documents = BusinessDocument::query()
@@ -192,10 +191,16 @@ class BusinessDocumentService
 
         abort_if($zip->count() === 0, 404, 'Nincs letölthető dokumentum ebben a hónapban.');
 
-        return response()->download($tempPath, $zipName, [
+        $bytes = file_get_contents($tempPath);
+        @unlink($tempPath);
+        abort_unless(is_string($bytes) && $bytes !== '', 500, 'A csomag összeállítása nem sikerült.');
+
+        return new Response($bytes, 200, [
             'Content-Type' => 'application/zip',
             'Content-Disposition' => 'attachment; filename="'.$zipName.'"',
-        ])->deleteFileAfterSend(true);
+            'Content-Length' => (string) strlen($bytes),
+            'Cache-Control' => 'no-store, private',
+        ]);
     }
 
     /** @return array<string, mixed> */

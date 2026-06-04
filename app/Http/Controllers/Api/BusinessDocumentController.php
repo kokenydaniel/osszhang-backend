@@ -11,6 +11,19 @@ use Illuminate\Http\Request;
 
 class BusinessDocumentController extends Controller
 {
+    use ValidatesUploadedAttachments;
+
+    private const BUSINESS_DOC_EXTENSIONS = [
+        'pdf',
+        'jpg',
+        'jpeg',
+        'png',
+        'webp',
+        'xls',
+        'xlsx',
+        'csv',
+    ];
+
     public function __construct(
         private readonly BusinessDocumentService $documents,
         private readonly SumUpImportService $sumUpImport,
