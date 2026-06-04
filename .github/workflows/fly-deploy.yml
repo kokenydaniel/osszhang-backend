@@ -13,6 +13,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --yes -a osszhang-backend
+      - name: Remove legacy Fly volumes (Supabase storage migration)
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        continue-on-error: true
+        run: |
+          set +e
+          flyctl scale count 0 -a osszhang-backend -y
+          for id in $(flyctl machines list -a osszhang-backend --json 2>/dev/null | jq -r '.[].id // empty'); do
+            [ -n "$id" ] && flyctl machine destroy "$id" -a osszhang-backend --force -y
+          done
+          for id in $(flyctl volumes list -a osszhang-backend --json 2>/dev/null | jq -r '.[].id // empty'); do
+            [ -n "$id" ] && flyctl volumes delete "$id" -a osszhang-backend -y
+          done
+          set -e
+      - run: flyctl deploy --remote-only --yes --ha=false -a osszhang-backend
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
