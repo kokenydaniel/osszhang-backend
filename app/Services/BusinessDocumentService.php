@@ -150,6 +150,7 @@ class BusinessDocumentService
             $document->path,
             $document->original_name,
             $document->mime,
+            $document->size_bytes > 0 ? $document->size_bytes : null,
         );
     }
 
@@ -185,7 +186,8 @@ class BusinessDocumentService
         $sourcePaths = [];
 
         foreach ($documents as $index => $doc) {
-            $plaintext = HouseholdFileStorage::tryReadDecrypted($scope, $doc->disk, $doc->path);
+            $expectedBytes = $doc->size_bytes > 0 ? $doc->size_bytes : null;
+            $plaintext = HouseholdFileStorage::tryReadDecrypted($scope, $doc->disk, $doc->path, $expectedBytes);
             if ($plaintext === null) {
                 continue;
             }
@@ -195,7 +197,8 @@ class BusinessDocumentService
                 continue;
             }
 
-            if (file_put_contents($sourcePath, $plaintext) === false) {
+            $written = file_put_contents($sourcePath, $plaintext);
+            if ($written === false || $written !== strlen($plaintext)) {
                 @unlink($sourcePath);
 
                 continue;
@@ -241,7 +244,9 @@ class BusinessDocumentService
             'Content-Type' => 'application/zip',
             'Content-Disposition' => 'attachment; filename="'.$zipName.'"',
             'Content-Length' => (string) $zipBytes,
+            'Content-Transfer-Encoding' => 'binary',
             'Cache-Control' => 'no-store, private',
+            'X-Content-Type-Options' => 'nosniff',
         ])->deleteFileAfterSend(true);
     }
 

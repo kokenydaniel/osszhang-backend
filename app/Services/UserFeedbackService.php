@@ -208,6 +208,7 @@ class UserFeedbackService
             $attachment->path,
             $attachment->original_name,
             $attachment->mime,
+            $attachment->size_bytes > 0 ? $attachment->size_bytes : null,
         );
     }
 

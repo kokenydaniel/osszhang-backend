@@ -25,7 +25,7 @@ final class HouseholdFileStorage
             'path' => is_string($written) ? $written : $path,
             'original_name' => $file->getClientOriginalName(),
             'mime' => $file->getMimeType(),
-            'size_bytes' => $file->getSize() ?: 0,
+            'size_bytes' => strlen($plaintext),
         ];
     }
 
@@ -45,26 +45,40 @@ final class HouseholdFileStorage
         ];
     }
 
-    public static function readDecrypted(string $scope, string $diskName, string $path): string
-    {
-        $plaintext = self::tryReadDecrypted($scope, $diskName, $path);
-        abort_if($plaintext === null, 404);
+    public static function readDecrypted(
+        string $scope,
+        string $diskName,
+        string $path,
+        ?int $expectedPlainBytes = null,
+    ): string {
+        $plaintext = self::tryReadDecrypted($scope, $diskName, $path, $expectedPlainBytes);
+        abort_if($plaintext === null, 404, 'A fájl nem olvasható — töltsd fel újra.');
 
         return $plaintext;
     }
 
-    public static function tryReadDecrypted(string $scope, string $diskName, string $path): ?string
-    {
+    public static function tryReadDecrypted(
+        string $scope,
+        string $diskName,
+        string $path,
+        ?int $expectedPlainBytes = null,
+    ): ?string {
         $raw = StorageLocator::read($diskName, $path);
         if ($raw === null) {
             return null;
         }
 
         try {
-            return HouseholdFileCipher::decrypt($scope, $raw);
+            $plaintext = HouseholdFileCipher::decrypt($scope, $raw);
         } catch (\Throwable) {
             return null;
         }
+
+        if (! self::plaintextIntegrityOk($plaintext, $expectedPlainBytes)) {
+            return null;
+        }
+
+        return $plaintext;
     }
 
     public static function downloadResponse(
@@ -73,16 +87,52 @@ final class HouseholdFileStorage
         string $path,
         string $downloadName,
         ?string $mime,
+        ?int $expectedPlainBytes = null,
     ): Response {
-        $bytes = self::readDecrypted($scope, $diskName, $path);
-        $contentType = $mime ?? 'application/octet-stream';
+        $bytes = self::readDecrypted($scope, $diskName, $path, $expectedPlainBytes);
+        $contentType = self::binaryContentType($mime);
 
         return new Response($bytes, 200, [
             'Content-Type' => $contentType,
             'Content-Disposition' => self::contentDisposition($downloadName),
             'Content-Length' => (string) strlen($bytes),
+            'Content-Transfer-Encoding' => 'binary',
             'Cache-Control' => 'no-store, private',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    private static function binaryContentType(?string $mime): string
+    {
+        $type = trim((string) $mime);
+
+        if ($type === '' || str_contains(strtolower($type), 'charset')) {
+            return 'application/octet-stream';
+        }
+
+        return $type;
+    }
+
+    private static function plaintextIntegrityOk(string $plaintext, ?int $expectedPlainBytes): bool
+    {
+        if ($plaintext === '') {
+            return false;
+        }
+
+        if (HouseholdFileCipher::looksLikeEncryptedPayload($plaintext)) {
+            return false;
+        }
+
+        if ($expectedPlainBytes !== null && $expectedPlainBytes > 0) {
+            $actual = strlen($plaintext);
+            if ($actual === $expectedPlainBytes) {
+                return true;
+            }
+
+            return HouseholdFileCipher::hasBinaryDocumentMagic($plaintext);
+        }
+
+        return true;
     }
 
     public static function delete(string $diskName, string $path): void

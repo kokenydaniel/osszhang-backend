@@ -12,6 +12,12 @@ server {
 
     client_max_body_size 2048M;
 
+    # Binary downloads (PDF, ZIP) must not pass through charset conversion.
+    location ~ ^/api/(attachments|business-documents)/ {
+        charset off;
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
     access_log /dev/stdout fly;
 
     location / {
