@@ -187,6 +187,10 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
             ->middleware('tier.module:rental');
         Route::post('/rental-properties/{rental_property}/attachments', [AttachmentController::class, 'storeForRentalProperty'])
             ->middleware('tier.module:rental');
+        Route::get('/debts/{debt}/attachments', [AttachmentController::class, 'indexForDebt'])
+            ->middleware('tier.module:debts');
+        Route::post('/debts/{debt}/attachments', [AttachmentController::class, 'storeForDebt'])
+            ->middleware('tier.module:debts');
         Route::get('/attachments/{attachment}/download', [AttachmentController::class, 'download']);
         Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy']);
     });

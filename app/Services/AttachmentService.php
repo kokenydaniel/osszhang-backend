@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Attachment;
+use App\Models\Debt;
 use App\Models\Household;
 use App\Models\InsurancePolicy;
 use App\Models\RentalProperty;
@@ -90,6 +91,14 @@ class AttachmentService
         return RentalProperty::query()
             ->where('household_id', $household->id)
             ->whereKey($propertyId)
+            ->firstOrFail();
+    }
+
+    public function resolveDebt(User $user, int $debtId): Debt
+    {
+        return Debt::query()
+            ->accessibleTo($user)
+            ->whereKey($debtId)
             ->firstOrFail();
     }
 
@@ -192,6 +201,12 @@ class AttachmentService
         if ($attachable instanceof RentalProperty) {
             abort_if($attachable->household_id !== $household->id, 404);
             abort_unless($household->rental_enabled, 403, 'A bérbeadás modul nincs bekapcsolva.');
+
+            return;
+        }
+
+        if ($attachable instanceof Debt) {
+            abort_if($attachable->household_id !== $household->id, 404);
 
             return;
         }

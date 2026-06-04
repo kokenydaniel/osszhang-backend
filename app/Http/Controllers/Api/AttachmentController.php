@@ -19,6 +19,8 @@ class AttachmentController extends Controller
 
     private const POLICY_EXTENSIONS = ['pdf'];
 
+    private const DEBT_DOC_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+
     public function __construct(private readonly AttachmentService $attachments) {}
 
     public function storeForTransaction(Request $request, Transaction $transaction)
@@ -113,6 +115,24 @@ class AttachmentController extends Controller
         $property = $this->attachments->resolveRentalProperty($household, $rental_property);
 
         $attachment = $this->attachments->store($household, $request->user(), $property, $request->file('file'));
+
+        return response()->json(['data' => $attachment], 201);
+    }
+
+    public function indexForDebt(Request $request, int $debt)
+    {
+        $debtModel = $this->attachments->resolveDebt($request->user(), $debt);
+
+        return response()->json(['data' => $this->attachments->listFor($debtModel)]);
+    }
+
+    public function storeForDebt(Request $request, int $debt)
+    {
+        $this->validateUploadedAttachment($request->file('file'), 15360, self::DEBT_DOC_EXTENSIONS);
+
+        $household = $request->user()->household;
+        $debtModel = $this->attachments->resolveDebt($request->user(), $debt);
+        $attachment = $this->attachments->store($household, $request->user(), $debtModel, $request->file('file'));
 
         return response()->json(['data' => $attachment], 201);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Attachment;
 use App\Models\Debt;
 use App\Models\Household;
 use App\Models\User;
@@ -14,6 +15,7 @@ class DebtService
     public function __construct(
         private readonly EncryptedRecordService $crypto,
         private readonly WalletProvisioningService $wallets,
+        private readonly AttachmentService $attachments,
     ) {}
 
     /** @return list<array<string, mixed>> */
@@ -92,7 +94,18 @@ class DebtService
 
     public function delete(User $user, int|string $id): void
     {
-        $this->findAccessibleDebt($user, $id)->delete();
+        $debt = $this->findAccessibleDebt($user, $id);
+
+        $stored = Attachment::query()
+            ->where('attachable_type', $debt->getMorphClass())
+            ->where('attachable_id', $debt->id)
+            ->get();
+
+        foreach ($stored as $attachment) {
+            $this->attachments->delete($attachment);
+        }
+
+        $debt->delete();
     }
 
     private function requireHousehold(User $user): Household
