@@ -26,7 +26,7 @@ jobs:
             FILESYSTEM_DISK=s3 \
             SUPABASE_STORAGE_BUCKET="${BUCKET_NAME}" \
             SUPABASE_STORAGE_ENDPOINT=https://fpdbwoqlhhwjdetzlbit.storage.supabase.co/storage/v1/s3 \
-            SUPABASE_STORAGE_REGION=eu-central-1 \
+            SUPABASE_STORAGE_REGION=eu-west-1 \
             SUPABASE_STORAGE_USE_PATH_STYLE=true \
             SUPABASE_STORAGE_ACCESS_KEY="${ACCESS_KEY}" \
             SUPABASE_STORAGE_SECRET_KEY="${SECRET_KEY}"

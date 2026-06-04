@@ -27,13 +27,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        StorageDisk::applyRuntimeConfig();
         config(['filesystems.default' => StorageDisk::default()]);
-
-        if ($this->app->environment('production') && ! StorageDisk::objectStorageConfigured()) {
-            logger()->warning(
-                'Object storage (Supabase S3) is not configured. Set SUPABASE_STORAGE_* Fly secrets — uploads will not persist.',
-            );
-        }
 
         Event::listen(WebhookHandled::class, SyncHouseholdFromStripeWebhook::class);
 

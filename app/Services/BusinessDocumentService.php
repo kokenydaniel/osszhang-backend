@@ -7,8 +7,8 @@ use App\Models\BusinessOrder;
 use App\Models\Household;
 use App\Models\User;
 use App\Support\BusinessDocumentTypes;
-use App\Support\StorageDisk;
-use App\Support\StorageLocator;
+use App\Support\HouseholdFileCipher;
+use App\Support\HouseholdFileStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -57,11 +57,9 @@ class BusinessDocumentService
             );
         }
 
-        $disk = StorageDisk::default();
+        $scope = HouseholdFileCipher::householdScope($household->id);
         $dir = 'business-documents/'.$household->id.'/'.$year.'-'.str_pad((string) $month, 2, '0', STR_PAD_LEFT);
-        $storedName = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
-        $path = $file->storeAs($dir, $storedName, $disk);
-        abort_unless(is_string($path) && $path !== '', 500, 'A fájl mentése nem sikerült.');
+        $stored = HouseholdFileStorage::store($scope, $dir, $file);
 
         $document = BusinessDocument::create([
             'household_id' => $household->id,
@@ -73,11 +71,11 @@ class BusinessDocumentService
             'label' => $label ? trim($label) : null,
             'source' => 'manual',
             'import_key' => null,
-            'disk' => $disk,
-            'path' => $path,
-            'original_name' => $file->getClientOriginalName(),
-            'mime' => $file->getMimeType(),
-            'size_bytes' => $file->getSize() ?: 0,
+            'disk' => $stored['disk'],
+            'path' => $stored['path'],
+            'original_name' => $stored['original_name'],
+            'mime' => $stored['mime'],
+            'size_bytes' => $stored['size_bytes'],
         ]);
 
         return $this->format($document);
@@ -98,13 +96,11 @@ class BusinessDocumentService
     ): array {
         abort_unless(BusinessDocumentTypes::isValid($documentType), 422, 'Érvénytelen dokumentum típus.');
 
-        $disk = StorageDisk::default();
+        $scope = HouseholdFileCipher::householdScope($household->id);
         $dir = 'business-documents/'.$household->id.'/'.$year.'-'.str_pad((string) $month, 2, '0', STR_PAD_LEFT);
         $extension = pathinfo($originalName, PATHINFO_EXTENSION) ?: 'bin';
         $storedName = Str::uuid()->toString().'.'.$extension;
-        $path = $dir.'/'.$storedName;
-
-        Storage::disk($disk)->put($path, $contents);
+        $stored = HouseholdFileStorage::storeRaw($scope, $dir, $storedName, $contents, $mime);
 
         $document = BusinessDocument::create([
             'household_id' => $household->id,
@@ -116,11 +112,11 @@ class BusinessDocumentService
             'label' => $label,
             'source' => $source,
             'import_key' => $importKey,
-            'disk' => $disk,
-            'path' => $path,
+            'disk' => $stored['disk'],
+            'path' => $stored['path'],
             'original_name' => $originalName,
             'mime' => $mime,
-            'size_bytes' => strlen($contents),
+            'size_bytes' => $stored['size_bytes'],
         ]);
 
         return $this->format($document);
@@ -142,18 +138,19 @@ class BusinessDocumentService
 
     public function delete(BusinessDocument $document): void
     {
-        Storage::disk($document->disk)->delete($document->path);
+        HouseholdFileStorage::delete($document->disk, $document->path);
         $document->delete();
     }
 
-    public function downloadResponse(BusinessDocument $document): BinaryFileResponse|StreamedResponse
+    public function downloadResponse(BusinessDocument $document): StreamedResponse
     {
-        abort_unless(StorageLocator::exists($document->disk, $document->path), 404);
-        $disk = StorageLocator::forPath($document->disk, $document->path);
-
-        return $disk->download($document->path, $document->original_name, [
-            'Content-Type' => $document->mime ?? 'application/octet-stream',
-        ]);
+        return HouseholdFileStorage::downloadResponse(
+            HouseholdFileCipher::householdScope($document->household_id),
+            $document->disk,
+            $document->path,
+            $document->original_name,
+            $document->mime,
+        );
     }
 
     public function bundleZipResponse(Household $household, int $year, int $month): BinaryFileResponse
@@ -171,22 +168,24 @@ class BusinessDocumentService
 
         $monthLabel = str_pad((string) $month, 2, '0', STR_PAD_LEFT);
         $zipName = 'konyvelesi-anyag-'.$year.'-'.$monthLabel.'.zip';
-        $tempPath = storage_path('app/temp/'.Str::uuid()->toString().'.zip');
-
-        if (! is_dir(dirname($tempPath))) {
-            mkdir(dirname($tempPath), 0755, true);
-        }
+        $tempPath = tempnam(sys_get_temp_dir(), 'osszhang_zip_').'.zip';
 
         $zip = new ZipArchive;
         abort_unless($zip->open($tempPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true, 500);
 
         foreach ($documents as $index => $doc) {
-            if (! StorageLocator::exists($doc->disk, $doc->path)) {
+            try {
+                $bytes = HouseholdFileStorage::readDecrypted(
+                    HouseholdFileCipher::householdScope($household->id),
+                    $doc->disk,
+                    $doc->path,
+                );
+            } catch (\Throwable) {
                 continue;
             }
             $folder = $this->zipFolderForType($doc->document_type);
             $entryName = $this->uniqueZipEntryName($folder, $doc->original_name, $index);
-            $zip->addFromString($entryName, StorageLocator::forPath($doc->disk, $doc->path)->get($doc->path));
+            $zip->addFromString($entryName, $bytes);
         }
 
         $zip->close();

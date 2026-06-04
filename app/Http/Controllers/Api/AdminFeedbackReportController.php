@@ -73,20 +73,4 @@ class AdminFeedbackReportController extends Controller
         ]);
     }
 
-    public function downloadAttachment(UserFeedbackReportAttachment $attachment)
-    {
-        return $this->feedback->downloadAttachment($attachment);
-    }
-
-    public function downloadLegacyAttachment(UserFeedbackReport $feedbackReport)
-    {
-        abort_unless($feedbackReport->path && $feedbackReport->disk, 404);
-
-        abort_unless(\App\Support\StorageLocator::exists($feedbackReport->disk, $feedbackReport->path), 404);
-        $disk = \App\Support\StorageLocator::forPath($feedbackReport->disk, $feedbackReport->path);
-
-        return $disk->download($feedbackReport->path, $feedbackReport->original_name ?? 'csatolmany', [
-            'Content-Type' => $feedbackReport->mime ?? 'application/octet-stream',
-        ]);
-    }
 }

@@ -34,12 +34,6 @@ use App\Http\Controllers\Api\UtilityController;
 use App\Http\Controllers\Api\WalletController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
-
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
@@ -68,8 +62,6 @@ Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(fu
     Route::patch('/announcements/{announcement}/toggle', [AdminAnnouncementController::class, 'toggle']);
     Route::get('/feedback-reports/attention-count', [AdminFeedbackReportController::class, 'attentionCount']);
     Route::get('/feedback-reports', [AdminFeedbackReportController::class, 'index']);
-    Route::get('/feedback-reports/attachments/{attachment}/download', [AdminFeedbackReportController::class, 'downloadAttachment']);
-    Route::get('/feedback-reports/{feedbackReport}/legacy-attachment', [AdminFeedbackReportController::class, 'downloadLegacyAttachment']);
     Route::get('/feedback-reports/{feedbackReport}', [AdminFeedbackReportController::class, 'show']);
     Route::post('/feedback-reports/{feedbackReport}/messages', [AdminFeedbackReportController::class, 'storeMessage']);
     Route::patch('/feedback-reports/{feedbackReport}', [AdminFeedbackReportController::class, 'update']);

@@ -3,15 +3,13 @@
 namespace App\Services;
 
 use App\Support\FeedbackConfig;
-use App\Support\StorageDisk;
-use App\Support\StorageLocator;
+use App\Support\HouseholdFileCipher;
+use App\Support\HouseholdFileStorage;
 use App\Models\User;
 use App\Models\UserFeedbackReport;
 use App\Models\UserFeedbackReportAttachment;
 use App\Models\UserFeedbackReportMessage;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserFeedbackService
@@ -193,28 +191,24 @@ class UserFeedbackService
         return $this->format($report->fresh()->load(['user', 'household', 'attachments', 'messages.user']));
     }
 
-    public function downloadAttachment(UserFeedbackReportAttachment $attachment): BinaryFileResponse|StreamedResponse
-    {
-        return $this->streamAttachment($attachment);
-    }
-
-    public function downloadAttachmentForUser(User $user, UserFeedbackReportAttachment $attachment): BinaryFileResponse|StreamedResponse
+    public function downloadAttachmentForUser(User $user, UserFeedbackReportAttachment $attachment): StreamedResponse
     {
         $report = $attachment->report;
         abort_unless($report !== null, 404);
         $this->assertOwner($user, $report);
 
-        return $this->streamAttachment($attachment);
+        return $this->streamAttachment($report, $attachment);
     }
 
-    private function streamAttachment(UserFeedbackReportAttachment $attachment): BinaryFileResponse|StreamedResponse
+    private function streamAttachment(UserFeedbackReport $report, UserFeedbackReportAttachment $attachment): StreamedResponse
     {
-        abort_unless(StorageLocator::exists($attachment->disk, $attachment->path), 404);
-        $disk = StorageLocator::forPath($attachment->disk, $attachment->path);
-
-        return $disk->download($attachment->path, $attachment->original_name, [
-            'Content-Type' => $attachment->mime ?? 'application/octet-stream',
-        ]);
+        return HouseholdFileStorage::downloadResponse(
+            HouseholdFileCipher::userScope($report->user_id),
+            $attachment->disk,
+            $attachment->path,
+            $attachment->original_name,
+            $attachment->mime,
+        );
     }
 
     public function resolveAttachment(int $attachmentId): UserFeedbackReportAttachment
@@ -229,20 +223,17 @@ class UserFeedbackService
 
     private function storeAttachment(UserFeedbackReport $report, UploadedFile $file): void
     {
-        $disk = StorageDisk::default();
+        $scope = HouseholdFileCipher::userScope($report->user_id);
         $dir = 'feedback-reports/'.$report->id;
-        $ext = $file->getClientOriginalExtension() ?: $file->extension() ?: 'bin';
-        $storedName = \Illuminate\Support\Str::uuid()->toString().'.'.$ext;
-        $path = $file->storeAs($dir, $storedName, $disk);
-        abort_unless(is_string($path) && $path !== '', 500, 'A fájl mentése nem sikerült.');
+        $stored = HouseholdFileStorage::store($scope, $dir, $file);
 
         UserFeedbackReportAttachment::create([
             'user_feedback_report_id' => $report->id,
-            'disk' => $disk,
-            'path' => $path,
-            'original_name' => $file->getClientOriginalName(),
-            'mime' => $file->getMimeType(),
-            'size_bytes' => $file->getSize() ?: 0,
+            'disk' => $stored['disk'],
+            'path' => $stored['path'],
+            'original_name' => $stored['original_name'],
+            'mime' => $stored['mime'],
+            'size_bytes' => $stored['size_bytes'],
         ]);
     }
 

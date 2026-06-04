@@ -48,7 +48,16 @@ final class StorageDisk
 
     public static function region(): string
     {
-        return (string) (env('SUPABASE_STORAGE_REGION') ?: env('AWS_DEFAULT_REGION') ?: 'eu-central-1');
+        $configured = env('SUPABASE_STORAGE_REGION') ?: env('AWS_DEFAULT_REGION');
+        if (is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        if (str_contains((string) self::endpoint(), 'supabase.co')) {
+            return 'eu-west-1';
+        }
+
+        return 'eu-central-1';
     }
 
     public static function usePathStyleEndpoint(): bool
@@ -60,5 +69,24 @@ final class StorageDisk
         }
 
         return filter_var($value, FILTER_VALIDATE_BOOL);
+    }
+
+    public static function applyRuntimeConfig(): void
+    {
+        if (! self::objectStorageConfigured()) {
+            return;
+        }
+
+        config([
+            'filesystems.disks.s3.key' => self::accessKey(),
+            'filesystems.disks.s3.secret' => self::secretKey(),
+            'filesystems.disks.s3.bucket' => self::bucket(),
+            'filesystems.disks.s3.region' => self::region(),
+            'filesystems.disks.s3.endpoint' => self::endpoint(),
+            'filesystems.disks.s3.use_path_style_endpoint' => self::usePathStyleEndpoint(),
+            'filesystems.disks.s3.request_checksum_calculation' => 'when_required',
+            'filesystems.disks.s3.response_checksum_validation' => 'when_required',
+            'filesystems.disks.s3.throw' => true,
+        ]);
     }
 }

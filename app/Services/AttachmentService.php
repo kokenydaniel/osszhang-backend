@@ -9,13 +9,11 @@ use App\Models\RentalProperty;
 use App\Models\LedgerEntry;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Support\StorageDisk;
-use App\Support\StorageLocator;
+use App\Support\HouseholdFileCipher;
+use App\Support\HouseholdFileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttachmentService
@@ -31,22 +29,20 @@ class AttachmentService
     ): array {
         $this->assertAttachableOwnedByHousehold($household, $attachable);
 
-        $disk = StorageDisk::default();
-        $dir = 'attachments/'.$household->id.'/'.Str::snake(class_basename($attachable));
-        $storedName = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
-        $path = $file->storeAs($dir, $storedName, $disk);
-        abort_unless(is_string($path) && $path !== '', 500, 'A fájl mentése nem sikerült.');
+        $scope = HouseholdFileCipher::householdScope($household->id);
+        $dir = 'h/'.$household->id.'/'.Str::snake(class_basename($attachable));
+        $stored = HouseholdFileStorage::store($scope, $dir, $file);
 
         $attachment = Attachment::create([
             'household_id' => $household->id,
             'uploaded_by' => $user->id,
             'attachable_type' => $attachable->getMorphClass(),
             'attachable_id' => $attachable->getKey(),
-            'disk' => $disk,
-            'path' => $path,
-            'original_name' => $file->getClientOriginalName(),
-            'mime' => $file->getMimeType(),
-            'size_bytes' => $file->getSize() ?: 0,
+            'disk' => $stored['disk'],
+            'path' => $stored['path'],
+            'original_name' => $stored['original_name'],
+            'mime' => $stored['mime'],
+            'size_bytes' => $stored['size_bytes'],
         ]);
 
         return $this->format($attachment);
@@ -66,18 +62,19 @@ class AttachmentService
 
     public function delete(Attachment $attachment): void
     {
-        Storage::disk($attachment->disk)->delete($attachment->path);
+        HouseholdFileStorage::delete($attachment->disk, $attachment->path);
         $attachment->delete();
     }
 
-    public function downloadResponse(Attachment $attachment): BinaryFileResponse|StreamedResponse
+    public function downloadResponse(Attachment $attachment): StreamedResponse
     {
-        abort_unless(StorageLocator::exists($attachment->disk, $attachment->path), 404);
-        $disk = StorageLocator::forPath($attachment->disk, $attachment->path);
-
-        return $disk->download($attachment->path, $attachment->original_name, [
-            'Content-Type' => $attachment->mime ?? 'application/octet-stream',
-        ]);
+        return HouseholdFileStorage::downloadResponse(
+            HouseholdFileCipher::householdScope($attachment->household_id),
+            $attachment->disk,
+            $attachment->path,
+            $attachment->original_name,
+            $attachment->mime,
+        );
     }
 
     public function resolveInsurancePolicy(Household $household, int $policyId): InsurancePolicy
