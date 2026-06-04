@@ -21,9 +21,9 @@ console_command = 'php /var/www/artisan tinker'
   LOG_STDERR_FORMATTER = 'Monolog\Formatter\JsonFormatter'
   SESSION_DRIVER = 'cookie'
   SESSION_SECURE_COOKIE = 'true'
-  FILESYSTEM_DISK = 's3'
 
 # Fájlok: Supabase Storage (S3 API). Fly secrets (nem volume — az fizetős):
+#   FILESYSTEM_DISK=s3  (csak ha a kulcsok megvannak)
 #   SUPABASE_STORAGE_BUCKET, SUPABASE_STORAGE_ENDPOINT,
 #   SUPABASE_STORAGE_ACCESS_KEY, SUPABASE_STORAGE_SECRET_KEY,
 #   SUPABASE_STORAGE_REGION (pl. eu-central-1), SUPABASE_STORAGE_USE_PATH_STYLE=true
