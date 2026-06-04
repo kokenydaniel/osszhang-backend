@@ -168,7 +168,8 @@ class BusinessDocumentService
         abort_if($documents->isEmpty(), 404, 'Nincs feltöltött dokumentum ebben a hónapban.');
 
         $monthLabel = str_pad((string) $month, 2, '0', STR_PAD_LEFT);
-        $zipName = 'konyvelesi-anyag-'.$year.'-'.$monthLabel.'.zip';
+        $bundleFolder = $this->accountingBundleFolderName($household, $year, $monthLabel);
+        $zipName = $bundleFolder.'.zip';
         $zipPath = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
             .DIRECTORY_SEPARATOR
             .'osszhang_zip_'
@@ -198,7 +199,7 @@ class BusinessDocumentService
             }
 
             $entryName = $this->uniqueZipEntryName(
-                $this->zipFolderForType($doc->document_type),
+                $bundleFolder.'/'.$this->zipFolderForType($doc->document_type),
                 $doc->original_name,
                 $index,
             );
@@ -256,6 +257,14 @@ class BusinessDocumentService
             'sizeBytes' => $document->size_bytes,
             'createdAt' => $document->created_at?->toIso8601String(),
         ];
+    }
+
+    private function accountingBundleFolderName(Household $household, int $year, string $monthLabel): string
+    {
+        $name = trim((string) $household->business_name);
+        $slug = Str::slug($name !== '' ? $name : 'vallalkozas', '-', 'hu');
+
+        return $slug.'-konyvelesi-anyag-'.$year.'-'.$monthLabel;
     }
 
     private function zipFolderForType(string $type): string

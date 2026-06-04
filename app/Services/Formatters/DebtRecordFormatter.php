@@ -57,6 +57,7 @@ class DebtRecordFormatter extends AbstractEncryptedRecordFormatter
             'budgetStartYear' => isset($s['budget_start_year']) ? (int) $s['budget_start_year'] : null,
             'budgetStartMonth' => isset($s['budget_start_month']) ? (int) $s['budget_start_month'] : null,
             'paidInstallmentMonths' => array_values($s['paid_installment_months'] ?? []),
+            'attachmentCount' => (int) ($d->attachments_count ?? $d->attachments()->count()),
         ];
     }
 }

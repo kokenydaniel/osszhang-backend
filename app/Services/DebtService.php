@@ -24,6 +24,7 @@ class DebtService
         $household = $this->requireHousehold($user);
 
         return $this->accessibleDebtsQuery($user, $walletId)
+            ->withCount('attachments')
             ->get()
             ->map(fn ($d) => $this->crypto->formatDebt($d, $household))
             ->all();
