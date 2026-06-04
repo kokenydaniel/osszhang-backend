@@ -179,32 +179,23 @@ class BusinessDocumentService
         $opened = $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         abort_if($opened !== true, 500, 'A csomag létrehozása nem sikerült.');
 
-        $entryFlags = defined('ZipArchive::FL_ENC_UTF_8') ? ZipArchive::FL_ENC_UTF_8 : 0;
-
         $scope = HouseholdFileCipher::householdScope($household->id);
         $added = 0;
-        $sourcePaths = [];
 
         foreach ($documents as $index => $doc) {
             $expectedBytes = $doc->size_bytes > 0 ? $doc->size_bytes : null;
-            $plaintext = HouseholdFileStorage::tryReadDecrypted($scope, $doc->disk, $doc->path, $expectedBytes);
+            $plaintext = HouseholdFileStorage::tryReadDecrypted(
+                $scope,
+                $doc->disk,
+                $doc->path,
+                $expectedBytes,
+                true,
+                $doc->mime,
+                $doc->original_name,
+            );
             if ($plaintext === null) {
                 continue;
             }
-
-            $sourcePath = tempnam(sys_get_temp_dir(), 'osszhang_doc_');
-            if ($sourcePath === false) {
-                continue;
-            }
-
-            $written = file_put_contents($sourcePath, $plaintext);
-            if ($written === false || $written !== strlen($plaintext)) {
-                @unlink($sourcePath);
-
-                continue;
-            }
-
-            unset($plaintext);
 
             $entryName = $this->uniqueZipEntryName(
                 $this->zipFolderForType($doc->document_type),
@@ -212,20 +203,18 @@ class BusinessDocumentService
                 $index,
             );
 
-            if ($zip->addFile($sourcePath, $entryName, $entryFlags) !== true) {
-                @unlink($sourcePath);
-
+            if ($zip->addFromString($entryName, $plaintext) !== true) {
                 continue;
             }
 
-            $sourcePaths[] = $sourcePath;
+            if (defined('ZipArchive::CM_STORE')) {
+                $zip->setCompressionName($entryName, ZipArchive::CM_STORE);
+            }
+
             $added++;
         }
 
         $closed = $zip->close();
-        foreach ($sourcePaths as $sourcePath) {
-            @unlink($sourcePath);
-        }
 
         if (! $closed || $added === 0) {
             @unlink($zipPath);

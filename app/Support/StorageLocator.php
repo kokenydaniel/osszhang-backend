@@ -43,18 +43,22 @@ final class StorageLocator
     private static function safeGet(string $diskName, string $path): ?string
     {
         try {
-            if (Storage::disk($diskName)->exists($path)) {
-                $contents = Storage::disk($diskName)->get($path);
-
-                return is_string($contents) && $contents !== '' ? $contents : null;
+            $disk = Storage::disk($diskName);
+            if (! $disk->exists($path)) {
+                return null;
             }
-        } catch (\Throwable) {
-        }
 
-        try {
-            $contents = Storage::disk($diskName)->get($path);
+            $contents = $disk->get($path);
+            if (! is_string($contents) || $contents === '') {
+                return null;
+            }
 
-            return is_string($contents) && $contents !== '' ? $contents : null;
+            $objectSize = $disk->size($path);
+            if (is_int($objectSize) && $objectSize > 0 && strlen($contents) !== $objectSize) {
+                return null;
+            }
+
+            return $contents;
         } catch (\Throwable) {
             return null;
         }

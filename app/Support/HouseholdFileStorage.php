@@ -50,8 +50,18 @@ final class HouseholdFileStorage
         string $diskName,
         string $path,
         ?int $expectedPlainBytes = null,
+        ?string $mime = null,
+        ?string $originalName = null,
     ): string {
-        $plaintext = self::tryReadDecrypted($scope, $diskName, $path, $expectedPlainBytes);
+        $plaintext = self::tryReadDecrypted(
+            $scope,
+            $diskName,
+            $path,
+            $expectedPlainBytes,
+            false,
+            $mime,
+            $originalName,
+        );
         abort_if($plaintext === null, 404, 'A fájl nem olvasható — töltsd fel újra.');
 
         return $plaintext;
@@ -62,6 +72,9 @@ final class HouseholdFileStorage
         string $diskName,
         string $path,
         ?int $expectedPlainBytes = null,
+        bool $strictPlainSize = false,
+        ?string $mime = null,
+        ?string $originalName = null,
     ): ?string {
         $raw = StorageLocator::read($diskName, $path);
         if ($raw === null) {
@@ -74,8 +87,14 @@ final class HouseholdFileStorage
             return null;
         }
 
-        if (! self::plaintextIntegrityOk($plaintext, $expectedPlainBytes)) {
+        if (! self::plaintextIntegrityOk($plaintext, $expectedPlainBytes, $strictPlainSize)) {
             return null;
+        }
+
+        if ($mime !== null || $originalName !== null) {
+            if (! HouseholdFileValidator::isValidPayload($plaintext, $mime, $originalName)) {
+                return null;
+            }
         }
 
         return $plaintext;
@@ -89,7 +108,14 @@ final class HouseholdFileStorage
         ?string $mime,
         ?int $expectedPlainBytes = null,
     ): Response {
-        $bytes = self::readDecrypted($scope, $diskName, $path, $expectedPlainBytes);
+        $bytes = self::readDecrypted(
+            $scope,
+            $diskName,
+            $path,
+            $expectedPlainBytes,
+            $mime,
+            $downloadName,
+        );
         $contentType = self::binaryContentType($mime);
 
         return new Response($bytes, 200, [
@@ -113,8 +139,11 @@ final class HouseholdFileStorage
         return $type;
     }
 
-    private static function plaintextIntegrityOk(string $plaintext, ?int $expectedPlainBytes): bool
-    {
+    private static function plaintextIntegrityOk(
+        string $plaintext,
+        ?int $expectedPlainBytes,
+        bool $strictPlainSize,
+    ): bool {
         if ($plaintext === '') {
             return false;
         }
@@ -123,16 +152,16 @@ final class HouseholdFileStorage
             return false;
         }
 
-        if ($expectedPlainBytes !== null && $expectedPlainBytes > 0) {
-            $actual = strlen($plaintext);
-            if ($actual === $expectedPlainBytes) {
-                return true;
-            }
-
-            return HouseholdFileCipher::hasBinaryDocumentMagic($plaintext);
+        if ($expectedPlainBytes === null || $expectedPlainBytes <= 0) {
+            return true;
         }
 
-        return true;
+        $actual = strlen($plaintext);
+        if ($actual === $expectedPlainBytes) {
+            return true;
+        }
+
+        return ! $strictPlainSize && HouseholdFileCipher::hasBinaryDocumentMagic($plaintext);
     }
 
     public static function delete(string $diskName, string $path): void
