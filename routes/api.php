@@ -77,6 +77,7 @@ Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(fu
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/feedback-reports/mine', [FeedbackReportController::class, 'index']);
+    Route::get('/feedback-reports/attachments/{attachment}/download', [FeedbackReportController::class, 'downloadAttachment']);
     Route::get('/feedback-reports/{feedbackReport}', [FeedbackReportController::class, 'show']);
     Route::post('/feedback-reports/{feedbackReport}/messages', [FeedbackReportController::class, 'storeMessage']);
     Route::post('/feedback-reports', [FeedbackReportController::class, 'store']);

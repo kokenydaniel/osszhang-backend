@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Concerns\CollectsUploadedFiles;
 use App\Http\Controllers\Api\Concerns\ValidatesFeedbackAttachments;
 use App\Http\Controllers\Controller;
 use App\Models\UserFeedbackReport;
+use App\Models\UserFeedbackReportAttachment;
 use App\Services\UserFeedbackService;
 use App\Support\FeedbackConfig;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,13 @@ class FeedbackReportController extends Controller
     use ValidatesFeedbackAttachments;
 
     public function __construct(private readonly UserFeedbackService $feedback) {}
+
+    public function downloadAttachment(Request $request, UserFeedbackReportAttachment $attachment)
+    {
+        $attachment->loadMissing('report');
+
+        return $this->feedback->downloadAttachmentForUser($request->user(), $attachment);
+    }
 
     public function index(Request $request): JsonResponse
     {

@@ -15,6 +15,7 @@ console_command = 'php /var/www/artisan tinker'
 
 [env]
   APP_ENV = 'production'
+  FRONTEND_URL = 'https://osszhang.vercel.app'
   LOG_CHANNEL = 'stderr'
   LOG_LEVEL = 'info'
   LOG_STDERR_FORMATTER = 'Monolog\Formatter\JsonFormatter'
@@ -35,6 +36,13 @@ console_command = 'php /var/www/artisan tinker'
   memory = '256mb'
   cpu_kind = 'shared'
   cpus = 1
+
+# Perzisztens fájltárolás (csatolmányok, vállalkozási dokumentumok).
+# Egyszer: fly volumes create osszhang_private_storage -r fra -s 1
+# Majd: fly volumes attach osszhang_private_storage -a osszhang-backend
+[mounts]
+  source = "osszhang_private_storage"
+  destination = "/var/www/storage/app/private"
 
 [deploy]
   release_command = "sh -c 'php /var/www/artisan migrate --force && php /var/www/artisan demo:seed'"

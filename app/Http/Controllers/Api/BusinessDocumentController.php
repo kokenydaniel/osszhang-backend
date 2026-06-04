@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\ValidatesUploadedAttachments;
 use App\Http\Controllers\Controller;
 use App\Models\BusinessDocument;
 use App\Services\BusinessDocumentService;
@@ -41,8 +42,9 @@ class BusinessDocumentController extends Controller
             'document_type' => 'required|string|max:32',
             'business_order_id' => 'nullable|integer|exists:business_orders,id',
             'label' => 'nullable|string|max:200',
-            'file' => 'required|file|max:20480|mimes:pdf,jpg,jpeg,png,webp,xls,xlsx,csv',
         ]);
+
+        $this->validateUploadedAttachment($request->file('file'), 20480, self::BUSINESS_DOC_EXTENSIONS);
 
         $household = $request->user()->household;
 

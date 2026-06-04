@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\ValidatesUploadedAttachments;
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
 use App\Models\Transaction;
@@ -10,11 +11,19 @@ use Illuminate\Http\Request;
 
 class AttachmentController extends Controller
 {
+    use ValidatesUploadedAttachments;
+
+    private const RECEIPT_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+
+    private const CONTRACT_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
+
+    private const POLICY_EXTENSIONS = ['pdf'];
+
     public function __construct(private readonly AttachmentService $attachments) {}
 
     public function storeForTransaction(Request $request, Transaction $transaction)
     {
-        $request->validate(['file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,webp']);
+        $this->validateUploadedAttachment($request->file('file'), 10240, self::RECEIPT_EXTENSIONS);
 
         $household = $request->user()->household;
         abort_if($transaction->household_id !== $household->id, 404);
@@ -33,7 +42,7 @@ class AttachmentController extends Controller
 
     public function storeForLedgerEntry(Request $request, int $ledgerEntry)
     {
-        $request->validate(['file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,webp']);
+        $this->validateUploadedAttachment($request->file('file'), 10240, self::RECEIPT_EXTENSIONS);
 
         $household = $request->user()->household;
         $entry = $this->attachments->resolveLedgerEntry($household, $ledgerEntry);
@@ -53,10 +62,8 @@ class AttachmentController extends Controller
 
     public function storeForBudgetLedgerItem(Request $request, int $transaction)
     {
-        $request->validate([
-            'file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,webp',
-            'item_id' => 'required|integer',
-        ]);
+        $request->validate(['item_id' => 'required|integer']);
+        $this->validateUploadedAttachment($request->file('file'), 10240, self::RECEIPT_EXTENSIONS);
 
         $household = $request->user()->household;
         $entry = $this->attachments->resolveBudgetLedgerItem($household, $transaction, (int) $request->input('item_id'));
@@ -77,7 +84,7 @@ class AttachmentController extends Controller
 
     public function storeForInsurancePolicy(Request $request, int $insurancePolicy)
     {
-        $request->validate(['file' => 'required|file|max:15360|mimes:pdf']);
+        $this->validateUploadedAttachment($request->file('file'), 15360, self::POLICY_EXTENSIONS);
 
         $household = $request->user()->household;
         abort_unless($household->insurance_enabled, 403);
@@ -99,7 +106,7 @@ class AttachmentController extends Controller
 
     public function storeForRentalProperty(Request $request, int $rental_property)
     {
-        $request->validate(['file' => 'required|file|max:15360|mimes:pdf,jpg,jpeg,png,webp']);
+        $this->validateUploadedAttachment($request->file('file'), 15360, self::CONTRACT_EXTENSIONS);
 
         $household = $request->user()->household;
         abort_unless($household->rental_enabled, 403);

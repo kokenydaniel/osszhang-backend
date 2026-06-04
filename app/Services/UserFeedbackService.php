@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Support\FeedbackConfig;
+use App\Support\StorageDisk;
 use App\Models\User;
 use App\Models\UserFeedbackReport;
 use App\Models\UserFeedbackReportAttachment;
@@ -193,6 +194,20 @@ class UserFeedbackService
 
     public function downloadAttachment(UserFeedbackReportAttachment $attachment): BinaryFileResponse|StreamedResponse
     {
+        return $this->streamAttachment($attachment);
+    }
+
+    public function downloadAttachmentForUser(User $user, UserFeedbackReportAttachment $attachment): BinaryFileResponse|StreamedResponse
+    {
+        $report = $attachment->report;
+        abort_unless($report !== null, 404);
+        $this->assertOwner($user, $report);
+
+        return $this->streamAttachment($attachment);
+    }
+
+    private function streamAttachment(UserFeedbackReportAttachment $attachment): BinaryFileResponse|StreamedResponse
+    {
         $disk = Storage::disk($attachment->disk);
         abort_unless($disk->exists($attachment->path), 404);
 
@@ -213,11 +228,12 @@ class UserFeedbackService
 
     private function storeAttachment(UserFeedbackReport $report, UploadedFile $file): void
     {
-        $disk = config('filesystems.default', 'local');
+        $disk = StorageDisk::default();
         $dir = 'feedback-reports/'.$report->id;
         $ext = $file->getClientOriginalExtension() ?: $file->extension() ?: 'bin';
         $storedName = \Illuminate\Support\Str::uuid()->toString().'.'.$ext;
         $path = $file->storeAs($dir, $storedName, $disk);
+        abort_unless(is_string($path) && $path !== '', 500, 'A fájl mentése nem sikerült.');
 
         UserFeedbackReportAttachment::create([
             'user_feedback_report_id' => $report->id,

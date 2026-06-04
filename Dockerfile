@@ -19,6 +19,8 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
 
+COPY docker/php-uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

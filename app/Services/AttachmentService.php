@@ -9,6 +9,7 @@ use App\Models\RentalProperty;
 use App\Models\LedgerEntry;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Support\StorageDisk;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -29,10 +30,11 @@ class AttachmentService
     ): array {
         $this->assertAttachableOwnedByHousehold($household, $attachable);
 
-        $disk = config('filesystems.default', 'local');
+        $disk = StorageDisk::default();
         $dir = 'attachments/'.$household->id.'/'.Str::snake(class_basename($attachable));
         $storedName = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs($dir, $storedName, $disk);
+        abort_unless(is_string($path) && $path !== '', 500, 'A fájl mentése nem sikerült.');
 
         $attachment = Attachment::create([
             'household_id' => $household->id,

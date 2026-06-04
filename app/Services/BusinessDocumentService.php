@@ -7,6 +7,7 @@ use App\Models\BusinessOrder;
 use App\Models\Household;
 use App\Models\User;
 use App\Support\BusinessDocumentTypes;
+use App\Support\StorageDisk;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -55,10 +56,11 @@ class BusinessDocumentService
             );
         }
 
-        $disk = config('filesystems.default', 'local');
+        $disk = StorageDisk::default();
         $dir = 'business-documents/'.$household->id.'/'.$year.'-'.str_pad((string) $month, 2, '0', STR_PAD_LEFT);
         $storedName = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs($dir, $storedName, $disk);
+        abort_unless(is_string($path) && $path !== '', 500, 'A fájl mentése nem sikerült.');
 
         $document = BusinessDocument::create([
             'household_id' => $household->id,
@@ -95,7 +97,7 @@ class BusinessDocumentService
     ): array {
         abort_unless(BusinessDocumentTypes::isValid($documentType), 422, 'Érvénytelen dokumentum típus.');
 
-        $disk = config('filesystems.default', 'local');
+        $disk = StorageDisk::default();
         $dir = 'business-documents/'.$household->id.'/'.$year.'-'.str_pad((string) $month, 2, '0', STR_PAD_LEFT);
         $extension = pathinfo($originalName, PATHINFO_EXTENSION) ?: 'bin';
         $storedName = Str::uuid()->toString().'.'.$extension;

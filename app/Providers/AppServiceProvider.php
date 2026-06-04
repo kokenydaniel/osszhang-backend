@@ -12,6 +12,7 @@ use App\Policies\TransactionPolicy;
 use App\Policies\WalletPolicy;
 use App\Listeners\SyncHouseholdFromStripeWebhook;
 use App\Services\BillingService;
+use App\Support\StorageDisk;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        config(['filesystems.default' => StorageDisk::default()]);
+
         Event::listen(WebhookHandled::class, SyncHouseholdFromStripeWebhook::class);
 
         Gate::policy(Wallet::class, WalletPolicy::class);
