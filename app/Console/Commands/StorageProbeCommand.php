@@ -32,11 +32,13 @@ class StorageProbeCommand extends Command
         try {
             $written = Storage::disk('s3')->put($key, 'ok');
             $exists = Storage::disk('s3')->exists($key);
+            $contents = Storage::disk('s3')->get($key);
             Storage::disk('s3')->delete($key);
             $this->line('put='.var_export($written, true));
             $this->line('exists='.($exists ? 'yes' : 'no'));
+            $this->line('get='.($contents === 'ok' ? 'yes' : 'no'));
 
-            return $written && $exists ? self::SUCCESS : self::FAILURE;
+            return $written && $exists && $contents === 'ok' ? self::SUCCESS : self::FAILURE;
         } catch (\Throwable $e) {
             $this->error($e->getMessage());
 

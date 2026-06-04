@@ -47,8 +47,8 @@ final class HouseholdFileStorage
 
     public static function readDecrypted(string $scope, string $diskName, string $path): string
     {
-        abort_unless(StorageLocator::exists($diskName, $path), 404);
-        $raw = StorageLocator::forPath($diskName, $path)->get($path);
+        $raw = StorageLocator::read($diskName, $path);
+        abort_if($raw === null, 404);
 
         return HouseholdFileCipher::decrypt($scope, $raw);
     }
