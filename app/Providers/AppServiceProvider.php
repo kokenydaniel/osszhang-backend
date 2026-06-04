@@ -15,6 +15,7 @@ use App\Services\BillingService;
 use App\Support\StorageDisk;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Events\WebhookHandled;
 
@@ -29,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
     {
         StorageDisk::applyRuntimeConfig();
         config(['filesystems.default' => StorageDisk::default()]);
+
+        Storage::forgetDisk('s3');
 
         Event::listen(WebhookHandled::class, SyncHouseholdFromStripeWebhook::class);
 
