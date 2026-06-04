@@ -14,7 +14,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 use ZipArchive;
 
 class BusinessDocumentService
@@ -142,7 +142,7 @@ class BusinessDocumentService
         $document->delete();
     }
 
-    public function downloadResponse(BusinessDocument $document): StreamedResponse
+    public function downloadResponse(BusinessDocument $document): Response
     {
         return HouseholdFileStorage::downloadResponse(
             HouseholdFileCipher::householdScope($document->household_id),
@@ -190,8 +190,11 @@ class BusinessDocumentService
 
         $zip->close();
 
+        abort_if($zip->count() === 0, 404, 'Nincs letölthető dokumentum ebben a hónapban.');
+
         return response()->download($tempPath, $zipName, [
             'Content-Type' => 'application/zip',
+            'Content-Disposition' => 'attachment; filename="'.$zipName.'"',
         ])->deleteFileAfterSend(true);
     }
 

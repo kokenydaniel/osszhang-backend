@@ -4,7 +4,7 @@ namespace App\Support;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 final class HouseholdFileStorage
 {
@@ -59,18 +59,28 @@ final class HouseholdFileStorage
         string $path,
         string $downloadName,
         ?string $mime,
-    ): StreamedResponse {
-        return response()->streamDownload(
-            function () use ($scope, $diskName, $path): void {
-                echo self::readDecrypted($scope, $diskName, $path);
-            },
-            $downloadName,
-            ['Content-Type' => $mime ?? 'application/octet-stream'],
-        );
+    ): Response {
+        $bytes = self::readDecrypted($scope, $diskName, $path);
+        $contentType = $mime ?? 'application/octet-stream';
+
+        return new Response($bytes, 200, [
+            'Content-Type' => $contentType,
+            'Content-Disposition' => self::contentDisposition($downloadName),
+            'Content-Length' => (string) strlen($bytes),
+            'Cache-Control' => 'no-store, private',
+        ]);
     }
 
     public static function delete(string $diskName, string $path): void
     {
         Storage::disk($diskName)->delete($path);
+    }
+
+    private static function contentDisposition(string $filename): string
+    {
+        $safe = trim($filename) !== '' ? trim($filename) : 'letoltes';
+        $ascii = preg_replace('/[^\w.\- ]+/u', '_', $safe) ?: 'letoltes';
+
+        return 'attachment; filename="'.$ascii.'"; filename*=UTF-8\'\''.rawurlencode($safe);
     }
 }

@@ -14,7 +14,7 @@ use App\Support\HouseholdFileStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class AttachmentService
 {
@@ -66,7 +66,7 @@ class AttachmentService
         $attachment->delete();
     }
 
-    public function downloadResponse(Attachment $attachment): StreamedResponse
+    public function downloadResponse(Attachment $attachment): Response
     {
         return HouseholdFileStorage::downloadResponse(
             HouseholdFileCipher::householdScope($attachment->household_id),

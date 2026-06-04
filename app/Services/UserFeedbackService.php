@@ -10,7 +10,7 @@ use App\Models\UserFeedbackReport;
 use App\Models\UserFeedbackReportAttachment;
 use App\Models\UserFeedbackReportMessage;
 use Illuminate\Http\UploadedFile;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserFeedbackService
 {
@@ -191,7 +191,7 @@ class UserFeedbackService
         return $this->format($report->fresh()->load(['user', 'household', 'attachments', 'messages.user']));
     }
 
-    public function downloadAttachmentForUser(User $user, UserFeedbackReportAttachment $attachment): StreamedResponse
+    public function downloadAttachmentForUser(User $user, UserFeedbackReportAttachment $attachment): Response
     {
         $report = $attachment->report;
         abort_unless($report !== null, 404);
@@ -200,7 +200,7 @@ class UserFeedbackService
         return $this->streamAttachment($report, $attachment);
     }
 
-    private function streamAttachment(UserFeedbackReport $report, UserFeedbackReportAttachment $attachment): StreamedResponse
+    private function streamAttachment(UserFeedbackReport $report, UserFeedbackReportAttachment $attachment): Response
     {
         return HouseholdFileStorage::downloadResponse(
             HouseholdFileCipher::userScope($report->user_id),
