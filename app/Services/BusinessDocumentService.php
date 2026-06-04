@@ -13,6 +13,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use ZipArchive;
 
@@ -152,7 +153,7 @@ class BusinessDocumentService
         );
     }
 
-    public function bundleZipResponse(Household $household, int $year, int $month): Response
+    public function bundleZipResponse(Household $household, int $year, int $month): BinaryFileResponse
     {
         /** @var Collection<int, BusinessDocument> $documents */
         $documents = BusinessDocument::query()
@@ -167,40 +168,81 @@ class BusinessDocumentService
 
         $monthLabel = str_pad((string) $month, 2, '0', STR_PAD_LEFT);
         $zipName = 'konyvelesi-anyag-'.$year.'-'.$monthLabel.'.zip';
-        $tempPath = tempnam(sys_get_temp_dir(), 'osszhang_zip_').'.zip';
+        $zipPath = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
+            .DIRECTORY_SEPARATOR
+            .'osszhang_zip_'
+            .uniqid('', true)
+            .'.zip';
 
         $zip = new ZipArchive;
-        abort_unless($zip->open($tempPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true, 500);
+        $opened = $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        abort_if($opened !== true, 500, 'A csomag létrehozása nem sikerült.');
+
+        $entryFlags = defined('ZipArchive::FL_ENC_UTF_8') ? ZipArchive::FL_ENC_UTF_8 : 0;
+
+        $scope = HouseholdFileCipher::householdScope($household->id);
+        $added = 0;
+        $sourcePaths = [];
 
         foreach ($documents as $index => $doc) {
-            try {
-                $bytes = HouseholdFileStorage::readDecrypted(
-                    HouseholdFileCipher::householdScope($household->id),
-                    $doc->disk,
-                    $doc->path,
-                );
-            } catch (\Throwable) {
+            $plaintext = HouseholdFileStorage::tryReadDecrypted($scope, $doc->disk, $doc->path);
+            if ($plaintext === null) {
                 continue;
             }
-            $folder = $this->zipFolderForType($doc->document_type);
-            $entryName = $this->uniqueZipEntryName($folder, $doc->original_name, $index);
-            $zip->addFromString($entryName, $bytes);
+
+            $sourcePath = tempnam(sys_get_temp_dir(), 'osszhang_doc_');
+            if ($sourcePath === false) {
+                continue;
+            }
+
+            if (file_put_contents($sourcePath, $plaintext) === false) {
+                @unlink($sourcePath);
+
+                continue;
+            }
+
+            unset($plaintext);
+
+            $entryName = $this->uniqueZipEntryName(
+                $this->zipFolderForType($doc->document_type),
+                $doc->original_name,
+                $index,
+            );
+
+            if ($zip->addFile($sourcePath, $entryName, $entryFlags) !== true) {
+                @unlink($sourcePath);
+
+                continue;
+            }
+
+            $sourcePaths[] = $sourcePath;
+            $added++;
         }
 
-        $zip->close();
+        $closed = $zip->close();
+        foreach ($sourcePaths as $sourcePath) {
+            @unlink($sourcePath);
+        }
 
-        abort_if($zip->count() === 0, 404, 'Nincs letölthető dokumentum ebben a hónapban.');
+        if (! $closed || $added === 0) {
+            @unlink($zipPath);
+            abort_if($added === 0, 404, 'Nincs letölthető dokumentum ebben a hónapban (a fájlok nem érhetők el a tárolóban).');
 
-        $bytes = file_get_contents($tempPath);
-        @unlink($tempPath);
-        abort_unless(is_string($bytes) && $bytes !== '', 500, 'A csomag összeállítása nem sikerült.');
+            abort(500, 'A csomag összeállítása nem sikerült.');
+        }
 
-        return new Response($bytes, 200, [
+        $zipBytes = filesize($zipPath);
+        if ($zipBytes === false || $zipBytes < 22) {
+            @unlink($zipPath);
+            abort(500, 'A csomag összeállítása nem sikerült.');
+        }
+
+        return response()->file($zipPath, [
             'Content-Type' => 'application/zip',
             'Content-Disposition' => 'attachment; filename="'.$zipName.'"',
-            'Content-Length' => (string) strlen($bytes),
+            'Content-Length' => (string) $zipBytes,
             'Cache-Control' => 'no-store, private',
-        ]);
+        ])->deleteFileAfterSend(true);
     }
 
     /** @return array<string, mixed> */

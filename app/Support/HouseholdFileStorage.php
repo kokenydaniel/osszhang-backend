@@ -47,10 +47,24 @@ final class HouseholdFileStorage
 
     public static function readDecrypted(string $scope, string $diskName, string $path): string
     {
-        $raw = StorageLocator::read($diskName, $path);
-        abort_if($raw === null, 404);
+        $plaintext = self::tryReadDecrypted($scope, $diskName, $path);
+        abort_if($plaintext === null, 404);
 
-        return HouseholdFileCipher::decrypt($scope, $raw);
+        return $plaintext;
+    }
+
+    public static function tryReadDecrypted(string $scope, string $diskName, string $path): ?string
+    {
+        $raw = StorageLocator::read($diskName, $path);
+        if ($raw === null) {
+            return null;
+        }
+
+        try {
+            return HouseholdFileCipher::decrypt($scope, $raw);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     public static function downloadResponse(

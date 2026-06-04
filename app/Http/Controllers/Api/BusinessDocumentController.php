@@ -120,6 +120,7 @@ class BusinessDocumentController extends Controller
         ]);
 
         $household = $request->user()->household;
+        abort_if($household === null, 403);
 
         return $this->documents->bundleZipResponse(
             $household,
