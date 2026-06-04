@@ -57,7 +57,43 @@ class DebtRecordFormatter extends AbstractEncryptedRecordFormatter
             'budgetStartYear' => isset($s['budget_start_year']) ? (int) $s['budget_start_year'] : null,
             'budgetStartMonth' => isset($s['budget_start_month']) ? (int) $s['budget_start_month'] : null,
             'paidInstallmentMonths' => array_values($s['paid_installment_months'] ?? []),
+            'installmentPayments' => $this->formatInstallmentPayments($s),
             'attachmentCount' => (int) ($d->attachments_count ?? $d->attachments()->count()),
         ];
+    }
+
+    /** @param array<string, mixed> $s @return list<array<string, mixed>> */
+    private function formatInstallmentPayments(array $s): array
+    {
+        $raw = $s['installment_payments'] ?? [];
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($raw as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $period = (string) ($row['period'] ?? '');
+            if (! preg_match('/^\d{4}-\d{2}$/', $period)) {
+                continue;
+            }
+            $paidAt = $row['paid_at'] ?? $row['paidAt'] ?? null;
+            $source = (string) ($row['source'] ?? 'budget');
+            if (! in_array($source, ['budget', 'debt_pay'], true)) {
+                $source = 'budget';
+            }
+            $out[] = [
+                'period' => $period,
+                'paidAt' => is_string($paidAt) && $paidAt !== '' ? $paidAt : null,
+                'amount' => (float) ($row['amount'] ?? 0),
+                'source' => $source,
+            ];
+        }
+
+        usort($out, fn ($a, $b) => strcmp((string) $b['period'], (string) $a['period']));
+
+        return $out;
     }
 }

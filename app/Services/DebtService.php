@@ -156,6 +156,21 @@ class DebtService
         if (array_key_exists('paidInstallmentMonths', $validated)) {
             $sensitive['paid_installment_months'] = array_values($validated['paidInstallmentMonths']);
         }
+        if (array_key_exists('installmentPayments', $validated)) {
+            $sensitive['installment_payments'] = array_values(array_map(
+                fn (array $row) => [
+                    'period' => (string) ($row['period'] ?? ''),
+                    'paid_at' => isset($row['paidAt']) && $row['paidAt'] !== '' && $row['paidAt'] !== null
+                        ? (string) $row['paidAt']
+                        : null,
+                    'amount' => (float) ($row['amount'] ?? 0),
+                    'source' => in_array($row['source'] ?? '', ['budget', 'debt_pay'], true)
+                        ? (string) $row['source']
+                        : 'budget',
+                ],
+                $validated['installmentPayments'],
+            ));
+        }
 
         return $sensitive;
     }

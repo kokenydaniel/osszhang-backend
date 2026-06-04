@@ -35,6 +35,11 @@ class DebtController extends Controller
             'budgetStartMonth' => 'nullable|integer|min:1|max:12',
             'paidInstallmentMonths' => 'sometimes|array',
             'paidInstallmentMonths.*' => 'string|regex:/^\d{4}-\d{2}$/',
+            'installmentPayments' => 'sometimes|array',
+            'installmentPayments.*.period' => 'required_with:installmentPayments|string|regex:/^\d{4}-\d{2}$/',
+            'installmentPayments.*.paidAt' => 'nullable|date_format:Y-m-d',
+            'installmentPayments.*.amount' => 'required_with:installmentPayments|numeric|min:0',
+            'installmentPayments.*.source' => 'required_with:installmentPayments|string|in:budget,debt_pay',
         ]);
 
         return response()->json(
@@ -58,6 +63,11 @@ class DebtController extends Controller
             'budgetStartMonth' => 'nullable|integer|min:1|max:12',
             'paidInstallmentMonths' => 'sometimes|array',
             'paidInstallmentMonths.*' => 'string|regex:/^\d{4}-\d{2}$/',
+            'installmentPayments' => 'sometimes|array',
+            'installmentPayments.*.period' => 'required_with:installmentPayments|string|regex:/^\d{4}-\d{2}$/',
+            'installmentPayments.*.paidAt' => 'nullable|date_format:Y-m-d',
+            'installmentPayments.*.amount' => 'required_with:installmentPayments|numeric|min:0',
+            'installmentPayments.*.source' => 'required_with:installmentPayments|string|in:budget,debt_pay',
         ]);
 
         return response()->json(
