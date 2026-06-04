@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Household;
 use App\Models\User;
 
 final class AccessControl
@@ -23,13 +24,13 @@ final class AccessControl
     public const STATUS_TRIALING = 'trialing';
 
     /** @var list<string> */
-    public const MODULES = ['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental'];
+    public const MODULES = ['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental', 'receivables', 'travel_planner'];
 
     /** @var list<string> */
-    public const PRO_MODULES = ['savings', 'debts', 'utilities', 'meters', 'pocket_money', 'insurance', 'rental'];
+    public const PRO_MODULES = ['savings', 'debts', 'utilities', 'meters', 'pocket_money', 'insurance', 'rental', 'receivables'];
 
     /** @var list<string> */
-    public const PREMIUM_MODULES = ['business'];
+    public const PREMIUM_MODULES = ['business', 'travel_planner'];
 
     /** @var list<string> */
     public const PRO_FEATURES = ['private_wallet', 'utility_split'];
@@ -75,7 +76,7 @@ final class AccessControl
         return self::effectiveTier($user);
     }
 
-    public static function canAccessModule(User $user, string $moduleId): bool
+    public static function canAccessModuleByTier(User $user, string $moduleId): bool
     {
         if ($user->lifetime_admin || self::isBetaMode()) {
             return true;
@@ -96,6 +97,42 @@ final class AccessControl
         }
 
         return false;
+    }
+
+    public static function isHouseholdModuleEnabled(?Household $household, string $moduleId): bool
+    {
+        if ($household === null) {
+            return false;
+        }
+
+        if ($moduleId === 'budget') {
+            return (bool) ($household->budget_enabled ?? true);
+        }
+
+        $key = "{$moduleId}_enabled";
+
+        return (bool) ($household->{$key} ?? false);
+    }
+
+    public static function canAccessModule(User $user, string $moduleId): bool
+    {
+        if ($user->lifetime_admin || self::isBetaMode()) {
+            return true;
+        }
+
+        if (! self::canAccessModuleByTier($user, $moduleId)) {
+            return false;
+        }
+
+        if (! self::isHouseholdModuleEnabled($user->household, $moduleId)) {
+            return false;
+        }
+
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        return in_array($moduleId, $user->permissions ?? [], true);
     }
 
     public static function canUseFeature(User $user, string $featureId): bool
@@ -124,6 +161,10 @@ final class AccessControl
 
     public static function moduleAccessDeniedMessage(string $moduleId): string
     {
+        if ($moduleId === 'travel_planner') {
+            return 'Az utazástervező modul csak Premium előfizetéssel érhető el.';
+        }
+
         if (in_array($moduleId, self::PREMIUM_MODULES, true)) {
             return 'A Vállalkozás modul csak Premium előfizetéssel érhető el.';
         }

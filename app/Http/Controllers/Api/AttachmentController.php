@@ -51,6 +51,30 @@ class AttachmentController extends Controller
         return response()->json(['data' => $this->attachments->listFor($entry)]);
     }
 
+    public function storeForBudgetLedgerItem(Request $request, int $transaction)
+    {
+        $request->validate([
+            'file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,webp',
+            'item_id' => 'required|integer',
+        ]);
+
+        $household = $request->user()->household;
+        $entry = $this->attachments->resolveBudgetLedgerItem($household, $transaction, (int) $request->input('item_id'));
+        $attachment = $this->attachments->store($household, $request->user(), $entry, $request->file('file'));
+
+        return response()->json(['data' => $attachment], 201);
+    }
+
+    public function indexForBudgetLedgerItem(Request $request, int $transaction)
+    {
+        $request->validate(['item_id' => 'required|integer']);
+
+        $household = $request->user()->household;
+        $entry = $this->attachments->resolveBudgetLedgerItem($household, $transaction, (int) $request->input('item_id'));
+
+        return response()->json(['data' => $this->attachments->listFor($entry)]);
+    }
+
     public function storeForInsurancePolicy(Request $request, int $insurancePolicy)
     {
         $request->validate(['file' => 'required|file|max:15360|mimes:pdf']);

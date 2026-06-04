@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\BusinessDocumentController;
 use App\Http\Controllers\Api\BusinessOrderController;
 use App\Http\Controllers\Api\CronController;
 use App\Http\Controllers\Api\DashboardAiCfoController;
+use App\Http\Controllers\Api\FeedbackReportController;
+use App\Http\Controllers\Api\AdminFeedbackReportController;
 use App\Http\Controllers\Api\DebtController;
 use App\Http\Controllers\Api\HouseholdController;
 use App\Http\Controllers\Api\InsuranceController;
@@ -21,6 +23,7 @@ use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeterController;
 use App\Http\Controllers\Api\PocketMoneyController;
+use App\Http\Controllers\Api\ReceivableController;
 use App\Http\Controllers\Api\RentalController;
 use App\Http\Controllers\Api\RentalIncomeController;
 use App\Http\Controllers\Api\RentalExpenseController;
@@ -63,6 +66,20 @@ Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(fu
     Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update']);
     Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy']);
     Route::patch('/announcements/{announcement}/toggle', [AdminAnnouncementController::class, 'toggle']);
+    Route::get('/feedback-reports/attention-count', [AdminFeedbackReportController::class, 'attentionCount']);
+    Route::get('/feedback-reports', [AdminFeedbackReportController::class, 'index']);
+    Route::get('/feedback-reports/attachments/{attachment}/download', [AdminFeedbackReportController::class, 'downloadAttachment']);
+    Route::get('/feedback-reports/{feedbackReport}/legacy-attachment', [AdminFeedbackReportController::class, 'downloadLegacyAttachment']);
+    Route::get('/feedback-reports/{feedbackReport}', [AdminFeedbackReportController::class, 'show']);
+    Route::post('/feedback-reports/{feedbackReport}/messages', [AdminFeedbackReportController::class, 'storeMessage']);
+    Route::patch('/feedback-reports/{feedbackReport}', [AdminFeedbackReportController::class, 'update']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/feedback-reports/mine', [FeedbackReportController::class, 'index']);
+    Route::get('/feedback-reports/{feedbackReport}', [FeedbackReportController::class, 'show']);
+    Route::post('/feedback-reports/{feedbackReport}/messages', [FeedbackReportController::class, 'storeMessage']);
+    Route::post('/feedback-reports', [FeedbackReportController::class, 'store']);
 });
 
 Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
@@ -152,11 +169,23 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
         Route::apiResource('rental-expenses', RentalExpenseController::class)->only(['store', 'update', 'destroy']);
     });
 
+    Route::middleware('tier.module:receivables')->group(function () {
+        Route::get('receivables', [ReceivableController::class, 'index']);
+        Route::post('receivables/contacts', [ReceivableController::class, 'storeContact']);
+        Route::patch('receivables/contacts/{receivable_contact}', [ReceivableController::class, 'updateContact']);
+        Route::delete('receivables/contacts/{receivable_contact}', [ReceivableController::class, 'destroyContact']);
+        Route::post('receivables/contacts/{receivable_contact}/entries', [ReceivableController::class, 'storeEntry']);
+        Route::patch('receivables/entries/{receivable_entry}', [ReceivableController::class, 'updateEntry']);
+        Route::delete('receivables/entries/{receivable_entry}', [ReceivableController::class, 'destroyEntry']);
+    });
+
     Route::middleware(['platform.feature:enable_attachments'])->group(function () {
         Route::get('/transactions/{transaction}/attachments', [AttachmentController::class, 'indexForTransaction']);
         Route::post('/transactions/{transaction}/attachments', [AttachmentController::class, 'storeForTransaction']);
         Route::get('/ledger-entries/{ledgerEntry}/attachments', [AttachmentController::class, 'indexForLedgerEntry']);
         Route::post('/ledger-entries/{ledgerEntry}/attachments', [AttachmentController::class, 'storeForLedgerEntry']);
+        Route::get('/transactions/{transaction}/budget-items/attachments', [AttachmentController::class, 'indexForBudgetLedgerItem']);
+        Route::post('/transactions/{transaction}/budget-items/attachments', [AttachmentController::class, 'storeForBudgetLedgerItem']);
         Route::get('/insurance-policies/{insurancePolicy}/attachments', [AttachmentController::class, 'indexForInsurancePolicy'])
             ->middleware('tier.module:insurance');
         Route::post('/insurance-policies/{insurancePolicy}/attachments', [AttachmentController::class, 'storeForInsurancePolicy'])

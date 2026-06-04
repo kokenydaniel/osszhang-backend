@@ -56,6 +56,8 @@ class HouseholdResource extends JsonResource
             'insurance_settings' => $this->resolvedInsuranceSettings(),
             'rental_enabled' => (bool) $this->rental_enabled,
             'rental_settings' => $this->resolvedRentalSettings(),
+            'receivables_enabled' => (bool) $this->receivables_enabled,
+            'travel_planner_enabled' => (bool) $this->travel_planner_enabled,
             'business_settings' => $this->resolvedBusinessSettings(),
             'shopify_shop_url' => $this->shopify_shop_url,
             'woocommerce_shop_url' => $this->woocommerce_shop_url,

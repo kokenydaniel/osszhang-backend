@@ -13,6 +13,9 @@ class HouseholdRole
 
     public const READER = 'reader';
 
+    /** @deprecated Legacy UI value; treated as reader. */
+    public const VIEWER = 'viewer';
+
     /** @deprecated Legacy value from early migrations / demo seed data. Treated as editor. */
     public const MEMBER = 'member';
 
@@ -23,7 +26,7 @@ class HouseholdRole
 
     public static function isReader(User $user): bool
     {
-        return $user->role === self::READER;
+        return in_array($user->role, [self::READER, self::VIEWER], true);
     }
 
     public static function isAdmin(User $user): bool

@@ -37,6 +37,15 @@ class PocketMoneySettings
         if (! is_array($members)) {
             $members = [];
         }
+        $hiddenKeys = $stored['hidden_member_keys'] ?? $stored['hiddenMemberKeys'] ?? [];
+        if (! is_array($hiddenKeys)) {
+            $hiddenKeys = [];
+        }
+        $hiddenKeys = array_values(array_unique(array_filter(array_map(
+            fn ($k) => trim((string) $k),
+            $hiddenKeys,
+        ))));
+
         $members = array_values(array_filter(array_map(function ($row) {
             if (! is_array($row)) {
                 return null;
@@ -82,6 +91,7 @@ class PocketMoneySettings
             'currencies' => $currencies,
             'default_currency' => $defaultCurrency,
             'members' => $members,
+            'hidden_member_keys' => $hiddenKeys,
             'interest_enabled' => $interestEnabled,
             'interest_rate_percent' => $interestRate,
             'interest_on' => $interestOn,

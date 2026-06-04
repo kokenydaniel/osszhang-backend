@@ -184,10 +184,17 @@ class BudgetService
         $this->ensureHousehold($household);
         $transaction = $this->findAccessibleTransaction($user, $id);
 
+        $entry = LedgerEntry::create([
+            'transaction_id' => $transaction->id,
+            'date' => $validated['date'],
+            'amount' => (float) $validated['amount'],
+            'reason' => $validated['reason'],
+        ]);
+
         $current = $this->sensitive->resolve($transaction, $household);
         $items = $current['subItems'] ?? [];
         $items[] = [
-            'id' => -1 * (time() % 1000000),
+            'id' => $entry->id,
             'date' => $validated['date'],
             'amount' => (float) $validated['amount'],
             'reason' => $validated['reason'],

@@ -18,6 +18,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttachmentService
 {
+    public function __construct(
+        private readonly TransactionSensitiveData $transactionSensitive,
+    ) {}
     public function store(
         Household $household,
         User $user,
@@ -92,16 +95,72 @@ class AttachmentService
 
     public function resolveLedgerEntry(Household $household, int $ledgerEntryId): LedgerEntry
     {
-        $entry = LedgerEntry::query()->whereKey($ledgerEntryId)->firstOrFail();
+        $entry = LedgerEntry::query()->whereKey($ledgerEntryId)->first();
 
-        if ($entry->transaction_id) {
-            $transaction = Transaction::query()->whereKey($entry->transaction_id)->firstOrFail();
-            abort_if($transaction->household_id !== $household->id, 404);
+        if ($entry) {
+            if ($entry->transaction_id) {
+                $transaction = Transaction::query()->whereKey($entry->transaction_id)->firstOrFail();
+                abort_if($transaction->household_id !== $household->id, 404);
+            }
 
             return $entry;
         }
 
         abort(404);
+    }
+
+    public function resolveBudgetLedgerItem(Household $household, int $transactionId, int $itemId): LedgerEntry
+    {
+        $transaction = Transaction::query()
+            ->where('household_id', $household->id)
+            ->whereKey($transactionId)
+            ->firstOrFail();
+
+        $existing = LedgerEntry::query()
+            ->where('transaction_id', $transaction->id)
+            ->whereKey($itemId)
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $sensitive = $this->transactionSensitive->resolve($transaction, $household);
+        $subItems = $sensitive['subItems'] ?? [];
+        $item = collect($subItems)->first(fn (array $i) => (int) ($i['id'] ?? 0) === $itemId);
+        abort_unless($item, 404);
+
+        $matched = LedgerEntry::query()
+            ->where('transaction_id', $transaction->id)
+            ->where('date', $item['date'])
+            ->where('amount', (float) ($item['amount'] ?? 0))
+            ->where('reason', (string) ($item['reason'] ?? ''))
+            ->first();
+
+        $entry = $matched ?? LedgerEntry::create([
+            'transaction_id' => $transaction->id,
+            'date' => $item['date'],
+            'amount' => (float) ($item['amount'] ?? 0),
+            'reason' => (string) ($item['reason'] ?? ''),
+        ]);
+
+        if ($itemId !== (int) $entry->id) {
+            $sensitive['subItems'] = collect($subItems)
+                ->map(function (array $i) use ($itemId, $entry) {
+                    if ((int) ($i['id'] ?? 0) !== $itemId) {
+                        return $i;
+                    }
+
+                    return [...$i, 'id' => (int) $entry->id];
+                })
+                ->values()
+                ->all();
+
+            $this->transactionSensitive->persistSensitive($transaction, $household, $sensitive);
+            $transaction->save();
+        }
+
+        return $entry;
     }
 
     public function assertHouseholdOwnsAttachment(Household $household, Attachment $attachment): void

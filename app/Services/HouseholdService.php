@@ -63,7 +63,7 @@ class HouseholdService
                 ->sharedWalletForHousehold($household)
                 ->update(['manual_balance' => (float) $request->manual_balance]);
         }
-        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental'] as $module) {
+        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental', 'receivables', 'travel_planner'] as $module) {
             $key = "{$module}_enabled";
             if ($request->has($key)) {
                 $data[$key] = $request->boolean($key);
@@ -194,11 +194,13 @@ class HouseholdService
             'pocket_money' => 'Zsebpénz',
             'insurance' => 'Biztosítások',
             'rental' => 'Bérbeadás',
+            'receivables' => 'Kintlévőség',
+            'travel_planner' => 'Utazástervező',
         ];
 
-        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental'] as $module) {
+        foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental', 'receivables', 'travel_planner'] as $module) {
             $key = "{$module}_enabled";
-            if ($request->has($key) && $request->boolean($key) && ! AccessControl::canAccessModule($user, $module)) {
+            if ($request->has($key) && $request->boolean($key) && ! AccessControl::canAccessModuleByTier($user, $module)) {
                 $label = $moduleLabels[$module] ?? $module;
                 throw new HttpResponseException(response()->json([
                     'message' => "A(z) {$label} modul nem érhető el a jelenlegi csomagodban.",

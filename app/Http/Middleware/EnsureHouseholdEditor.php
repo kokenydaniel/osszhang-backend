@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\AccessControl;
 use App\Support\HouseholdRole;
 use Closure;
 use Illuminate\Http\Request;
@@ -18,6 +19,13 @@ class EnsureHouseholdEditor
 
         if ($request->is('api/me', 'api/me/*', 'api/logout')) {
             return $next($request);
+        }
+
+        if ($request->is('api/tools/travel/plan') && $request->isMethod('POST')) {
+            $user = $request->user();
+            if ($user !== null && AccessControl::canAccessModule($user, 'travel_planner')) {
+                return $next($request);
+            }
         }
 
         $user = $request->user();

@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Household;
 
+use App\Support\AccessControl;
 use App\Support\Username;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AddMemberRequest extends FormRequest
 {
@@ -14,8 +16,14 @@ class AddMemberRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $role = $this->input('role');
+        if ($role === 'viewer') {
+            $role = 'reader';
+        }
+
         $this->merge([
             'username' => Username::normalize($this->input('username', '')),
+            'role' => $role,
         ]);
     }
 
@@ -28,6 +36,7 @@ class AddMemberRequest extends FormRequest
             'password' => 'required|string|min:8',
             'role' => 'required|string|in:admin,editor,reader',
             'permissions' => 'required|array',
+            'permissions.*' => ['string', Rule::in(AccessControl::MODULES)],
         ];
     }
 }
