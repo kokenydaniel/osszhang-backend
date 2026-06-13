@@ -11,6 +11,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utility;
 use App\Models\Wallet;
+use App\Support\AiUsageContext;
 use App\Services\Finance\PaymentPriorityCalculator;
 use App\Services\Finance\VatEstimationCalculator;
 use Carbon\Carbon;
@@ -48,8 +49,9 @@ class AIFinanceService
         ];
     }
 
-    public function autoCategorizeTransaction(array $validated): array
+    public function autoCategorizeTransaction(User $user, array $validated): array
     {
+        $usageContext = $this->aiUsage($user->household, $user, 'auto_categorize');
         $fallback = function () use ($validated) {
             $description = mb_strtolower($validated['description']);
             $categories = $validated['candidate_categories'];
@@ -95,6 +97,7 @@ class AIFinanceService
             $decoded = $this->ai->askJson(
                 $prompt,
                 'Te egy adatfeldolgozó vagy. Adj vissza KIZÁRÓLAG érvényes JSON-t a kért mezőkkel.',
+                $usageContext,
             );
             if (! isset($decoded['category']) || ! in_array($decoded['category'], $validated['candidate_categories'], true)) {
                 throw new \RuntimeException('Invalid category from model');
@@ -193,6 +196,7 @@ class AIFinanceService
             $decoded = $this->ai->askJson(
                 $prompt,
                 'Te egy pénzügyi tanácsadó vagy. A számokat már kiszámoltuk — csak gyakorlati teendőket adj vissza érvényes JSON-ban.',
+                $this->aiUsage($household, $user, 'overspend_analysis'),
             );
 
             $actions = $decoded['actions'] ?? $payload['actions'];
@@ -540,6 +544,7 @@ class AIFinanceService
             $decoded = $this->ai->askJson(
                 $prompt,
                 $systemPrompt,
+                $this->aiUsage($household, $user, 'monthly_advisor'),
             );
 
             $result = [
@@ -597,7 +602,7 @@ class AIFinanceService
         ];
     }
 
-    public function travelPlan(array $validated): array
+    public function travelPlan(User $user, array $validated): array
     {
         $destination = trim($validated['destination']);
         $durationDays = max(1, (int) $validated['duration_days']);
@@ -626,7 +631,11 @@ class AIFinanceService
                 "Időtartam: {$durationDays} nap\n".
                 "Felhasználó költségkerete: {$totalBudget} HUF";
 
-            $decoded = $this->ai->askJson($prompt, $travelSystemPrompt);
+            $decoded = $this->ai->askJson(
+                $prompt,
+                $travelSystemPrompt,
+                $this->aiUsage($user->household, $user, 'travel_planner'),
+            );
             $result = $this->normalizeTravelPlanPayload($decoded, $destination, $durationDays, $totalBudget);
 
             if (count($result['daily_itinerary']) === 0) {
@@ -766,9 +775,22 @@ class AIFinanceService
             ];
         }
 
-        $response = $this->ai->ask($prompt, $context);
+        $response = $this->ai->ask(
+            $prompt,
+            $context,
+            $this->aiUsage($user->household, $user, 'ai_query'),
+        );
 
         return ['answer' => $response];
+    }
+
+    private function aiUsage(?Household $household, ?User $user, string $feature): ?AiUsageContext
+    {
+        if ($household === null) {
+            return null;
+        }
+
+        return new AiUsageContext($household->id, $user?->id, $feature);
     }
 
     private function utilityHouseholdPortion(Utility $utility, Household $household): float
@@ -1025,7 +1047,11 @@ class AIFinanceService
                 'Adj 2-4 rövid, konkrét javaslatot JSON-ben: { "suggestions": string[] }',
             ]);
             $prompt = "Havi kiadások kategóriánként (Ft):\n".json_encode($categories, JSON_UNESCAPED_UNICODE);
-            $decoded = $this->ai->askJson($prompt, $systemPrompt);
+            $decoded = $this->ai->askJson(
+                $prompt,
+                $systemPrompt,
+                $this->aiUsage($household, $user, 'cost_reduction'),
+            );
             $suggestions = array_values(array_filter(array_map('strval', $decoded['suggestions'] ?? [])));
 
             return $this->envelope([

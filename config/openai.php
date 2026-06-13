@@ -56,4 +56,20 @@ return [
     'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
 
     'temperature' => (float) env('OPENAI_TEMPERATURE', 0.7),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Model pricing overrides (optional)
+    |--------------------------------------------------------------------------
+    |
+    | Default rates come from config/openai_model_pricing.php (OpenAI Standard
+    | tier — https://platform.openai.com/docs/pricing). Set OPENAI_MODEL_PRICING
+    | only to override or extend specific models before the next deploy update.
+    */
+
+    'pricing' => [
+        'overrides' => is_array($openAiPricingOverrides = json_decode((string) env('OPENAI_MODEL_PRICING', '{}'), true))
+            ? $openAiPricingOverrides
+            : [],
+    ],
 ];

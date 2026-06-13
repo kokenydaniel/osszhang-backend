@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\AccessControl;
 use App\Support\FeatureFlags;
 use App\Support\PlatformSettings;
+use App\Support\ProductUpdates;
 use App\Support\SystemAnnouncements;
 use App\Support\Username;
 use Illuminate\Http\Request;
@@ -168,6 +169,15 @@ class AuthService
                 'platformFeatureFlags' => FeatureFlags::allEnabled(),
                 'system_announcement' => SystemAnnouncements::active(),
                 'systemAnnouncement' => SystemAnnouncements::active(),
+                ...($pendingUpdate = ProductUpdates::pendingForUser($user)) !== null
+                    ? [
+                        'pending_product_update' => $pendingUpdate,
+                        'pendingProductUpdate' => $pendingUpdate,
+                    ]
+                    : [
+                        'pending_product_update' => null,
+                        'pendingProductUpdate' => null,
+                    ],
                 'wallets' => $this->walletService->listAccessible($user),
                 'household' => $user->household
                     ? (new HouseholdResource($user->household))->resolve()

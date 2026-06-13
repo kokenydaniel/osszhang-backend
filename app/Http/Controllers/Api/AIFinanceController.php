@@ -16,7 +16,7 @@ class AIFinanceController extends Controller
     public function autoCategorizeTransaction(AutoCategorizeTransactionRequest $request)
     {
         return response()->json(
-            $this->aiFinanceService->autoCategorizeTransaction($request->validated()),
+            $this->aiFinanceService->autoCategorizeTransaction($request->user(), $request->validated()),
         );
     }
 

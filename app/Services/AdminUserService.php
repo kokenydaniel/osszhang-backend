@@ -9,13 +9,14 @@ use App\Services\AuthService;
 use App\Support\AccessControl;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AdminUserService
 {
     public function __construct(
         private readonly AuthService $authService,
+        private readonly AuditLogService $auditLogService,
     ) {}
 
     public function listUsers(Request $request): LengthAwarePaginator
@@ -147,49 +148,41 @@ class AdminUserService
             ]);
         }
 
-        $grantTier = $request->input('grant_tier');
+        app(AdminHouseholdService::class)->updateTierGrant($actor, $household, $request);
 
-        if ($grantTier === null || $grantTier === '') {
-            $household->update([
-                'tier_grant' => null,
-                'tier_grant_expires_at' => null,
-                'tier_grant_note' => null,
-                'tier_grant_granted_by' => null,
-            ]);
+        return (new AdminUserResource($target->fresh('household')))->resolve();
+    }
 
-            return (new AdminUserResource($target->fresh('household')))->resolve();
-        }
-
-        if (! in_array($grantTier, [AccessControl::TIER_PRO, AccessControl::TIER_PREMIUM], true)) {
+    /** @return array<string, mixed> */
+    public function resetPassword(User $actor, User $target, Request $request): array
+    {
+        if ($target->id === $actor->id) {
             throw ValidationException::withMessages([
-                'grant_tier' => ['Érvénytelen grant szint.'],
+                'user' => ['Saját jelszavadat itt nem állíthatod — használd a profil beállításokat.'],
             ]);
         }
 
-        $permanent = $request->boolean('permanent');
-        $expiresAt = null;
-
-        if (! $permanent) {
-            $expiresRaw = $request->input('expires_at');
-            if ($expiresRaw === null || $expiresRaw === '') {
-                throw ValidationException::withMessages([
-                    'expires_at' => ['Adj meg lejárati dátumot, vagy jelöld be az örökös grantot.'],
-                ]);
-            }
-            $expiresAt = Carbon::parse($expiresRaw)->endOfDay();
-            if ($expiresAt->isPast()) {
-                throw ValidationException::withMessages([
-                    'expires_at' => ['A lejárat csak jövőbeli dátum lehet.'],
-                ]);
-            }
+        if ($target->lifetime_admin) {
+            throw ValidationException::withMessages([
+                'user' => ['Platform admin jelszavát nem állíthatod vissza.'],
+            ]);
         }
 
-        $household->update([
-            'tier_grant' => $grantTier,
-            'tier_grant_expires_at' => $expiresAt,
-            'tier_grant_note' => $request->input('note'),
-            'tier_grant_granted_by' => $actor->id,
+        $target->update([
+            'password' => Hash::make((string) $request->input('password')),
+            'must_change_password' => true,
         ]);
+        $target->tokens()->delete();
+
+        $this->auditLogService->record(
+            'admin.user.reset_password',
+            $actor->id,
+            $target->household_id,
+            'user',
+            $target->id,
+            ['username' => $target->username],
+            $request,
+        );
 
         return (new AdminUserResource($target->fresh('household')))->resolve();
     }

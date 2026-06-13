@@ -120,6 +120,10 @@ final class AccessControl
             return true;
         }
 
+        if (! PlatformModules::isReleased($moduleId)) {
+            return false;
+        }
+
         if (! self::canAccessModuleByTier($user, $moduleId)) {
             return false;
         }

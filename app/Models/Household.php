@@ -33,6 +33,7 @@ class Household extends Model
         'cipher_key_encrypted', 'sensitive_encrypted',
         'subscription_tier', 'subscription_status',
         'tier_grant', 'tier_grant_expires_at', 'tier_grant_note', 'tier_grant_granted_by',
+        'ai_usage_blocked', 'ai_monthly_token_limit',
     ];
 
     protected $hidden = [
@@ -70,6 +71,8 @@ class Household extends Model
         'subscription_status' => 'string',
         'tier_grant' => 'string',
         'tier_grant_expires_at' => 'datetime',
+        'ai_usage_blocked' => 'boolean',
+        'ai_monthly_token_limit' => 'integer',
         'business_enabled' => 'boolean',
         'shopify_import_enabled' => 'boolean',
         'woocommerce_import_enabled' => 'boolean',

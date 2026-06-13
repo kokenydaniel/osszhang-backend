@@ -250,6 +250,15 @@ Both commands run inside `sh -c` in `fly.toml`.
 fly secrets set APP_KEY=base64:...
 fly secrets set DATABASE_URL=postgres://...
 fly secrets set OPENAI_API_KEY=sk-...
+fly secrets set OPENAI_MODEL=gpt-4o-mini
+# Optional overrides only — default rates: config/openai_model_pricing.php (OpenAI docs)
+# fly secrets set OPENAI_MODEL_PRICING='{"gpt-4o-mini":{"input":0.15,"output":0.60,"cached":0.075}}'
+```
+
+After deploy, optional backfill for AI cost rows created before pricing was enabled:
+
+```bash
+fly ssh console -a osszhang-backend -C "php /var/www/artisan ai:backfill-usage-costs"
 ```
 
 ---

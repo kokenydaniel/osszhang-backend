@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdminResetUserPasswordRequest;
 use App\Http\Requests\Admin\UpdateAdminUserTierGrantRequest;
 use App\Http\Resources\AdminUserResource;
 use App\Models\User;
@@ -56,6 +57,14 @@ class AdminUserController extends Controller
     {
         return response()->json([
             'data' => $this->adminUserService->updateTierGrant($request->user(), $user, $request),
+        ]);
+    }
+
+    public function resetPassword(AdminResetUserPasswordRequest $request, User $user): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->adminUserService->resetPassword($request->user(), $user, $request),
+            'message' => 'Ideiglenes jelszó beállítva — első belépéskor meg kell változtatnia.',
         ]);
     }
 }

@@ -20,7 +20,7 @@ class AiTravelController extends Controller
         }
 
         return response()->json(
-            $this->aiFinanceService->travelPlan($request->validated()),
+            $this->aiFinanceService->travelPlan($user, $request->validated()),
         );
     }
 }

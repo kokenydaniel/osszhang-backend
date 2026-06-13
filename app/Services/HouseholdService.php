@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Household;
 use App\Models\User;
 use App\Support\AccessControl;
+use App\Support\PlatformModules;
 use App\Support\BudgetSettings;
 use App\Support\BusinessSettings;
 use App\Support\DashboardSettings;
@@ -200,6 +201,13 @@ class HouseholdService
 
         foreach (['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental', 'receivables', 'travel_planner'] as $module) {
             $key = "{$module}_enabled";
+            if ($request->has($key) && $request->boolean($key) && ! $user->lifetime_admin && ! PlatformModules::isReleased($module)) {
+                $label = $moduleLabels[$module] ?? $module;
+                throw new HttpResponseException(response()->json([
+                    'message' => PlatformModules::releaseBlockedMessage($module),
+                    'errors' => [$key => ['A modul még nem érhető el.']],
+                ], 422));
+            }
             if ($request->has($key) && $request->boolean($key) && ! AccessControl::canAccessModuleByTier($user, $module)) {
                 $label = $moduleLabels[$module] ?? $module;
                 throw new HttpResponseException(response()->json([
@@ -340,6 +348,11 @@ class HouseholdService
             ], 422));
         }
 
+        $this->destroyHousehold($household);
+    }
+
+    public function destroyHousehold(Household $household): void
+    {
         DB::transaction(function () use ($household) {
             $household->update(['utility_split_partner_id' => null]);
 

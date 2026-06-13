@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\AdminProductUpdateController;
 use App\Http\Controllers\Api\AdminAnnouncementController;
 use App\Http\Controllers\Api\AdminAuditLogController;
 use App\Http\Controllers\Api\AdminFeatureController;
+use App\Http\Controllers\Api\AdminHouseholdController;
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AdminWebhookController;
 use App\Http\Controllers\Api\AIController;
@@ -23,6 +25,7 @@ use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeterController;
 use App\Http\Controllers\Api\PocketMoneyController;
+use App\Http\Controllers\Api\ProductUpdateController;
 use App\Http\Controllers\Api\ReceivableController;
 use App\Http\Controllers\Api\RentalController;
 use App\Http\Controllers\Api\RentalIncomeController;
@@ -41,11 +44,18 @@ Route::post('/cron/shopify-sync', [CronController::class, 'shopifySync'])
     ->middleware('cron.secret');
 
 Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(function () {
+    Route::get('/households', [AdminHouseholdController::class, 'index']);
+    Route::get('/households/{household}', [AdminHouseholdController::class, 'show']);
+    Route::patch('/households/{household}/tier-grant', [AdminHouseholdController::class, 'updateTierGrant']);
+    Route::patch('/households/{household}/ai-settings', [AdminHouseholdController::class, 'updateAiSettings']);
+    Route::delete('/households/{household}', [AdminHouseholdController::class, 'destroy']);
+
     Route::get('/users', [AdminUserController::class, 'index']);
     Route::patch('/users/{user}/activate', [AdminUserController::class, 'activate']);
     Route::patch('/users/{user}/deactivate', [AdminUserController::class, 'deactivate']);
     Route::post('/users/{user}/impersonate', [AdminUserController::class, 'impersonate']);
     Route::patch('/users/{user}/tier-grant', [AdminUserController::class, 'updateTierGrant']);
+    Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword']);
 
     Route::get('/features', [AdminFeatureController::class, 'index']);
     Route::patch('/features/{key}', [AdminFeatureController::class, 'update']);
@@ -60,6 +70,13 @@ Route::middleware(['auth:sanctum', 'platform.admin'])->prefix('admin')->group(fu
     Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update']);
     Route::delete('/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy']);
     Route::patch('/announcements/{announcement}/toggle', [AdminAnnouncementController::class, 'toggle']);
+
+    Route::get('/product-updates', [AdminProductUpdateController::class, 'index']);
+    Route::post('/product-updates', [AdminProductUpdateController::class, 'store']);
+    Route::put('/product-updates/{productUpdate}', [AdminProductUpdateController::class, 'update']);
+    Route::delete('/product-updates/{productUpdate}', [AdminProductUpdateController::class, 'destroy']);
+    Route::patch('/product-updates/{productUpdate}/toggle', [AdminProductUpdateController::class, 'toggle']);
+
     Route::get('/feedback-reports/attention-count', [AdminFeedbackReportController::class, 'attentionCount']);
     Route::get('/feedback-reports', [AdminFeedbackReportController::class, 'index']);
     Route::get('/feedback-reports/{feedbackReport}', [AdminFeedbackReportController::class, 'show']);
@@ -79,6 +96,7 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/me', [AuthController::class, 'update']);
     Route::post('/me/change-password', [AuthController::class, 'changePassword']);
+    Route::post('/me/product-updates/{productUpdate}/dismiss', [ProductUpdateController::class, 'dismiss']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Household management
