@@ -10,6 +10,7 @@ use App\Models\UserFeedbackReport;
 use App\Models\UserFeedbackReportAttachment;
 use App\Models\UserFeedbackReportMessage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserFeedbackService
@@ -39,6 +40,8 @@ class UserFeedbackService
         foreach ($files as $file) {
             $this->storeAttachment($report, $file);
         }
+
+        self::forgetAdminAttentionCountCache();
 
         return $this->format($report->fresh()->load(['user', 'household', 'attachments', 'messages.user']));
     }
@@ -85,6 +88,8 @@ class UserFeedbackService
             'status' => 'new',
             'user_last_read_at' => now(),
         ]);
+
+        self::forgetAdminAttentionCountCache();
 
         return $this->format($report->fresh()->load(['attachments', 'messages.user']), forUser: true);
     }
@@ -137,30 +142,39 @@ class UserFeedbackService
             'user_last_read_at' => null,
         ]);
 
+        self::forgetAdminAttentionCountCache();
+
         return $this->format($report->fresh()->load(['user', 'household', 'attachments', 'messages.user']));
     }
 
     public function adminAttentionCount(): int
     {
-        return UserFeedbackReport::query()
-            ->where('status', '!=', 'resolved')
-            ->where(function ($q) {
-                $q->where('status', 'new')
-                    ->orWhere(function ($q2) {
-                        $q2->whereHas('messages', function ($mq) {
-                            $mq->where('author', 'user')
-                                ->where(function ($inner) {
-                                    $inner->whereNull('user_feedback_reports.admin_last_read_at')
-                                        ->orWhereColumn(
-                                            'user_feedback_report_messages.created_at',
-                                            '>',
-                                            'user_feedback_reports.admin_last_read_at',
-                                        );
-                                });
+        return (int) Cache::remember('admin.feedback.attention_count', now()->addSeconds(30), function (): int {
+            return UserFeedbackReport::query()
+                ->where('status', '!=', 'resolved')
+                ->where(function ($q) {
+                    $q->where('status', 'new')
+                        ->orWhere(function ($q2) {
+                            $q2->whereHas('messages', function ($mq) {
+                                $mq->where('author', 'user')
+                                    ->where(function ($inner) {
+                                        $inner->whereNull('user_feedback_reports.admin_last_read_at')
+                                            ->orWhereColumn(
+                                                'user_feedback_report_messages.created_at',
+                                                '>',
+                                                'user_feedback_reports.admin_last_read_at',
+                                            );
+                                    });
+                            });
                         });
-                    });
-            })
-            ->count();
+                })
+                ->count();
+        });
+    }
+
+    public static function forgetAdminAttentionCountCache(): void
+    {
+        Cache::forget('admin.feedback.attention_count');
     }
 
     public function userUnreadCount(User $user): int
@@ -187,6 +201,8 @@ class UserFeedbackService
         abort_unless(in_array($status, FeedbackConfig::statuses(), true), 422, 'Érvénytelen státusz.');
 
         $report->update(['status' => $status]);
+
+        self::forgetAdminAttentionCountCache();
 
         return $this->format($report->fresh()->load(['user', 'household', 'attachments', 'messages.user']));
     }

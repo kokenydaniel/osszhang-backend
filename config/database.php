@@ -97,6 +97,7 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'connect_timeout' => (int) env('DB_CONNECT_TIMEOUT', 10),
         ],
 
         'sqlsrv' => [
