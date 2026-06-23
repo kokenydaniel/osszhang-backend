@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 
 class RentalService
 {
-    /** @return array<string, mixed> */
+
     public function index(User $user, ?int $year = null, ?int $month = null): array
     {
         $household = $this->requireHousehold($user);
@@ -85,7 +85,6 @@ class RentalService
         ];
     }
 
-    /** @param  array<string, mixed>  $validated */
     public function createProperty(User $user, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -97,7 +96,6 @@ class RentalService
         return $this->formatProperty($property->fresh()->loadCount('attachments'));
     }
 
-    /** @param  array<string, mixed>  $validated */
     public function updateProperty(User $user, int $id, array $validated): array
     {
         $property = $this->findPropertyForUser($user, $id);
@@ -115,7 +113,6 @@ class RentalService
         return $formatted;
     }
 
-    /** @param  array<string, mixed>  $validated */
     public function createIncome(User $user, array $validated): array
     {
         $property = $this->findPropertyForUser($user, (int) $this->value($validated, 'rentalPropertyId', 'rental_property_id'));
@@ -132,7 +129,6 @@ class RentalService
         return $this->formatIncomeEntry($entry);
     }
 
-    /** @param  array<string, mixed>  $validated */
     public function updateIncome(User $user, int $id, array $validated): array
     {
         $entry = $this->findIncomeForUser($user, $id);
@@ -170,7 +166,6 @@ class RentalService
         $this->findIncomeForUser($user, $id)->delete();
     }
 
-    /** @param  array<string, mixed>  $validated */
     public function createExpense(User $user, array $validated): array
     {
         $property = $this->findPropertyForUser($user, (int) $this->value($validated, 'rentalPropertyId', 'rental_property_id'));
@@ -187,7 +182,6 @@ class RentalService
         return $this->formatExpense($expense);
     }
 
-    /** @param  array<string, mixed>  $validated */
     public function updateExpense(User $user, int $id, array $validated): array
     {
         $expense = $this->findExpenseForUser($user, $id);
@@ -219,7 +213,6 @@ class RentalService
         $this->findExpenseForUser($user, $id)->delete();
     }
 
-    /** @return list<array<string, mixed>> */
     public function exportRows(User $user, int $year): array
     {
         $data = $this->index($user, $year, null);
@@ -247,10 +240,6 @@ class RentalService
         return $rows;
     }
 
-    /** @param  Collection<int, RentalProperty>  $properties */
-    /** @param  Collection<int, array<string, mixed>>  $entries */
-    /** @return array<string, mixed> */
-    /** @param  Collection<int, array<string, mixed>>  $expenses */
     private function buildSummary(
         Collection $properties,
         Collection $entries,
@@ -325,9 +314,6 @@ class RentalService
         ];
     }
 
-    /** @param  Collection<int, RentalProperty>  $properties */
-    /** @param  Collection<int, array<string, mixed>>  $entries */
-    /** @return list<array<string, mixed>> */
     private function buildOverdueRents(
         Collection $properties,
         Collection $entries,
@@ -386,7 +372,6 @@ class RentalService
         return round((float) $property->monthly_rent + (float) $property->monthly_common_cost, 2);
     }
 
-    /** @param  array<string, mixed>|null  $entry */
     private function receivedTenantAmountForEntry(?array $entry): float
     {
         if ($entry === null || empty($entry['paidDate'])) {
@@ -396,7 +381,6 @@ class RentalService
         return (float) $entry['amount'];
     }
 
-    /** @param  array<string, mixed>|null  $entry */
     private function tenantOutstandingForProperty(RentalProperty $property, ?array $entry): float
     {
         $expected = $this->expectedTenantAmountForProperty($property);
@@ -404,8 +388,6 @@ class RentalService
         return round(max(0, $expected - $this->receivedTenantAmountForEntry($entry)), 2);
     }
 
-    /** @param  array<string, mixed>  $validated */
-    /** @return array<string, mixed> */
     private function incomeDefaultsFromProperty(RentalProperty $property, int $year, int $month, array $validated): array
     {
         $rent = (float) $this->value($validated, 'rentAmount', 'rent_amount', $property->monthly_rent);
@@ -428,7 +410,6 @@ class RentalService
         ];
     }
 
-    /** @param  array<string, mixed>  $expense */
     private function expenseInMonth(array $expense, int $year, int $month): bool
     {
         $date = (string) ($expense['expenseDate'] ?? '');
@@ -437,8 +418,6 @@ class RentalService
         return str_starts_with($date, $prefix);
     }
 
-    /** @param  list<array<string, mixed>>  $properties */
-    /** @return list<array<string, mixed>> */
     private function buildUpcomingContractEnds(array $properties, int $reminderDays): array
     {
         $today = Carbon::today();
@@ -484,8 +463,6 @@ class RentalService
         }
     }
 
-    /** @param  array<string, mixed>  $validated */
-    /** @param  array<string, mixed>|null  $defaults */
     private function propertyPayload(
         int $householdId,
         array $validated,
@@ -546,7 +523,6 @@ class RentalService
         return $payload;
     }
 
-    /** @return array<string, mixed> */
     private function formatProperty(RentalProperty $property): array
     {
         return [
@@ -567,7 +543,6 @@ class RentalService
         ];
     }
 
-    /** @return array<string, mixed> */
     private function formatIncomeEntry(RentalIncomeEntry $entry): array
     {
         return [
@@ -585,7 +560,6 @@ class RentalService
         ];
     }
 
-    /** @return array<string, mixed> */
     private function formatExpense(RentalExpense $expense): array
     {
         return [
@@ -649,7 +623,6 @@ class RentalService
         }
     }
 
-    /** @param  array<string, mixed>  $data */
     private function hasKey(array $data, string ...$keys): bool
     {
         foreach ($keys as $key) {
@@ -661,7 +634,6 @@ class RentalService
         return false;
     }
 
-    /** @param  array<string, mixed>  $data */
     private function value(array $data, string $camel, string $snake, mixed $default = null): mixed
     {
         if (array_key_exists($camel, $data)) {

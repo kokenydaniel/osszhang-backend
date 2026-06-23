@@ -13,7 +13,6 @@ return new class extends Migration
             $table->boolean('shopify_import_enabled')->default(false)->after('business_name');
         });
 
-        // Meglévő Shopify-konfigurációval rendelkező háztartásoknál tartsuk bekapcsolva az importot
         DB::table('households')
             ->whereNotNull('shopify_shop_url')
             ->where('shopify_shop_url', '!=', '')

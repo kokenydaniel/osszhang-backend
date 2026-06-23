@@ -156,7 +156,7 @@ class BusinessDocumentService
 
     public function bundleZipResponse(Household $household, int $year, int $month): BinaryFileResponse
     {
-        /** @var Collection<int, BusinessDocument> $documents */
+
         $documents = BusinessDocument::query()
             ->where('household_id', $household->id)
             ->where('year', $year)
@@ -240,7 +240,6 @@ class BusinessDocumentService
         ])->deleteFileAfterSend(true);
     }
 
-    /** @return array<string, mixed> */
     private function format(BusinessDocument $document): array
     {
         return [

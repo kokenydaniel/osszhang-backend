@@ -62,10 +62,6 @@ class WalletPolicy
             && $wallet->owner_id === $user->id;
     }
 
-    /**
-     * Privát kassza: csak a tulajdonos módosíthat.
-     * Közös kassza: háztartás-tag szerkesztő vagy admin (olvasó nem).
-     */
     private function canModifyWallet(User $user, Wallet $wallet): bool
     {
         if ($wallet->household_id !== $user->household_id || ! $wallet->isAccessibleTo($user)) {

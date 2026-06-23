@@ -6,7 +6,6 @@ use App\Models\SystemAnnouncement;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin SystemAnnouncement */
 class SystemAnnouncementResource extends JsonResource
 {
     public function toArray(Request $request): array

@@ -11,13 +11,13 @@ return new class extends Migration
         Schema::create('investments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('household_id')->constrained()->onDelete('cascade');
-            $table->string('name'); // pl. PMÁP 2030/J
-            $table->string('type')->default('bond'); // bond, stock, stb.
-            $table->decimal('principal_amount', 15, 2); // tőke
-            $table->decimal('annual_interest_rate', 5, 2); // százalékban, pl. 18.5
+            $table->string('name');
+            $table->string('type')->default('bond');
+            $table->decimal('principal_amount', 15, 2);
+            $table->decimal('annual_interest_rate', 5, 2);
             $table->date('purchase_date');
             $table->date('maturity_date')->nullable();
-            $table->string('owner')->nullable(); // Közös, Szandi, Dani stb.
+            $table->string('owner')->nullable();
             $table->boolean('count_in_savings')->default(true);
             $table->timestamps();
         });

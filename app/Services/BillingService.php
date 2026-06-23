@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class BillingService
 {
-    /** @var list<string> Stripe currencies billed in the major unit (no /100). HUF is not included. */
+
     private const ZERO_DECIMAL_CURRENCIES = [
         'bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga',
         'pyg', 'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf',
@@ -35,7 +35,6 @@ class BillingService
         return new self(rtrim((string) config('app.frontend_url', 'http://localhost:3000'), '/'));
     }
 
-    /** @return array<string, mixed> */
     public function billingSummary(User $user): array
     {
         $user->load('household');
@@ -90,7 +89,6 @@ class BillingService
         return $user->downloadInvoice($invoiceId);
     }
 
-    /** @return array{url: string} */
     public function createCheckoutSession(User $user, string $priceId): array
     {
         $this->ensureBillingAdmin($user);
@@ -120,7 +118,6 @@ class BillingService
         return ['url' => (string) $checkout->url];
     }
 
-    /** @return array{url: string} */
     public function createPortalSession(User $user): array
     {
         $this->ensureBillingAdmin($user);
@@ -159,7 +156,6 @@ class BillingService
         }
     }
 
-    /** @return array<string, mixed> */
     private function betaBillingSummary(User $user): array
     {
         $tier = AccessControl::effectiveTier($user);
@@ -246,7 +242,6 @@ class BillingService
         return AccessControl::STATUS_ACTIVE;
     }
 
-    /** @return array<string, mixed> */
     private function freeSummary(string $tier): array
     {
         return [
@@ -264,7 +259,6 @@ class BillingService
         ];
     }
 
-    /** @return array<string, mixed> */
     private function paidSummary(User $user, string $tier, ?Subscription $subscription): array
     {
         $nextBillingDate = null;
@@ -310,7 +304,6 @@ class BillingService
         ];
     }
 
-    /** @return array{date: string|null, amount: string}|null */
     private function upcomingInvoiceSummary(User $user, ?Subscription $subscription = null): ?array
     {
         if ($user->stripe_id === null) {
@@ -353,7 +346,6 @@ class BillingService
         }
     }
 
-    /** @return array<string, mixed>|null */
     private function paymentMethodSummary(User $user): ?array
     {
         if ($user->stripe_id === null) {
@@ -372,7 +364,6 @@ class BillingService
         }
     }
 
-    /** @return array{brand: string, last4: string, expMonth: int, expYear: int}|null */
     private function resolveCardDetails(User $user): ?array
     {
         foreach ($this->paymentMethodCandidates($user) as $candidate) {
@@ -394,7 +385,6 @@ class BillingService
         return null;
     }
 
-    /** @return list<mixed> */
     private function paymentMethodCandidates(User $user): array
     {
         $candidates = [];
@@ -405,7 +395,7 @@ class BillingService
                 $candidates[] = $default;
             }
         } catch (\Throwable) {
-            // Stripe customer default may be unset after Checkout — fall back below.
+
         }
 
         foreach ($user->paymentMethods('card') as $method) {
@@ -424,14 +414,13 @@ class BillingService
                     $candidates[] = $paymentMethod;
                 }
             } catch (ApiErrorException) {
-                //
+
             }
         }
 
         return $candidates;
     }
 
-    /** @return array{brand: string, last4: string, expMonth: int, expYear: int}|null */
     private function cardDetailsFromCandidate(mixed $candidate): ?array
     {
         if ($candidate instanceof CashierPaymentMethod) {
@@ -459,7 +448,6 @@ class BillingService
         return null;
     }
 
-    /** @return array<string, mixed>|null */
     private function paymentMethodSummarySnake(User $user): ?array
     {
         $method = $this->paymentMethodSummary($user);
@@ -475,7 +463,6 @@ class BillingService
         ];
     }
 
-    /** @return list<array<string, mixed>> */
     private function invoiceHistory(User $user, string $tier): array
     {
         if ($user->stripe_id === null) {

@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class AdminProductUpdateService
 {
-    /** @return Collection<int, ProductUpdate> */
+
     public function listUpdates(): Collection
     {
         return ProductUpdate::query()
@@ -20,7 +20,6 @@ class AdminProductUpdateService
             ->get();
     }
 
-    /** @param array<string, mixed> $payload */
     public function createUpdate(array $payload): array
     {
         $validated = $this->validatePayload($payload);
@@ -34,7 +33,6 @@ class AdminProductUpdateService
         return (new ProductUpdateResource($update))->resolve();
     }
 
-    /** @param array<string, mixed> $payload */
     public function updateUpdate(ProductUpdate $update, array $payload): array
     {
         $validated = $this->validatePayload($payload, updating: true);
@@ -63,7 +61,6 @@ class AdminProductUpdateService
         return (new ProductUpdateResource($update->fresh()))->resolve();
     }
 
-    /** @param array<string, mixed> $payload */
     private function validatePayload(array $payload, bool $updating = false): array
     {
         $validator = Validator::make($payload, [

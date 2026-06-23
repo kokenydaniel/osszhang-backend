@@ -12,7 +12,6 @@ class AdminFeatureService
 {
     public function __construct(private readonly AuditLogService $auditLogService) {}
 
-    /** @return Collection<int, FeatureFlag> */
     public function listFlags(): Collection
     {
         return FeatureFlag::query()->orderBy('key')->get();

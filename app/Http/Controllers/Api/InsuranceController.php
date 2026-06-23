@@ -38,7 +38,6 @@ class InsuranceController extends Controller
         );
     }
 
-    /** @return array<string, mixed> */
     private function validatePolicy(Request $request, bool $partial = false): array
     {
         $rules = [
@@ -70,8 +69,8 @@ class InsuranceController extends Controller
             'budget_start_year' => 'nullable|integer|min:2000|max:2100',
             'budgetStartMonth' => 'nullable|integer|min:1|max:12',
             'budget_start_month' => 'nullable|integer|min:1|max:12',
-            'budgetDueDay' => 'nullable|integer|min:1|max:28',
-            'budget_due_day' => 'nullable|integer|min:1|max:28',
+            'budgetDueDay' => 'nullable|integer|min:1|max:31',
+            'budget_due_day' => 'nullable|integer|min:1|max:31',
             'paidBudgetPeriods' => 'sometimes|array',
             'paidBudgetPeriods.*' => 'string|regex:/^\d{4}-\d{2}$/',
             'paid_budget_periods' => 'sometimes|array',

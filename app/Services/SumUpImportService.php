@@ -19,7 +19,6 @@ class SumUpImportService
         private readonly BusinessDocumentService $documents,
     ) {}
 
-    /** @return array{success: bool, message?: string, error?: string, status?: int, imported?: int} */
     public function importMonth(User $user, int $year, int $month): array
     {
         if (! AccessControl::canUseFeature($user, 'sumup_import')) {

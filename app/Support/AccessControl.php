@@ -23,19 +23,14 @@ final class AccessControl
 
     public const STATUS_TRIALING = 'trialing';
 
-    /** @var list<string> */
     public const MODULES = ['budget', 'savings', 'debts', 'utilities', 'meters', 'business', 'pocket_money', 'insurance', 'rental', 'receivables', 'travel_planner'];
 
-    /** @var list<string> */
     public const PRO_MODULES = ['savings', 'debts', 'utilities', 'meters', 'pocket_money', 'insurance', 'rental', 'receivables'];
 
-    /** @var list<string> */
     public const PREMIUM_MODULES = ['business', 'travel_planner'];
 
-    /** @var list<string> */
     public const PRO_FEATURES = ['private_wallet', 'utility_split'];
 
-    /** @var list<string> */
     public const PREMIUM_FEATURES = ['shopify_import', 'woocommerce_import', 'unas_import', 'ai', 'attachments', 'sumup_import'];
 
     public static function isBetaMode(): bool
@@ -43,13 +38,11 @@ final class AccessControl
         return PlatformSettings::isBetaMode();
     }
 
-    /** Stripe / fizetős előfizetés — admin grant nem módosítja. */
     public static function billingTier(User $user): string
     {
         return HouseholdTierAccess::billingTier($user->household);
     }
 
-    /** Funkció-hozzáférés (fizetős + aktív admin grant). */
     public static function effectiveTier(User $user): string
     {
         if ($user->lifetime_admin) {
@@ -63,10 +56,6 @@ final class AccessControl
         return HouseholdTierAccess::accessTier($user->household);
     }
 
-    /**
-     * Tier shown in admin/support UIs — reflects actual feature access
-     * (béta mód = Premium hozzáférés minden háztartásnak).
-     */
     public static function resolvedAccessTier(User $user): string
     {
         if ($user->lifetime_admin || self::isBetaMode()) {

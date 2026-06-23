@@ -29,7 +29,6 @@ class BudgetService
         return $household;
     }
 
-    /** @return list<array<string, mixed>> */
     public function listTransactionsForUser(User $user, ?int $walletId = null): array
     {
         $household = $this->requireHousehold($user);
@@ -43,7 +42,6 @@ class BudgetService
             ->all();
     }
 
-    /** @return list<array<string, mixed>> */
     public function goalRowsForMonth(User $user, ?int $walletId, int $month, int $year): array
     {
         $this->requireHousehold($user);
@@ -51,7 +49,6 @@ class BudgetService
         return $this->savings->buildGoalBudgetRowsForMonth($user, $walletId, $month, $year);
     }
 
-    /** @return array{transactions: list<array<string, mixed>>, goalRows: list<array<string, mixed>>} */
     public function listForUser(User $user, ?int $walletId = null, ?int $month = null, ?int $year = null): array
     {
         $now = now();
@@ -64,7 +61,6 @@ class BudgetService
         ];
     }
 
-    /** @return array<string, mixed> */
     public function show(User $user, int|string $id): array
     {
         $household = $this->requireHousehold($user);
@@ -74,7 +70,6 @@ class BudgetService
         return $this->sensitive->formatApi($transaction, $household);
     }
 
-    /** @return array<string, mixed> */
     public function create(User $user, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -108,7 +103,6 @@ class BudgetService
         return $this->sensitive->formatApi($transaction->load('items'), $household);
     }
 
-    /** @return array<string, mixed> */
     public function update(User $user, int|string $id, array $input): array
     {
         $household = $this->requireHousehold($user);
@@ -172,7 +166,6 @@ class BudgetService
         $transaction->delete();
     }
 
-    /** @return array<string, mixed> */
     public function addItem(User $user, int|string $id, array $validated): array
     {
         $savingId = SavingService::parseGoalVirtualId($id);
@@ -207,7 +200,6 @@ class BudgetService
         return $this->sensitive->formatApi($transaction->load('items'), $household);
     }
 
-    /** @return array<string, mixed> */
     public function updateItem(User $user, int|string $txId, int|string $itemId, array $validated): array
     {
         if (SavingService::parseGoalVirtualId($txId) !== null) {
@@ -246,7 +238,6 @@ class BudgetService
         return $this->sensitive->formatApi($transaction->load('items'), $household);
     }
 
-    /** @return array<string, mixed> */
     public function deleteItem(User $user, int|string $txId, int|string $itemId): array
     {
         $savingId = SavingService::parseGoalVirtualId($txId);
@@ -274,13 +265,11 @@ class BudgetService
         return $this->sensitive->formatApi($transaction->load('items'), $household);
     }
 
-    /** @return array<string, mixed> */
     public function upsertGoalMonthlyActual(User $user, int $savingId, int $month, int $year, float $amount, ?string $reason = null): array
     {
         return $this->savings->upsertMonthlyActual($user, $savingId, $month, $year, $amount, $reason);
     }
 
-    /** @return array{message: string} */
     public function cloneMonth(User $user, int $month, int $year, ?int $walletId = null): array
     {
         $household = $this->requireHousehold($user);
@@ -302,7 +291,6 @@ class BudgetService
 
         $toClone = $this->accessibleTransactionsQuery($user, $targetWallet->id)
             ->where('due_date', 'like', $prevMonthStr.'%')
-            ->with('items')
             ->get()
             ->filter(function (Transaction $tx) use ($cloneMode) {
                 return match ($cloneMode) {
@@ -314,6 +302,10 @@ class BudgetService
 
         foreach ($toClone as $tx) {
             $sensitive = $this->sensitive->resolve($tx, $household);
+            if ($tx->is_budget) {
+
+                $sensitive['subItems'] = [];
+            }
             $newDate = MonthDates::shiftToMonth($tx->due_date, $year, $month);
 
             $exists = $this->accessibleTransactionsQuery($user, $targetWallet->id)
@@ -352,7 +344,6 @@ class BudgetService
         return $user->household;
     }
 
-    /** @return Builder<Transaction> */
     private function accessibleTransactionsQuery(User $user, ?int $walletId = null): Builder
     {
         $query = Transaction::query()->accessibleTo($user);

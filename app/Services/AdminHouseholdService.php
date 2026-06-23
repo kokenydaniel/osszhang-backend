@@ -105,7 +105,6 @@ class AdminHouseholdService
         ))->resolve();
     }
 
-    /** @return array<string, mixed> */
     public function updateTierGrant(User $actor, Household $household, Request $request): array
     {
         if ($household->users()->where('lifetime_admin', true)->exists()) {
@@ -161,7 +160,6 @@ class AdminHouseholdService
         return $this->show($household->fresh());
     }
 
-    /** @return array<string, mixed> */
     public function updateAiSettings(User $actor, Household $household, Request $request): array
     {
         $updates = [];

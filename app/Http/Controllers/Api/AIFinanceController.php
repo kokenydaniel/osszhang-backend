@@ -44,8 +44,22 @@ class AIFinanceController extends Controller
 
     public function utilityAnomalies(MonthYearRequest $request)
     {
+        $household = $request->user()->household;
+        if ($household === null) {
+            return response()->json([
+                'message' => 'Ehhez a művelethez háztartás szükséges.',
+            ], 403);
+        }
+
+        if ($household->ai_usage_blocked) {
+            return response()->json([
+                'message' => 'Az AI funkciók ehhez a háztartáshoz admin által le vannak tiltva.',
+                'code' => 'AI_USAGE_BLOCKED',
+            ], 403);
+        }
+
         return response()->json(
-            $this->aiFinanceService->utilityAnomalies($request->user()->household, $request->validated()),
+            $this->aiFinanceService->utilityAnomalies($household, $request->validated()),
         );
     }
 

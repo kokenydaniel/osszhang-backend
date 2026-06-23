@@ -14,7 +14,6 @@ class SumUpClient
         $this->apiKey = trim($apiKey);
     }
 
-    /** @return array<int, array<string, mixed>> */
     public function listTransactionsForPeriod(string $merchantCode, string $oldestTime, string $newestTime): array
     {
         $this->assertConfigured();
@@ -58,7 +57,6 @@ class SumUpClient
         return $all;
     }
 
-    /** @return array<int, array<string, mixed>> */
     public function listPayoutsForPeriod(string $merchantCode, string $startDate, string $endDate): array
     {
         $path = '/v1.0/merchants/'.rawurlencode($merchantCode).'/payouts';
@@ -83,7 +81,6 @@ class SumUpClient
         return [];
     }
 
-    /** @return array<string, mixed>|null */
     public function fetchReceipt(string $merchantCode, string $transactionId): ?array
     {
         $this->assertConfigured();
@@ -102,7 +99,6 @@ class SumUpClient
         }
     }
 
-    /** @return array<string, mixed> */
     private function request(string $method, string $path, array $query = []): array
     {
         $url = $this->baseUrl().$path;

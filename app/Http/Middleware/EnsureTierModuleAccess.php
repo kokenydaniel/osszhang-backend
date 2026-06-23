@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTierModuleAccess
 {
-    /** @param  Closure(Request): Response  $next */
+
     public function handle(Request $request, Closure $next, string $module): Response
     {
         $user = $request->user();

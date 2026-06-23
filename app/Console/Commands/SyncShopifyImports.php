@@ -43,7 +43,7 @@ class SyncShopifyImports extends Command
                                 continue;
                             }
                         } catch (\Throwable) {
-                            // proceed with sync
+
                         }
                     }
 

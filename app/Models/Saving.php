@@ -16,6 +16,7 @@ class Saving extends Model
     protected $fillable = [
         'household_id',
         'wallet_id',
+        'travel_plan_id',
         'type',
         'institution',
         'currency',
@@ -42,6 +43,11 @@ class Saving extends Model
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);
+    }
+
+    public function travelPlan(): BelongsTo
+    {
+        return $this->belongsTo(TravelPlan::class);
     }
 
     public function ledger(): HasMany

@@ -99,7 +99,6 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
     Route::post('/me/product-updates/{productUpdate}/dismiss', [ProductUpdateController::class, 'dismiss']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Household management
     Route::get('/household', [HouseholdController::class, 'show']);
     Route::put('/household', [HouseholdController::class, 'update']);
     Route::delete('/household', [HouseholdController::class, 'destroy']);
@@ -109,17 +108,14 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
     Route::put('/household/members/{member}', [HouseholdController::class, 'updateMember']);
     Route::delete('/household/members/{member}', [HouseholdController::class, 'deleteMember']);
 
-    // Wallets
     Route::apiResource('wallets', WalletController::class)->except(['show']);
     Route::put('/wallets/{wallet}/manual-balance', [WalletController::class, 'updateManualBalance']);
 
-    // Subscription / billing (dummy data until payment provider)
     Route::get('/subscription/billing', [SubscriptionController::class, 'billing']);
     Route::get('/subscription/invoices/{invoice}/download', [SubscriptionController::class, 'downloadInvoice']);
     Route::post('/subscription/checkout', [SubscriptionController::class, 'checkout']);
     Route::get('/subscription/portal', [SubscriptionController::class, 'portal']);
 
-    // Transactions / Budget
     Route::get('/transactions/goal-rows', [TransactionController::class, 'goalRows']);
     Route::apiResource('transactions', TransactionController::class);
     Route::post('/transactions/clone', [TransactionController::class, 'cloneMonth']);
@@ -127,7 +123,6 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
     Route::put('/transactions/{transaction}/items/{item}', [TransactionController::class, 'updateItem']);
     Route::delete('/transactions/{transaction}/items/{item}', [TransactionController::class, 'deleteItem']);
 
-    // Utilities (Pro+)
     Route::middleware('tier.module:utilities')->group(function () {
         Route::post('/utilities/clone', [UtilityController::class, 'cloneMonth']);
         Route::post('/utilities/settlement', [UtilityController::class, 'settleMonth']);
@@ -135,7 +130,6 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
         Route::apiResource('utilities', UtilityController::class);
     });
 
-    // Meters (Pro+)
     Route::middleware('tier.module:meters')->group(function () {
         Route::apiResource('meters', MeterController::class);
         Route::post('/meters/{meter}/readings', [MeterController::class, 'addReading']);
@@ -143,7 +137,6 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
         Route::delete('/meters/{meter}/readings/{reading}', [MeterController::class, 'deleteReading']);
     });
 
-    // Business (Premium)
     Route::middleware('tier.module:business')->group(function () {
         Route::post('/business-orders/shopify-import', [BusinessOrderController::class, 'shopifyImport'])
             ->middleware('tier.feature:shopify_import');
@@ -213,12 +206,10 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
         Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy']);
     });
 
-    // Debts (Pro+)
     Route::middleware('tier.module:debts')->group(function () {
         Route::apiResource('debts', DebtController::class);
     });
 
-    // Savings + investments (Pro+)
     Route::middleware('tier.module:savings')->group(function () {
         Route::apiResource('savings', SavingController::class);
         Route::post('/savings/{saving}/entries', [SavingController::class, 'addEntry']);
@@ -228,10 +219,11 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
         Route::apiResource('investments', InvestmentController::class);
     });
 
-    // Invitations
     Route::apiResource('invitations', InvitationController::class);
 
-    // AI Integration (Premium tier or lifetime_admin only)
+    Route::middleware(['tier.feature:ai', 'platform.feature:enable_ai_utility_anomaly'])
+        ->get('/ai/v1/utilities/anomalies', [AIFinanceController::class, 'utilityAnomalies']);
+
     Route::middleware('premium.ai')->group(function () {
         Route::post('/ai/query', [AIController::class, 'query']);
 
@@ -239,7 +231,6 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
             Route::post('/transactions/auto-categorize', [AIFinanceController::class, 'autoCategorizeTransaction']);
             Route::get('/budget/overspend-root-cause', [AIFinanceController::class, 'overspendRootCause']);
             Route::get('/budget/cashflow-forecast', [AIFinanceController::class, 'cashflowForecast']);
-            Route::get('/utilities/anomalies', [AIFinanceController::class, 'utilityAnomalies']);
             Route::post('/savings/recommendations', [AIFinanceController::class, 'savingsRecommendations']);
             Route::post('/debts/optimize', [AIFinanceController::class, 'optimizeDebts']);
             Route::get('/dashboard/weekly-briefing', [AIFinanceController::class, 'weeklyBriefing'])
@@ -256,6 +247,12 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
 
         Route::middleware('platform.feature:enable_ai_travel_planner')->prefix('tools/travel')->group(function () {
             Route::post('/plan', [AiTravelController::class, 'plan']);
+            Route::post('/pdf', [AiTravelController::class, 'pdf']);
+            Route::get('/plans', [AiTravelController::class, 'index']);
+            Route::get('/plans/{travelPlan}', [AiTravelController::class, 'show']);
+            Route::patch('/plans/{travelPlan}', [AiTravelController::class, 'update']);
+            Route::delete('/plans/{travelPlan}', [AiTravelController::class, 'destroy']);
+            Route::post('/plans/{travelPlan}/link-saving', [AiTravelController::class, 'linkSaving']);
         });
     });
 });

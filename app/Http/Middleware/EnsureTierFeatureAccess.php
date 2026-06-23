@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTierFeatureAccess
 {
-    /** @param  Closure(Request): Response  $next */
+
     public function handle(Request $request, Closure $next, string $feature): Response
     {
         $user = $request->user();

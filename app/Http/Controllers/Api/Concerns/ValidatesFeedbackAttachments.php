@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
 
 trait ValidatesFeedbackAttachments
 {
-    /** @param  list<string>  $extensions */
+
     protected function validateFeedbackFile(UploadedFile $file, int $maxKb, array $extensions, int $index = 0): void
     {
         $mimesRule = 'mimes:'.implode(',', $extensions);
@@ -39,7 +39,6 @@ trait ValidatesFeedbackAttachments
         }
     }
 
-    /** @param  list<string>  $extensions */
     private function feedbackFileAllowedByExtension(UploadedFile $file, array $extensions): bool
     {
         $ext = strtolower($file->getClientOriginalExtension() ?: (string) $file->extension());

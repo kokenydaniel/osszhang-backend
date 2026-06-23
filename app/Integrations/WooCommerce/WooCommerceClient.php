@@ -17,10 +17,9 @@ class WooCommerceClient
         $this->consumerSecret = $consumerSecret;
     }
 
-    /** @return list<array<string, mixed>> */
     public function getOrders(): array
     {
-        // Előkészített integráció — WooCommerce REST API hívás ide kerül.
+
         if (! $this->shopUrl || ! $this->consumerKey || ! $this->consumerSecret) {
             return [];
         }

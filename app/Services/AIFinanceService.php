@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Models\Utility;
 use App\Models\Wallet;
 use App\Support\AiUsageContext;
+use App\Services\Travel\TravelCostEstimator;
+use App\Services\Travel\TravelFinancialContextBuilder;
 use App\Services\Finance\PaymentPriorityCalculator;
 use App\Services\Finance\VatEstimationCalculator;
 use Carbon\Carbon;
@@ -26,6 +28,8 @@ class AIFinanceService
         private WalletProvisioningService $wallets,
         private PaymentPriorityCalculator $paymentPriorityCalculator,
         private VatEstimationCalculator $vatEstimationCalculator,
+        private TravelCostEstimator $travelCostEstimator,
+        private TravelFinancialContextBuilder $travelFinancialContext,
     ) {}
 
     public function ensureHousehold(Household $household): Household
@@ -607,48 +611,142 @@ class AIFinanceService
         $destination = trim($validated['destination']);
         $durationDays = max(1, (int) $validated['duration_days']);
         $totalBudget = round((float) $validated['total_budget'], 2);
+        $targetDate = isset($validated['target_date']) ? (string) $validated['target_date'] : null;
+        $walletId = isset($validated['wallet_id']) ? (int) $validated['wallet_id'] : null;
+        $exchangeRates = isset($validated['exchange_rates']) && is_array($validated['exchange_rates'])
+            ? $validated['exchange_rates']
+            : null;
 
-        $travelSystemPrompt = 'Te egy utazástervező és pénzügyi tanácsadó vagy. Adj vissza KIZÁRÓLAG érvényes JSON-t a kért mezőkkel, magyar nyelven. '.
-            'NE találj ki irreálisan alacsony árakat, hogy illeszkedjen a felhasználó költségkeretéhez. '.
-            'Ha a total_budget matematikailag vagy realitás alapján lehetetlen az adott destination és duration_days mellett '.
-            '(pl. 10 000 Ft ötsz napos londoni utazásra), NE hamisíts olcsó árakat. '.
-            'Ehelyett számíts ki egy REALISZTIKUS MINIMUM költségvetést az úti célhoz, és a terv total_estimated_cost mezője ezt tükrözze. '.
-            'Ilyenkor kötelező warning (string) mező: udvarias magyar magyarázat, hogy a kért keret túl alacsony volt, ezért a terv reális minimum költségeket mutat. '.
-            'Ha a keret reális, a warning mezőt hagyd el vagy null legyen.';
+        $estimatorInput = [
+            'destination' => $destination,
+            'origin_location' => $validated['origin_location'] ?? 'Budapest',
+            'duration_days' => $durationDays,
+            'travelers_count' => (int) ($validated['travelers_count'] ?? 1),
+            'trip_style' => (string) ($validated['trip_style'] ?? 'mixed'),
+            'accommodation_preference' => (string) ($validated['accommodation_preference'] ?? 'mixed'),
+            'transport_mode' => (string) ($validated['transport_mode'] ?? 'mixed'),
+            'transport_already_booked' => (bool) ($validated['transport_already_booked'] ?? false),
+            'accommodation_already_booked' => (bool) ($validated['accommodation_already_booked'] ?? false),
+            'car_fuel_consumption_l100' => isset($validated['car_fuel_consumption_l100'])
+                ? (float) $validated['car_fuel_consumption_l100']
+                : null,
+        ];
+
+        $costFloor = $this->travelCostEstimator->estimate($estimatorInput);
+        $financialContext = $this->travelFinancialContext->build($user, $walletId, $targetDate, $exchangeRates);
+
+        $travelSystemPrompt = 'Te egy utazástervező és pénzügyi tanácsadó vagy. Adj vissza KIZÁRÓLAG érvényes JSON-t a kért mezőkkel, magyar nyelven. '
+            .'NE találj ki irreálisan alacsony árakat — különösen repülőjegyre, autó üzemanyagra, autópálya-díjra, szállásra. '
+            .'A rendszer minimum költségpadlót számolt — a total_estimated_cost és a cost_breakdown mezők NEM lehetnek ez alatt. '
+            .'Autóval utazásnál számold az üzemanyagot (km × fogyasztás × literár), útdíjat és parkolást. '
+            .'Repülővel utazásnál realisztikus oda-vissza jegy + repülőtéri illeték (soha 5 000 Ft-os repülő). '
+            .'Ha a felhasználó költségkerete irreálisan alacsony, a total_estimated_cost legyen a reális minimum, és adj warning mezőt. '
+            .'A transport_detail mezőben magyarázd el a közlekedési költség logikáját.';
+
+        $floorJson = json_encode($costFloor, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $financeJson = json_encode($financialContext, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         try {
-            $prompt = "Tervezz egy személyre szabott utazást magyar nyelven. Adj vissza KIZÁRÓLAG érvényes JSON-t ezekkel a mezőkkel:\n".
-                "- destination (string)\n".
-                "- duration_days (integer)\n".
-                "- total_budget (number, HUF) — a felhasználó által megadott keret, ne módosítsd\n".
-                "- daily_itinerary (array): minden elem { day (int), title (string), activities (string[]), estimated_daily_cost (number) }\n".
-                "- cost_breakdown (object): { accommodation, food, activities, transport } — mind number, HUF\n".
-                "- total_estimated_cost (number): a cost_breakdown összege, reális piaci árak alapján\n".
-                "- summary (string): 1 rövid mondat az utazásról\n".
-                "- warning (string, opcionális): ha a megadott keret irreálisan alacsony, udvarias magyar figyelmeztetés\n".
-                "FONTOS: Ha a keret lehetetlen, a total_estimated_cost legyen a reális minimum, NE a megadott keret.\n".
-                "Úti cél: {$destination}\n".
-                "Időtartam: {$durationDays} nap\n".
-                "Felhasználó költségkerete: {$totalBudget} HUF";
+            $prompt = "Tervezz egy személyre szabott utazást magyar nyelven. Adj vissza KIZÁRÓLAG érvényes JSON-t ezekkel a mezőkkel:\n"
+                ."- destination (string)\n"
+                ."- duration_days (integer)\n"
+                ."- total_budget (number, HUF) — a felhasználó által megadott keret, ne módosítsd\n"
+                ."- daily_itinerary (array): minden elem { day (int), title (string), activities (string[]), estimated_daily_cost (number) }\n"
+                ."- cost_breakdown (object): { transport, accommodation, food, activities, insurance, miscellaneous } — mind number, HUF\n"
+                ."- transport_detail (object): { mode, description, estimated_cost, already_booked, notes (string[]), estimated_distance_km?, fuel_liters?, fuel_price_per_liter_huf? }\n"
+                ."- total_estimated_cost (number): a cost_breakdown összege\n"
+                ."- summary (string): 1-2 mondat\n"
+                ."- warning (string, opcionális): ha a keret irreálisan alacsony\n"
+                ."- currency_notes (string, opcionális): külföldi céloknál EUR becslés\n"
+                ."FONTOS: A cost_breakdown összege legalább a megadott minimum padló.\n"
+                ."Úti cél: {$destination}\n"
+                ."Indulás: ".($estimatorInput['origin_location'] ?? 'Budapest')."\n"
+                ."Időtartam: {$durationDays} nap\n"
+                ."Utazók: ".($estimatorInput['travelers_count'])." fő\n"
+                ."Utazás stílusa: ".($estimatorInput['trip_style'])."\n"
+                ."Szállás preferencia: ".($estimatorInput['accommodation_preference'])."\n"
+                ."Közlekedés: ".($estimatorInput['transport_mode'])."\n"
+                ."Közlekedés már lefoglalva: ".($estimatorInput['transport_already_booked'] ? 'igen' : 'nem')."\n"
+                ."Szállás már lefoglalva: ".($estimatorInput['accommodation_already_booked'] ? 'igen' : 'nem')."\n"
+                .($estimatorInput['transport_mode'] === 'car'
+                    ? 'Autó fogyasztás: '.($estimatorInput['car_fuel_consumption_l100'] ?? 7.0)." l/100 km\n"
+                    : '')
+                ."Felhasználó költségkerete: {$totalBudget} HUF\n"
+                ."Tervezett dátum: ".($targetDate ?? 'nincs megadva')."\n\n"
+                ."MINIMUM KÖLTSÉGPADLÓ (JSON):\n{$floorJson}\n\n"
+                ."HÁZTARTÁSI PÉNZÜGYI KONTEXTUS (JSON):\n{$financeJson}\n";
 
             $decoded = $this->ai->askJson(
                 $prompt,
                 $travelSystemPrompt,
                 $this->aiUsage($user->household, $user, 'travel_planner'),
             );
-            $result = $this->normalizeTravelPlanPayload($decoded, $destination, $durationDays, $totalBudget);
+
+            $result = $this->normalizeTravelPlanPayload(
+                $decoded,
+                $destination,
+                $durationDays,
+                $totalBudget,
+                $costFloor,
+                $estimatorInput,
+            );
 
             if (count($result['daily_itinerary']) === 0) {
                 throw new \RuntimeException('Empty travel itinerary');
             }
 
+            $tripCost = (float) $result['total_estimated_cost'];
+            $result['financial_fit'] = $this->travelFinancialContext->buildSavingsPlan(
+                $financialContext,
+                $tripCost,
+                $targetDate,
+            );
+            $result['savings_plan'] = [
+                'monthly_amount_huf' => (float) ($result['financial_fit']['required_monthly_savings_huf'] ?? 0),
+                'months' => (int) ($result['financial_fit']['months'] ?? 1),
+                'note' => (string) ($result['financial_fit']['summary'] ?? ''),
+            ];
+
+            if ((bool) ($validated['compare_budgets'] ?? true)) {
+                $result['comparison'] = $this->buildTravelComparisonScenarios(
+                    $costFloor,
+                    $totalBudget,
+                    $tripCost,
+                );
+            }
+
+            $result['financial_context'] = $financialContext;
+
             return $this->envelope($result);
         } catch (\Throwable $e) {
-            return $this->envelope(
-                $this->buildTravelPlanFallback($destination, $durationDays, $totalBudget),
-                true,
-                $e->getMessage(),
+            $fallback = $this->buildTravelPlanFallback(
+                $destination,
+                $durationDays,
+                $totalBudget,
+                $costFloor,
+                $estimatorInput,
             );
+            $fallback['financial_fit'] = $this->travelFinancialContext->buildSavingsPlan(
+                $financialContext,
+                (float) $fallback['total_estimated_cost'],
+                $targetDate,
+            );
+            $fallback['savings_plan'] = [
+                'monthly_amount_huf' => (float) ($fallback['financial_fit']['required_monthly_savings_huf'] ?? 0),
+                'months' => (int) ($fallback['financial_fit']['months'] ?? 1),
+                'note' => (string) ($fallback['financial_fit']['summary'] ?? ''),
+            ];
+            if ((bool) ($validated['compare_budgets'] ?? true)) {
+                $fallback['comparison'] = $this->buildTravelComparisonScenarios(
+                    $costFloor,
+                    $totalBudget,
+                    (float) $fallback['total_estimated_cost'],
+                );
+            }
+
+            $fallback['financial_context'] = $financialContext;
+
+            return $this->envelope($fallback, true, $e->getMessage());
         }
     }
 
@@ -807,12 +905,50 @@ class AIFinanceService
         string $destination,
         int $durationDays,
         float $requestedBudget,
+        array $costFloor,
+        array $estimatorInput,
     ): array {
         $breakdown = $decoded['cost_breakdown'] ?? [];
+        $floorBreakdown = $costFloor['breakdown_floor'] ?? [];
+
+        $normalizedBreakdown = [
+            'transport' => round(max((float) ($breakdown['transport'] ?? 0), (float) ($floorBreakdown['transport'] ?? 0)), 2),
+            'accommodation' => round(max((float) ($breakdown['accommodation'] ?? 0), (float) ($floorBreakdown['accommodation'] ?? 0)), 2),
+            'food' => round(max((float) ($breakdown['food'] ?? 0), (float) ($floorBreakdown['food'] ?? 0)), 2),
+            'activities' => round(max((float) ($breakdown['activities'] ?? 0), (float) ($floorBreakdown['activities'] ?? 0)), 2),
+            'insurance' => round(max((float) ($breakdown['insurance'] ?? 0), (float) ($floorBreakdown['insurance'] ?? 0)), 2),
+            'miscellaneous' => round(max((float) ($breakdown['miscellaneous'] ?? 0), (float) ($floorBreakdown['miscellaneous'] ?? 0)), 2),
+        ];
+
+        $transportDetail = is_array($decoded['transport_detail'] ?? null)
+            ? $decoded['transport_detail']
+            : ($costFloor['transport_detail'] ?? []);
+
+        if (! is_array($transportDetail) || $transportDetail === []) {
+            $transportDetail = $costFloor['transport_detail'] ?? [];
+        }
+
+        $transportDetail['estimated_cost'] = round(max(
+            (float) ($transportDetail['estimated_cost'] ?? 0),
+            (float) ($normalizedBreakdown['transport']),
+        ), 2);
+        $normalizedBreakdown['transport'] = (float) $transportDetail['estimated_cost'];
+
+        if ((bool) ($estimatorInput['accommodation_already_booked'] ?? false)) {
+            $normalizedBreakdown['accommodation'] = 0.0;
+        }
+
         $result = [
             'destination' => (string) ($decoded['destination'] ?? $destination),
             'duration_days' => max(1, (int) ($decoded['duration_days'] ?? $durationDays)),
             'total_budget' => round($requestedBudget, 2),
+            'travelers_count' => (int) ($estimatorInput['travelers_count'] ?? 1),
+            'trip_style' => (string) ($estimatorInput['trip_style'] ?? 'mixed'),
+            'accommodation_preference' => (string) ($estimatorInput['accommodation_preference'] ?? 'mixed'),
+            'transport_mode' => (string) ($estimatorInput['transport_mode'] ?? 'mixed'),
+            'transport_already_booked' => (bool) ($estimatorInput['transport_already_booked'] ?? false),
+            'accommodation_already_booked' => (bool) ($estimatorInput['accommodation_already_booked'] ?? false),
+            'origin_location' => (string) ($estimatorInput['origin_location'] ?? 'Budapest'),
             'daily_itinerary' => collect($decoded['daily_itinerary'] ?? [])
                 ->map(function ($row, $index) {
                     return [
@@ -824,24 +960,27 @@ class AIFinanceService
                 })
                 ->values()
                 ->all(),
-            'cost_breakdown' => [
-                'accommodation' => round((float) ($breakdown['accommodation'] ?? 0), 2),
-                'food' => round((float) ($breakdown['food'] ?? 0), 2),
-                'activities' => round((float) ($breakdown['activities'] ?? 0), 2),
-                'transport' => round((float) ($breakdown['transport'] ?? 0), 2),
-            ],
-            'total_estimated_cost' => round((float) ($decoded['total_estimated_cost'] ?? 0), 2),
+            'cost_breakdown' => $normalizedBreakdown,
+            'transport_detail' => $transportDetail,
+            'total_estimated_cost' => 0,
             'summary' => trim((string) ($decoded['summary'] ?? '')),
+            'currency_notes' => trim((string) ($decoded['currency_notes'] ?? '')),
         ];
 
-        if ($result['total_estimated_cost'] <= 0) {
-            $result['total_estimated_cost'] = round(array_sum($result['cost_breakdown']), 2);
+        $result['total_estimated_cost'] = round(array_sum($normalizedBreakdown), 2);
+        $minimumTotal = (float) ($costFloor['total_minimum_huf'] ?? 0);
+        if ($result['total_estimated_cost'] < $minimumTotal) {
+            $result['total_estimated_cost'] = round($minimumTotal, 2);
         }
 
         $warning = trim((string) ($decoded['warning'] ?? ''));
-        $realisticMinimum = $this->estimateRealisticMinimumTripBudget($destination, $durationDays);
-        if ($warning === '' && $requestedBudget < $realisticMinimum * 0.75) {
-            $warning = $this->buildUnrealisticBudgetWarning($destination, $durationDays, $requestedBudget, $realisticMinimum);
+        if ($warning === '' && $requestedBudget < $result['total_estimated_cost'] * 0.85) {
+            $warning = $this->buildUnrealisticBudgetWarning(
+                $destination,
+                $durationDays,
+                $requestedBudget,
+                $result['total_estimated_cost'],
+            );
         }
 
         if ($warning !== '') {
@@ -851,23 +990,28 @@ class AIFinanceService
         return $result;
     }
 
-    /** @return array<string, mixed> */
-    private function buildTravelPlanFallback(string $destination, int $durationDays, float $requestedBudget): array
-    {
-        $realisticMinimum = $this->estimateRealisticMinimumTripBudget($destination, $durationDays);
-        $planTotal = $requestedBudget;
+    private function buildTravelPlanFallback(
+        string $destination,
+        int $durationDays,
+        float $requestedBudget,
+        array $costFloor,
+        array $estimatorInput,
+    ): array {
+        $floorBreakdown = $costFloor['breakdown_floor'] ?? [];
+        $planTotal = max((float) ($costFloor['total_minimum_huf'] ?? 0), $requestedBudget);
         $warning = null;
 
-        if ($requestedBudget < $realisticMinimum * 0.75) {
-            $planTotal = $realisticMinimum;
-            $warning = $this->buildUnrealisticBudgetWarning($destination, $durationDays, $requestedBudget, $realisticMinimum);
+        if ($requestedBudget < (float) ($costFloor['total_minimum_huf'] ?? 0) * 0.85) {
+            $planTotal = (float) ($costFloor['total_minimum_huf'] ?? 0);
+            $warning = $this->buildUnrealisticBudgetWarning(
+                $destination,
+                $durationDays,
+                $requestedBudget,
+                $planTotal,
+            );
         }
 
         $dailyBudget = $durationDays > 0 ? round($planTotal / $durationDays, 2) : $planTotal;
-        $accommodation = round($planTotal * 0.35, 2);
-        $food = round($planTotal * 0.25, 2);
-        $activities = round($planTotal * 0.25, 2);
-        $transport = round($planTotal * 0.15, 2);
         $itinerary = [];
 
         for ($day = 1; $day <= $durationDays; $day++) {
@@ -885,14 +1029,24 @@ class AIFinanceService
             'destination' => $destination,
             'duration_days' => $durationDays,
             'total_budget' => round($requestedBudget, 2),
+            'travelers_count' => (int) ($estimatorInput['travelers_count'] ?? 1),
+            'trip_style' => (string) ($estimatorInput['trip_style'] ?? 'mixed'),
+            'accommodation_preference' => (string) ($estimatorInput['accommodation_preference'] ?? 'mixed'),
+            'transport_mode' => (string) ($estimatorInput['transport_mode'] ?? 'mixed'),
+            'transport_already_booked' => (bool) ($estimatorInput['transport_already_booked'] ?? false),
+            'accommodation_already_booked' => (bool) ($estimatorInput['accommodation_already_booked'] ?? false),
+            'origin_location' => (string) ($estimatorInput['origin_location'] ?? 'Budapest'),
             'daily_itinerary' => $itinerary,
             'cost_breakdown' => [
-                'accommodation' => $accommodation,
-                'food' => $food,
-                'activities' => $activities,
-                'transport' => $transport,
+                'transport' => round((float) ($floorBreakdown['transport'] ?? 0), 2),
+                'accommodation' => round((float) ($floorBreakdown['accommodation'] ?? 0), 2),
+                'food' => round((float) ($floorBreakdown['food'] ?? 0), 2),
+                'activities' => round((float) ($floorBreakdown['activities'] ?? 0), 2),
+                'insurance' => round((float) ($floorBreakdown['insurance'] ?? 0), 2),
+                'miscellaneous' => round((float) ($floorBreakdown['miscellaneous'] ?? 0), 2),
             ],
-            'total_estimated_cost' => round($accommodation + $food + $activities + $transport, 2),
+            'transport_detail' => $costFloor['transport_detail'] ?? [],
+            'total_estimated_cost' => round($planTotal, 2),
             'summary' => "Reális minimum alapú {$durationDays} napos terv {$destination} úti célhoz.",
         ];
 
@@ -901,6 +1055,33 @@ class AIFinanceService
         }
 
         return $result;
+    }
+
+    private function buildTravelComparisonScenarios(array $costFloor, float $requestedBudget, float $plannedTotal): array
+    {
+        $minimum = (float) ($costFloor['total_minimum_huf'] ?? $plannedTotal);
+        $comfort = round($minimum * 1.35, 2);
+
+        return [
+            'minimum' => [
+                'total_huf' => round($minimum, 2),
+                'summary' => 'Szűkös, de reális minimum — alap szállás, közlekedés és étkezés.',
+            ],
+            'requested' => [
+                'total_huf' => round($requestedBudget, 2),
+                'summary' => $requestedBudget >= $minimum
+                    ? 'A megadott keret fedezi a minimumot.'
+                    : 'A megadott keret a reális minimum alatt van.',
+            ],
+            'comfort' => [
+                'total_huf' => $comfort,
+                'summary' => 'Kényelmesebb szállás, több program és tartalék.',
+            ],
+            'planned' => [
+                'total_huf' => round($plannedTotal, 2),
+                'summary' => 'Az aktuális AI terv becsült összköltsége.',
+            ],
+        ];
     }
 
     private function estimateRealisticMinimumTripBudget(string $destination, int $durationDays): float

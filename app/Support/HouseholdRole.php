@@ -13,10 +13,8 @@ class HouseholdRole
 
     public const READER = 'reader';
 
-    /** @deprecated Legacy UI value; treated as reader. */
     public const VIEWER = 'viewer';
 
-    /** @deprecated Legacy value from early migrations / demo seed data. Treated as editor. */
     public const MEMBER = 'member';
 
     public static function canEdit(User $user): bool

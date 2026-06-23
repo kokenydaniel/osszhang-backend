@@ -107,7 +107,6 @@ class BusinessSettings
         return $clean;
     }
 
-    /** @return array<string, string> */
     public static function normalizeStatusColors(?array $colors, array $statuses, array $defaults): array
     {
         $allowed = ['success', 'warning', 'danger', 'info', 'primary', 'neutral'];

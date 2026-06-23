@@ -28,7 +28,6 @@ final class HouseholdTierAccess
             : AccessControl::TIER_FREE;
     }
 
-    /** Admin / ajándék hozzáférés — null, ha nincs vagy lejárt. */
     public static function activeGrantTier(?Household $household): ?string
     {
         if ($household === null || $household->tier_grant === null) {
@@ -46,7 +45,6 @@ final class HouseholdTierAccess
             : null;
     }
 
-    /** Funkció-hozzáférés: a magasabb a fizetős és az admin grant közül. */
     public static function accessTier(?Household $household): string
     {
         $billing = self::billingTier($household);
@@ -59,7 +57,6 @@ final class HouseholdTierAccess
         return self::tierRank($grant) > self::tierRank($billing) ? $grant : $billing;
     }
 
-    /** @return array<string, mixed>|null */
     public static function grantPayload(?Household $household): ?array
     {
         $grant = self::activeGrantTier($household);

@@ -27,7 +27,6 @@ return new class extends Migration
                 ->restrictOnDelete();
         });
 
-        /** @var WalletProvisioningService $provisioning */
         $provisioning = app(WalletProvisioningService::class);
 
         Household::query()->orderBy('id')->chunkById(100, function ($households) use ($provisioning) {

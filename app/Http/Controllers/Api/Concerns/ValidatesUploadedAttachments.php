@@ -7,7 +7,7 @@ use Illuminate\Validation\ValidationException;
 
 trait ValidatesUploadedAttachments
 {
-    /** @param  list<string>  $extensions */
+
     protected function validateUploadedAttachment(UploadedFile $file, int $maxKb, array $extensions, string $field = 'file'): void
     {
         $mimesRule = 'mimes:'.implode(',', $extensions);
@@ -28,7 +28,6 @@ trait ValidatesUploadedAttachments
         }
     }
 
-    /** @param  list<string>  $extensions */
     private function uploadedFileAllowedByExtension(UploadedFile $file, array $extensions, int $maxKb): bool
     {
         $ext = strtolower($file->getClientOriginalExtension() ?: (string) $file->extension());

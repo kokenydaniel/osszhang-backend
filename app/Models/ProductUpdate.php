@@ -37,7 +37,6 @@ class ProductUpdate extends Model
         ];
     }
 
-    /** @return HasMany<ProductUpdateDismissal, $this> */
     public function dismissals(): HasMany
     {
         return $this->hasMany(ProductUpdateDismissal::class);

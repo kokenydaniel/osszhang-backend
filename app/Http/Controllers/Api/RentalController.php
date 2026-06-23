@@ -65,7 +65,6 @@ class RentalController extends Controller
         ]);
     }
 
-    /** @return array<string, mixed> */
     private function validateProperty(Request $request, bool $partial = false): array
     {
         $prefix = $partial ? 'sometimes|' : '';

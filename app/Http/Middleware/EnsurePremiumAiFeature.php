@@ -14,7 +14,6 @@ class EnsurePremiumAiFeature
         private readonly AiHouseholdPolicyService $householdPolicy,
     ) {}
 
-    /** @param  Closure(Request): Response  $next */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();

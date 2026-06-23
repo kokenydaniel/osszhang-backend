@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('utilities', function (Blueprint $table) {
@@ -18,15 +16,12 @@ return new class extends Migration
             $table->decimal('total', 15, 2);
             $table->date('due_date');
             $table->date('paid_date')->nullable();
-            $table->string('paid_by')->nullable(); // 'Mi' | 'Ildi'
+            $table->string('paid_by')->nullable();
             $table->enum('split_rule', ['shared', 'dani-private', 'ildi-private'])->default('shared');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('utilities');

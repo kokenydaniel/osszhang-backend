@@ -22,13 +22,11 @@ class ProductUpdateDismissal extends Model
         ];
     }
 
-    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** @return BelongsTo<ProductUpdate, $this> */
     public function productUpdate(): BelongsTo
     {
         return $this->belongsTo(ProductUpdate::class);

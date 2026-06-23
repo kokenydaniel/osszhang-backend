@@ -10,7 +10,6 @@ class AiHouseholdPolicyService
         private readonly AiTokenUsageService $tokenUsage,
     ) {}
 
-    /** @return array{code: string, message: string}|null */
     public function denialReason(Household $household): ?array
     {
         if ($household->ai_usage_blocked) {

@@ -19,7 +19,6 @@ class SavingService
         private readonly WalletProvisioningService $wallets,
     ) {}
 
-    /** @return list<array<string, mixed>> */
     public function listForUser(User $user, ?int $walletId = null): array
     {
         $household = $this->requireHousehold($user);
@@ -31,7 +30,6 @@ class SavingService
             ->all();
     }
 
-    /** @return array<string, mixed> */
     public function create(User $user, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -50,6 +48,7 @@ class SavingService
         $saving = new Saving([
             'household_id' => $household->id,
             'wallet_id' => $wallet->id,
+            'travel_plan_id' => isset($validated['travelPlanId']) ? (int) $validated['travelPlanId'] : null,
             'type' => $type,
             'count_in_savings' => $validated['count_in_savings'] ?? true,
             'goal_amount' => $isGoal ? (float) ($validated['goal_amount'] ?? 0) : 0,
@@ -80,7 +79,6 @@ class SavingService
         return $this->crypto->formatSaving($saving->load(['ledger', 'wallet']), $household);
     }
 
-    /** @return array<string, mixed> */
     public function addEntry(User $user, int|string $id, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -103,7 +101,6 @@ class SavingService
         return $this->crypto->formatSaving($saving->load(['ledger', 'wallet']), $household);
     }
 
-    /** @return array<string, mixed> */
     public function updateEntry(User $user, int|string $savingId, int|string $entryId, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -131,7 +128,6 @@ class SavingService
         return $this->crypto->formatSaving($saving->load(['ledger', 'wallet']), $household);
     }
 
-    /** @return array<string, mixed> */
     public function deleteEntry(User $user, int|string $savingId, int|string $entryId): array
     {
         $household = $this->requireHousehold($user);
@@ -143,7 +139,6 @@ class SavingService
         return $this->crypto->formatSaving($saving->load(['ledger', 'wallet']), $household);
     }
 
-    /** @return array<string, mixed> */
     public function update(User $user, int|string $id, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -204,7 +199,6 @@ class SavingService
         return $savingId > 0 ? $savingId : null;
     }
 
-    /** @return list<array<string, mixed>> */
     public function buildGoalBudgetRowsForMonth(User $user, ?int $walletId, int $month, int $year): array
     {
         $household = $this->requireHousehold($user);
@@ -221,7 +215,6 @@ class SavingService
             ->all();
     }
 
-    /** @return array<string, mixed> */
     public function buildGoalBudgetRow(Saving $saving, Household $household, int $month, int $year): array
     {
         $sensitive = $this->crypto->savingResolved($saving, $household);
@@ -252,9 +245,6 @@ class SavingService
         ];
     }
 
-    /**
-     * @return array{savedBefore: float, monthEntries: list<array<string, mixed>>}
-     */
     private function resolveGoalLedgerContext(Saving $saving, Household $household, int $month, int $year): array
     {
         $monthStart = Carbon::create($year, $month, 1)->startOfMonth();
@@ -311,7 +301,6 @@ class SavingService
         return round($remaining / $monthsLeft, 2);
     }
 
-    /** @return array<string, mixed> */
     public function addGoalBudgetEntry(User $user, int $savingId, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -342,7 +331,6 @@ class SavingService
         );
     }
 
-    /** @return array<string, mixed> */
     public function deleteGoalBudgetEntry(User $user, int $savingId, int $entryId): array
     {
         $household = $this->requireHousehold($user);
@@ -361,7 +349,6 @@ class SavingService
         );
     }
 
-    /** @return array<string, mixed> */
     public function upsertMonthlyActual(User $user, int $savingId, int $month, int $year, float $amount, ?string $reason = null): array
     {
         $household = $this->requireHousehold($user);
@@ -430,7 +417,6 @@ class SavingService
         );
     }
 
-    /** @return list<array<string, mixed>> */
     public function ledgerEntriesForMonth(Saving $saving, Household $household, int $year, int $month): array
     {
         $monthStart = Carbon::create($year, $month, 1)->startOfMonth();
@@ -469,7 +455,6 @@ class SavingService
         return $user->household;
     }
 
-    /** @return Builder<Saving> */
     private function accessibleSavingsQuery(User $user, ?int $walletId = null): Builder
     {
         $query = Saving::query()->accessibleTo($user);

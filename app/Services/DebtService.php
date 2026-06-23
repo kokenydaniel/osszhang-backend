@@ -18,7 +18,6 @@ class DebtService
         private readonly AttachmentService $attachments,
     ) {}
 
-    /** @return list<array<string, mixed>> */
     public function listForUser(User $user, ?int $walletId = null): array
     {
         $household = $this->requireHousehold($user);
@@ -30,7 +29,6 @@ class DebtService
             ->all();
     }
 
-    /** @return array<string, mixed> */
     public function create(User $user, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -57,7 +55,6 @@ class DebtService
         return $this->crypto->formatDebt($d, $household);
     }
 
-    /** @return array<string, mixed> */
     public function update(User $user, int|string $id, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -118,7 +115,6 @@ class DebtService
         return $user->household;
     }
 
-    /** @return Builder<Debt> */
     private function accessibleDebtsQuery(User $user, ?int $walletId = null): Builder
     {
         $query = Debt::query()->accessibleTo($user);
@@ -135,13 +131,11 @@ class DebtService
         return $this->accessibleDebtsQuery($user)->findOrFail($id);
     }
 
-    /** @param array<string, mixed> $base */
     private function sensitiveFromValidated(array $validated, array $base): array
     {
         return $this->mergeBudgetFields($base, $validated);
     }
 
-    /** @param array<string, mixed> $sensitive @param array<string, mixed> $validated */
     private function mergeBudgetFields(array $sensitive, array $validated): array
     {
         if (array_key_exists('budgetSyncEnabled', $validated)) {

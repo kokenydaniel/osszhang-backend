@@ -73,7 +73,6 @@ final class StorageLocator
         }
     }
 
-    /** @return list<string> */
     private static function candidateDisks(string $storedDisk): array
     {
         $candidates = [$storedDisk];

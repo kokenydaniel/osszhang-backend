@@ -62,7 +62,6 @@ class DebtRecordFormatter extends AbstractEncryptedRecordFormatter
         ];
     }
 
-    /** @param array<string, mixed> $s @return list<array<string, mixed>> */
     private function formatInstallmentPayments(array $s): array
     {
         $raw = $s['installment_payments'] ?? [];

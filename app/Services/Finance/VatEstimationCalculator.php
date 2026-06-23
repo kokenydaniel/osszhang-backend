@@ -13,11 +13,6 @@ class VatEstimationCalculator
         private readonly EncryptedRecordService $crypto,
     ) {}
 
-    /**
-     * Bevétel és ÁFA bontás rögzített rendelésekből — adózási beállítások szerint szűrve.
-     *
-     * @return array<string, mixed>
-     */
     public function calculate(Household $household, int $year, int $month): array
     {
         $biz = $household->resolvedBusinessSettings();

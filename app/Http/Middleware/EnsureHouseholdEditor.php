@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureHouseholdEditor
 {
-    /** @param  Closure(Request): Response  $next */
+
     public function handle(Request $request, Closure $next): Response
     {
         if (in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
@@ -21,7 +21,7 @@ class EnsureHouseholdEditor
             return $next($request);
         }
 
-        if ($request->is('api/tools/travel/plan') && $request->isMethod('POST')) {
+        if ($request->is('api/tools/travel/plan', 'api/tools/travel/pdf') && $request->isMethod('POST')) {
             $user = $request->user();
             if ($user !== null && AccessControl::canAccessModule($user, 'travel_planner')) {
                 return $next($request);

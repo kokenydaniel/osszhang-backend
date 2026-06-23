@@ -6,7 +6,6 @@ use App\Models\ProductUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin ProductUpdate */
 class ProductUpdateResource extends JsonResource
 {
     public function toArray(Request $request): array

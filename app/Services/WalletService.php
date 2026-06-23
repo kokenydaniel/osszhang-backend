@@ -18,7 +18,7 @@ class WalletService
     public function __construct(
         private readonly UtilitySettlementService $utilitySettlements,
     ) {}
-    /** @return list<array<string, mixed>> */
+
     public function listAccessible(User $user): array
     {
         if ($user->household_id === null) {
@@ -34,7 +34,6 @@ class WalletService
             ->all();
     }
 
-    /** @return array<string, mixed> */
     public function create(User $user, array $validated): array
     {
         $isShared = (bool) ($validated['isShared'] ?? false);
@@ -75,7 +74,6 @@ class WalletService
         return (new WalletResource($wallet))->resolve();
     }
 
-    /** @return array<string, mixed> */
     public function updateManualBalance(User $user, Wallet $wallet, float $manualBalance): array
     {
         Gate::authorize('updateManualBalance', $wallet);
@@ -89,7 +87,6 @@ class WalletService
         return (new WalletResource($wallet->fresh()))->resolve();
     }
 
-    /** @return array<string, mixed> */
     public function update(User $user, Wallet $wallet, array $validated): array
     {
         Gate::authorize('update', $wallet);

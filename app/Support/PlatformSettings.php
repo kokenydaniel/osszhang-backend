@@ -28,6 +28,6 @@ final class PlatformSettings
 
     public static function clearCache(): void
     {
-        // Kept for backward compatibility with callers that reset platform caches.
+
     }
 }

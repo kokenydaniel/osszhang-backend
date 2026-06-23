@@ -6,7 +6,6 @@ use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 
-/** Tolerates legacy plain-text or APP_KEY-mismatched ciphertext without throwing. */
 class LenientEncrypted implements CastsAttributes
 {
     public function get($model, string $key, mixed $value, array $attributes): ?string

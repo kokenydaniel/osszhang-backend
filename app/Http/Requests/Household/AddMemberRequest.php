@@ -39,4 +39,12 @@ class AddMemberRequest extends FormRequest
             'permissions.*' => ['string', Rule::in(AccessControl::MODULES)],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'username.unique' => 'Ez a felhasználónév már foglalt.',
+            'username.regex' => 'A felhasználónév csak kisbetűt, számot és aláhúzást tartalmazhat.',
+        ];
+    }
 }

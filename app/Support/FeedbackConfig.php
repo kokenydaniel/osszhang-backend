@@ -4,7 +4,7 @@ namespace App\Support;
 
 class FeedbackConfig
 {
-    /** @return list<string> */
+
     public static function categories(): array
     {
         $fromConfig = config('feedback.categories');
@@ -14,7 +14,6 @@ class FeedbackConfig
             : ['bug', 'feature', 'improvement', 'question', 'other'];
     }
 
-    /** @return list<string> */
     public static function statuses(): array
     {
         $fromConfig = config('feedback.statuses');
@@ -24,7 +23,6 @@ class FeedbackConfig
             : ['new', 'read', 'replied', 'resolved'];
     }
 
-    /** @return array<string, string> */
     public static function legacyCategories(): array
     {
         $fromConfig = config('feedback.legacy_categories');
@@ -36,7 +34,6 @@ class FeedbackConfig
         ];
     }
 
-    /** @return list<string> */
     public static function allowedCategoryInputs(): array
     {
         return array_values(array_unique(array_merge(

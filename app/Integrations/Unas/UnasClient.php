@@ -14,10 +14,9 @@ class UnasClient
         $this->apiKey = $apiKey;
     }
 
-    /** @return list<array<string, mixed>> */
     public function getOrders(): array
     {
-        // Előkészített integráció — UNAS API hívás ide kerül.
+
         if (! $this->shopId || ! $this->apiKey) {
             return [];
         }

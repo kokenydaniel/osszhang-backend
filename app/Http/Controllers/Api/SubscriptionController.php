@@ -41,7 +41,6 @@ class SubscriptionController extends Controller
         return $this->billingService->downloadInvoice($request->user(), $invoice);
     }
 
-    /** @deprecated Use Stripe Customer Portal via portal() */
     public function cancel(Request $request)
     {
         throw ValidationException::withMessages([
@@ -49,7 +48,6 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    /** @deprecated Use Stripe Customer Portal via portal() */
     public function reactivate(Request $request)
     {
         throw ValidationException::withMessages([
@@ -57,7 +55,6 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    /** @deprecated Use Stripe Customer Portal via portal() */
     public function downgrade(Request $request)
     {
         throw ValidationException::withMessages([

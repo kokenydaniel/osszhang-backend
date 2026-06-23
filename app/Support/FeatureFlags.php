@@ -6,7 +6,7 @@ use App\Models\FeatureFlag;
 
 final class FeatureFlags
 {
-    /** @var array<string, bool> */
+
     private static array $cache = [];
 
     public static function isEnabled(string $key, bool $default = false): bool
@@ -27,7 +27,6 @@ final class FeatureFlags
         self::$cache = [];
     }
 
-    /** @return array<string, bool> */
     public static function allEnabled(): array
     {
         $flags = FeatureFlag::query()->orderBy('key')->get();

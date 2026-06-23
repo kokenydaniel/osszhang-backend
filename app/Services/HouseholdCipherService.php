@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Household;
 use Illuminate\Support\Facades\Crypt;
 
-/** Per-household AES-256-GCM; household keys are wrapped with APP_KEY. */
 class HouseholdCipherService
 {
     public function ensureCipherKey(Household $household): void

@@ -10,7 +10,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class PocketMoneyService
 {
-    /** @return array{entries: list<array<string, mixed>>, members: list<array<string, mixed>>} */
+
     public function listForUser(User $user, ?int $year = null, ?int $month = null): array
     {
         $household = $this->requireHousehold($user);
@@ -67,9 +67,6 @@ class PocketMoneyService
         ];
     }
 
-    /**
-     * @return array{applied: int, entries: list<array<string, mixed>>}
-     */
     public function applyMonthInterest(User $user, int $year, int $month): array
     {
         $household = $this->requireHousehold($user);
@@ -111,7 +108,6 @@ class PocketMoneyService
         return ['applied' => count($created), 'entries' => $created];
     }
 
-    /** @return array<string, mixed> */
     public function create(User $user, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -142,7 +138,6 @@ class PocketMoneyService
         return $this->formatEntry($entry);
     }
 
-    /** @return array<string, mixed> */
     public function update(User $user, int $id, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -191,10 +186,6 @@ class PocketMoneyService
         $this->findEntry($household, $id)->delete();
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $cumulativeEntries  entries up to period end (balance)
-     * @param  list<array<string, mixed>>|null  $monthEntries  entries in selected month only
-     */
     private function buildMemberSummaries(
         array $cumulativeEntries,
         string $defaultCurrency,
@@ -206,7 +197,6 @@ class PocketMoneyService
         $defaultCurrency = strtoupper(trim($defaultCurrency)) ?: 'HUF';
         $monthEntries ??= $cumulativeEntries;
 
-        /** @var array<string, array<string, mixed>> $byKey */
         $byKey = [];
 
         foreach ($cumulativeEntries as $row) {
@@ -279,7 +269,6 @@ class PocketMoneyService
         return $members;
     }
 
-    /** @param  array<string, mixed>  $bucket */
     private function accumulateEntry(
         array &$bucket,
         array $row,
@@ -333,7 +322,6 @@ class PocketMoneyService
         };
     }
 
-    /** @return array<string, mixed> */
     private function emptyMemberBucket(string $key, array $row): array
     {
         return [
@@ -355,7 +343,6 @@ class PocketMoneyService
         ];
     }
 
-    /** @return array<string, mixed>|null */
     private function buildInterestMeta(
         array $settings,
         ?int $year,
@@ -465,7 +452,7 @@ class PocketMoneyService
     {
         $currency = strtoupper(trim($currency)) ?: 'HUF';
         $defaultCurrency = strtoupper(trim($defaultCurrency)) ?: 'HUF';
-        /** @var array<string, float> $rates */
+
         $rates = config('exchange_rates.huf_per_unit', ['HUF' => 1, 'EUR' => 395, 'USD' => 365]);
 
         $huf = $amount;

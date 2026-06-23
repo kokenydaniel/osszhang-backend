@@ -27,7 +27,6 @@ class AuditLogService
         ]);
     }
 
-    /** @return array<int, array<string, mixed>> */
     public function listRecent(int $limit = 100): array
     {
         return AuditLog::query()

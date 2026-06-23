@@ -19,7 +19,6 @@ class InsurancePolicyService
         private readonly AttachmentService $attachments,
     ) {}
 
-    /** @return array{policies: list<array<string, mixed>>, budgetPolicies: list<array<string, mixed>>, upcoming: list<array<string, mixed>>} */
     public function listForUser(User $user): array
     {
         $household = $this->requireHousehold($user);
@@ -50,7 +49,6 @@ class InsurancePolicyService
         ];
     }
 
-    /** @return array<string, mixed> */
     public function create(User $user, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -61,7 +59,6 @@ class InsurancePolicyService
         return $this->formatPolicy($policy->fresh()->loadCount('attachments'));
     }
 
-    /** @return array<string, mixed> */
     public function update(User $user, int $id, array $validated): array
     {
         $policy = $this->findForUser($user, $id);
@@ -71,7 +68,6 @@ class InsurancePolicyService
         return $this->formatPolicy($policy->fresh()->loadCount('attachments'));
     }
 
-    /** @return array<string, mixed> */
     public function delete(User $user, int $id): array
     {
         $policy = $this->findForUser($user, $id);
@@ -91,7 +87,6 @@ class InsurancePolicyService
             ->firstOrFail();
     }
 
-    /** @param  array<string, mixed>  $validated */
     private function payloadFromValidated(int $householdId, array $validated, ?InsurancePolicy $existing = null): array
     {
         $payload = ['household_id' => $householdId];
@@ -193,7 +188,6 @@ class InsurancePolicyService
         return $this->applyCoverageExpiryActiveState($payload);
     }
 
-    /** @param  array<string, mixed>  $payload */
     private function applyCoverageExpiryActiveState(array $payload): array
     {
         $covered = $payload['covered_until'] ?? null;
@@ -204,7 +198,6 @@ class InsurancePolicyService
         return $payload;
     }
 
-    /** @return array<string, mixed> */
     private function formatPolicy(InsurancePolicy $p): array
     {
         $annual = $this->effectiveAnnualPremium($p);
@@ -242,13 +235,11 @@ class InsurancePolicyService
         ];
     }
 
-    /** @param  array<string, mixed>  $validated */
     private function hasValidatedKey(array $validated, string $camel, string $snake): bool
     {
         return array_key_exists($camel, $validated) || array_key_exists($snake, $validated);
     }
 
-    /** @param  array<string, mixed>  $validated */
     private function validatedValue(array $validated, string $camel, string $snake, mixed $default = null): mixed
     {
         if (array_key_exists($camel, $validated)) {
@@ -285,10 +276,6 @@ class InsurancePolicyService
         };
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $policies
-     * @return list<array<string, mixed>>
-     */
     private function buildUpcomingReminders(array $policies, int $reminderDays): array
     {
         $today = Carbon::today();

@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsurePlatformAdmin
 {
-    /** @param  Closure(Request): Response  $next */
+
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();

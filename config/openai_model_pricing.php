@@ -1,14 +1,5 @@
 <?php
 
-/**
- * OpenAI Standard tier pricing (USD per 1M tokens).
- *
- * Source: https://platform.openai.com/docs/pricing
- * Last verified: 2026-05-28
- *
- * Keys: input, cached (nullable), output — all USD / 1M tokens.
- * Prefix matching applies (e.g. gpt-4o-mini-2024-07-18 → gpt-4o-mini).
- */
 return [
     'source_url' => 'https://platform.openai.com/docs/pricing',
     'last_verified' => '2026-05-28',

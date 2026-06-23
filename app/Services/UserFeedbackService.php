@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserFeedbackService
 {
-    /** @param  array<int, UploadedFile>  $files */
+
     public function store(
         User $user,
         string $category,
@@ -46,7 +46,6 @@ class UserFeedbackService
         return $this->format($report->fresh()->load(['user', 'household', 'attachments', 'messages.user']));
     }
 
-    /** @return array<int, array<string, mixed>> */
     public function listForUser(User $user): array
     {
         return UserFeedbackReport::query()
@@ -94,7 +93,6 @@ class UserFeedbackService
         return $this->format($report->fresh()->load(['attachments', 'messages.user']), forUser: true);
     }
 
-    /** @return array<int, array<string, mixed>> */
     public function listForAdmin(?string $status = null, ?string $category = null): array
     {
         $query = UserFeedbackReport::query()
@@ -266,7 +264,6 @@ class UserFeedbackService
         return $category;
     }
 
-    /** @return array<string, mixed> */
     private function format(UserFeedbackReport $report, bool $forUser = false): array
     {
         $user = $report->relationLoaded('user') ? $report->user : null;
@@ -316,7 +313,6 @@ class UserFeedbackService
         ];
     }
 
-    /** @return array<int, array<string, mixed>> */
     private function resolveMessages(UserFeedbackReport $report): array
     {
         if (! $report->relationLoaded('messages')) {
@@ -363,7 +359,6 @@ class UserFeedbackService
         return $latest?->created_at;
     }
 
-    /** @return array<int, array<string, mixed>> */
     private function resolveAttachments(UserFeedbackReport $report): array
     {
         if ($report->relationLoaded('attachments') && $report->attachments->isNotEmpty()) {
@@ -383,7 +378,6 @@ class UserFeedbackService
         return [];
     }
 
-    /** @return array<string, mixed> */
     private function formatAttachment(UserFeedbackReportAttachment $attachment): array
     {
         return [

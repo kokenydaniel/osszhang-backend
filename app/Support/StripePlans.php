@@ -4,7 +4,7 @@ namespace App\Support;
 
 final class StripePlans
 {
-    /** @return list<string> */
+
     public static function allowedPriceIds(): array
     {
         return array_values(array_filter(config('stripe_plans.prices', [])));

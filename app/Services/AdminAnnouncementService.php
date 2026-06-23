@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class AdminAnnouncementService
 {
-    /** @return Collection<int, SystemAnnouncement> */
+
     public function listAnnouncements(): Collection
     {
         return SystemAnnouncement::query()

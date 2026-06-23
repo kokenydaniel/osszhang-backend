@@ -19,7 +19,7 @@ class OpenAIService
         $this->assertHouseholdPolicy($usageContext);
 
         $systemPrompt = 'You are Összhang AI, a professional financial assistant for a Hungarian family.
-        Analyze the provided data and give concise, helpful advice in Hungarian. 
+        Analyze the provided data and give concise, helpful advice in Hungarian.
         Always consider the budget, utility bills, and business performance.';
 
         $messages = [
@@ -37,7 +37,6 @@ class OpenAIService
         return $result['content'];
     }
 
-    /** @return array<string, mixed> */
     public function askJson(string $prompt, string $systemPrompt, ?AiUsageContext $usageContext = null): array
     {
         $this->assertHouseholdPolicy($usageContext);

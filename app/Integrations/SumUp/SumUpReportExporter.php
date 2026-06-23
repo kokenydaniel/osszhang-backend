@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xls;
 
 class SumUpReportExporter
 {
-    /** @param array<int, array<string, mixed>> $transactions */
+
     public function transactionsXls(array $transactions, string $periodLabel, string $merchantCode): string
     {
         $spreadsheet = new Spreadsheet;
@@ -71,7 +71,6 @@ class SumUpReportExporter
         return (string) ob_get_clean();
     }
 
-    /** @param array<int, array<string, mixed>> $payouts */
     public function payoutsPdf(array $payouts, string $periodLabel, string $merchantCode): string
     {
         $rows = '';
@@ -105,10 +104,6 @@ class SumUpReportExporter
         return $this->renderPdf($html);
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $transactions
-     * @param  array<int, array<string, mixed>>  $payouts
-     */
     public function revenueReportPdf(
         array $transactions,
         array $payouts,
@@ -189,9 +184,6 @@ class SumUpReportExporter
         return $this->renderPdf($html);
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $transactions
-     */
     public function receiptsPdf(
         SumUpClient $client,
         string $merchantCode,
@@ -247,7 +239,6 @@ class SumUpReportExporter
         return $this->renderPdf($html);
     }
 
-    /** @param array<string, mixed> $receipt */
     private function receiptBlock(array $receipt): string
     {
         $tx = is_array($receipt['transaction_data'] ?? null) ? $receipt['transaction_data'] : [];

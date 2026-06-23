@@ -38,6 +38,7 @@ class SavingController extends Controller
             $rules['goal_amount'] = 'required|numeric|min:0.01';
             $rules['current_amount'] = 'sometimes|numeric|min:0';
             $rules['target_date'] = 'required|date|after_or_equal:today';
+            $rules['travelPlanId'] = 'sometimes|integer|exists:travel_plans,id';
         }
 
         $v = $request->validate($rules);

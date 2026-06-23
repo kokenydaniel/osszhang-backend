@@ -4,7 +4,7 @@ namespace App\Integrations\SumUp;
 
 final class SumUpPeriodActivity
 {
-    /** @param array<int, array<string, mixed>> $transactions */
+
     public static function hasSalesTransactions(array $transactions): bool
     {
         foreach ($transactions as $tx) {
@@ -32,7 +32,6 @@ final class SumUpPeriodActivity
         return false;
     }
 
-    /** @param array<int, array<string, mixed>> $payouts */
     public static function hasPayoutRecords(array $payouts): bool
     {
         return count($payouts) > 0;

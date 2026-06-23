@@ -49,7 +49,6 @@ class AttachmentService
         return $this->format($attachment);
     }
 
-    /** @return array<int, array<string, mixed>> */
     public function listFor(Model $attachable): array
     {
         return Attachment::query()
@@ -215,7 +214,6 @@ class AttachmentService
         abort(422, 'Nem támogatott csatolás.');
     }
 
-    /** @return array<string, mixed> */
     private function format(Attachment $attachment): array
     {
         return [

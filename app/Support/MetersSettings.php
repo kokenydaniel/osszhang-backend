@@ -65,7 +65,6 @@ class MetersSettings
         ];
     }
 
-    /** @param  mixed  $rows */
     private static function normalizeLocationGroups($rows): array
     {
         if (! is_array($rows)) {

@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckMaintenanceMode
 {
-    /** @param  Closure(Request): Response  $next */
+
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->is('api/login', 'api/register', 'api/logout', 'api/me', 'api/cron/shopify-sync', 'up')) {

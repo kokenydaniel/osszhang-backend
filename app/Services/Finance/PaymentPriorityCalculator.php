@@ -18,11 +18,6 @@ class PaymentPriorityCalculator
         private readonly TransactionSensitiveData $sensitive,
     ) {}
 
-    /**
-     * Deterministic payment queue — exact amounts from stored records only.
-     *
-     * @return array<int, array<string, mixed>>
-     */
     public function buildQueue(Household $household, User $user, Wallet $wallet, int $year, int $month): array
     {
         $monthStart = Carbon::create($year, $month, 1)->startOfMonth();

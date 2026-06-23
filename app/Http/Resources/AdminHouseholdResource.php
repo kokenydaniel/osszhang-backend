@@ -7,10 +7,9 @@ use App\Support\HouseholdTierAccess;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin Household */
 class AdminHouseholdResource extends JsonResource
 {
-    /** @param array<string, mixed>|null $aiUsage */
+
     public function __construct($resource, private readonly bool $detailed = false, private readonly ?array $aiUsage = null)
     {
         parent::__construct($resource);

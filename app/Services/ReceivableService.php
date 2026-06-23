@@ -14,7 +14,6 @@ class ReceivableService
 
     private const SOURCES = ['savings', 'transfer', 'cash'];
 
-    /** @return array{contacts: list<array<string, mixed>>, summary: array<string, mixed>} */
     public function index(User $user): array
     {
         $household = $this->requireHousehold($user);
@@ -34,7 +33,6 @@ class ReceivableService
         ];
     }
 
-    /** @return array<string, mixed> */
     public function createContact(User $user, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -49,7 +47,6 @@ class ReceivableService
         return $this->formatContact($contact->fresh()->load('entries'));
     }
 
-    /** @return array<string, mixed> */
     public function updateContact(User $user, int $id, array $validated): array
     {
         $contact = $this->findContactForUser($user, $id);
@@ -66,7 +63,6 @@ class ReceivableService
         return $this->formatContact($contact->fresh()->load('entries'));
     }
 
-    /** @return array<string, mixed> */
     public function deleteContact(User $user, int $id): array
     {
         $contact = $this->findContactForUser($user, $id);
@@ -76,7 +72,6 @@ class ReceivableService
         return $formatted;
     }
 
-    /** @return array<string, mixed> */
     public function createEntry(User $user, int $contactId, array $validated): array
     {
         $household = $this->requireHousehold($user);
@@ -97,7 +92,6 @@ class ReceivableService
         return $this->formatContact($contact->fresh()->load('entries'));
     }
 
-    /** @return array<string, mixed> */
     public function updateEntry(User $user, int $entryId, array $validated): array
     {
         $entry = $this->findEntryForUser($user, $entryId);
@@ -128,7 +122,6 @@ class ReceivableService
         return $this->formatContact($contact->fresh()->load('entries'));
     }
 
-    /** @return array<string, mixed> */
     public function deleteEntry(User $user, int $entryId): array
     {
         $entry = $this->findEntryForUser($user, $entryId);
@@ -191,7 +184,6 @@ class ReceivableService
         return $source;
     }
 
-    /** @return array<string, mixed> */
     private function formatContact(ReceivableContact $contact): array
     {
         $entries = $contact->relationLoaded('entries')
@@ -214,7 +206,6 @@ class ReceivableService
         ];
     }
 
-    /** @return array<string, mixed> */
     private function formatEntry(ReceivableEntry $entry): array
     {
         return [
@@ -230,10 +221,6 @@ class ReceivableService
         ];
     }
 
-    /**
-     * @param  list<array<string, mixed>>  $entries
-     * @return array{totalLent: float, totalRepaid: float, outstanding: float, isSettled: bool}
-     */
     private function totalsFromEntries(array $entries): array
     {
         $totalLent = 0.0;
@@ -258,7 +245,6 @@ class ReceivableService
         ];
     }
 
-    /** @param  list<array<string, mixed>>  $contacts */
     private function buildSummary(array $contacts): array
     {
         $totalLent = 0.0;

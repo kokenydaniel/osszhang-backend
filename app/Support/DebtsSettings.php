@@ -44,7 +44,6 @@ class DebtsSettings
         ];
     }
 
-    /** @param  mixed  $rows */
     private static function normalizeTemplates($rows): array
     {
         if (! is_array($rows)) {

@@ -27,9 +27,6 @@ class WalletProvisioningService
         ]);
     }
 
-    /**
-     * @return array{households: int, wallets_created: int, transactions_linked: int}
-     */
     public function migrateLegacyData(): array
     {
         $stats = [

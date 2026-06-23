@@ -132,7 +132,6 @@ class AdminUserService
         ];
     }
 
-    /** @return array<string, mixed> */
     public function updateTierGrant(User $actor, User $target, Request $request): array
     {
         if ($target->lifetime_admin) {
@@ -153,7 +152,6 @@ class AdminUserService
         return (new AdminUserResource($target->fresh('household')))->resolve();
     }
 
-    /** @return array<string, mixed> */
     public function resetPassword(User $actor, User $target, Request $request): array
     {
         if ($target->id === $actor->id) {

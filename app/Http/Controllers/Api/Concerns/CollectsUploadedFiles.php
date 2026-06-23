@@ -7,7 +7,7 @@ use Illuminate\Http\UploadedFile;
 
 trait CollectsUploadedFiles
 {
-    /** @return array<int, UploadedFile> */
+
     protected function collectUploadedFiles(Request $request, string $key = 'files'): array
     {
         $uploaded = $request->file($key);

@@ -8,7 +8,7 @@ use Laravel\Cashier\Events\WebhookHandled;
 
 class SyncHouseholdFromStripeWebhook
 {
-    /** @var list<string> */
+
     private const SYNC_EVENTS = [
         'customer.subscription.created',
         'customer.subscription.updated',
@@ -38,7 +38,6 @@ class SyncHouseholdFromStripeWebhook
         HouseholdSubscriptionSync::syncUserHousehold($user);
     }
 
-    /** @param array<string, mixed> $payload */
     private function resolveCustomerId(array $payload): ?string
     {
         $object = $payload['data']['object'] ?? [];

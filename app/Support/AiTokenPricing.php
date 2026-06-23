@@ -4,10 +4,7 @@ namespace App\Support;
 
 final class AiTokenPricing
 {
-    /**
-     * @param  array{prompt_tokens?: int, completion_tokens?: int, cached_tokens?: int, reasoning_tokens?: int}  $usage
-     * @return array{cost_usd: float, rates: array{input_per_million: float, output_per_million: float, cached_per_million: float|null, model: string}}|null
-     */
+
     public static function calculateCostUsd(string $model, array $usage): ?array
     {
         $rates = self::ratesForModel($model);
@@ -40,7 +37,6 @@ final class AiTokenPricing
         ];
     }
 
-    /** @return array{input_per_million: float, output_per_million: float, cached_per_million: float|null, model: string}|null */
     public static function ratesForModel(string $model): ?array
     {
         $normalized = self::normalizeModel($model);
@@ -59,9 +55,6 @@ final class AiTokenPricing
         return null;
     }
 
-    /** @param  array<string, mixed>  $configured
-     * @return list<string>
-     */
     private static function sortedModelKeys(array $configured): array
     {
         $keys = array_keys($configured);
@@ -70,12 +63,11 @@ final class AiTokenPricing
         return $keys;
     }
 
-    /** @return array<string, array{input_per_million: float, output_per_million: float, cached_per_million: float|null, model: string}> */
     public static function configuredModels(): array
     {
-        /** @var array<string, mixed> $official */
+
         $official = config('openai_model_pricing.models', []);
-        /** @var array<string, mixed> $overrides */
+
         $overrides = config('openai.pricing.overrides', []);
 
         $normalized = [];
@@ -105,7 +97,6 @@ final class AiTokenPricing
         return $normalized;
     }
 
-    /** @return array{source_url: string, last_verified: string|null, tier: string|null, default_model: string, default_model_rates: array<string, mixed>|null} */
     public static function pricingMeta(): array
     {
         $defaultModel = (string) config('openai.model', 'gpt-4o-mini');
@@ -124,9 +115,6 @@ final class AiTokenPricing
         return self::configuredModels() !== [];
     }
 
-    /** @param  array<string, mixed>  $rates
-     * @return array{input_per_million: float, output_per_million: float, cached_per_million: float|null, model: string}|null
-     */
     private static function normalizeRates(string $model, array $rates): ?array
     {
         $input = self::readRate($rates, ['input', 'input_per_million']);
@@ -146,9 +134,6 @@ final class AiTokenPricing
         ];
     }
 
-    /** @param  array<string, mixed>  $rates
-     * @param  list<string>  $keys
-     */
     private static function readRate(array $rates, array $keys): ?float
     {
         foreach ($keys as $key) {

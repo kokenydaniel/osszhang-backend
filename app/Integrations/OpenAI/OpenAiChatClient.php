@@ -6,7 +6,7 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 class OpenAiChatClient
 {
-    /** @return array{content: string, model: string, usage: array{prompt_tokens: int, completion_tokens: int, total_tokens: int}} */
+
     public function chat(array $messages, array $options = []): array
     {
         $model = (string) ($options['model'] ?? $this->defaultModel());
@@ -23,7 +23,6 @@ class OpenAiChatClient
         ];
     }
 
-    /** @return array{content: array<string, mixed>, model: string, usage: array{prompt_tokens: int, completion_tokens: int, total_tokens: int}} */
     public function chatJson(array $messages, array $options = []): array
     {
         $model = (string) ($options['model'] ?? $this->defaultModel());
@@ -53,7 +52,6 @@ class OpenAiChatClient
         return (float) config('openai.temperature', 0.7);
     }
 
-    /** @return array{prompt_tokens: int, completion_tokens: int, total_tokens: int, cached_tokens: int, reasoning_tokens: int} */
     private function normalizeUsage(mixed $usage): array
     {
         if ($usage === null) {

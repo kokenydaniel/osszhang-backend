@@ -27,7 +27,7 @@ class User extends Authenticatable
         'last_login_at',
     ];
     protected $hidden = ['password', 'remember_token'];
-    /** @use HasFactory<UserFactory> */
+
     use HasApiTokens, Billable, HasFactory, Notifiable;
 
     public function household()

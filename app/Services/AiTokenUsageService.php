@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class AiTokenUsageService
 {
-    /** @param array{prompt_tokens?: int, completion_tokens?: int, total_tokens?: int, cached_tokens?: int, reasoning_tokens?: int} $usage */
+
     public function record(?AiUsageContext $context, string $model, array $usage): void
     {
         if ($context === null || $context->householdId === null) {
@@ -64,7 +64,6 @@ class AiTokenUsageService
             ->sum('total_tokens');
     }
 
-    /** @return array<string, mixed> */
     public function householdSummary(int $householdId): array
     {
         $query = AiTokenUsageEvent::query()->where('household_id', $householdId);

@@ -4,7 +4,7 @@ namespace App\Support;
 
 final class PlatformModules
 {
-    /** @return list<string> */
+
     public static function moduleIds(): array
     {
         return AccessControl::MODULES;

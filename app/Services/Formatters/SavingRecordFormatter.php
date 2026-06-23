@@ -78,6 +78,8 @@ class SavingRecordFormatter extends AbstractEncryptedRecordFormatter
             'current_amount' => $currentAmount,
             'targetDate' => $saving->target_date?->toDateString(),
             'target_date' => $saving->target_date?->toDateString(),
+            'travelPlanId' => $saving->travel_plan_id,
+            'travel_plan_id' => $saving->travel_plan_id,
             'wallet' => $this->formatWallet($saving),
             'ledger' => $ledger,
         ];
@@ -98,7 +100,6 @@ class SavingRecordFormatter extends AbstractEncryptedRecordFormatter
         );
     }
 
-    /** @return array<string, mixed>|null */
     private function formatWallet(Saving $saving): ?array
     {
         if (! $saving->relationLoaded('wallet') || $saving->wallet === null) {

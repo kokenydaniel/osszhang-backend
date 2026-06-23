@@ -48,13 +48,13 @@ class ImportDatabaseJson extends Command
         foreach ($tables as $table) {
             if (isset($data[$table])) {
                 $this->info("Importing table: {$table}");
-                
+
                 $rows = array_map(function($row) {
                     return (array) $row;
                 }, $data[$table]);
 
                 DB::table($table)->truncate();
-                
+
                 if (!empty($rows)) {
                     DB::table($table)->insert($rows);
                 }

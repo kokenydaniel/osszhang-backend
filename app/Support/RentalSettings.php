@@ -4,7 +4,7 @@ namespace App\Support;
 
 class RentalSettings
 {
-    /** @return array{currencies: list<string>, default_currency: string, contract_reminder_days_before: int, overdue_grace_days: int, budget_sync_default: bool, income_category_pattern: string} */
+
     public static function resolve(?array $stored): array
     {
         $defaults = config('rental.defaults', []);

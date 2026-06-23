@@ -14,7 +14,6 @@ final class BusinessDocumentTypes
 
     public const OTHER = 'other';
 
-    /** @return list<string> */
     public static function all(): array
     {
         return [

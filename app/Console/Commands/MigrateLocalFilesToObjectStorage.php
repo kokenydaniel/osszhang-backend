@@ -107,7 +107,6 @@ class MigrateLocalFilesToObjectStorage extends Command
         return self::SUCCESS;
     }
 
-    /** @return \Generator<int, array{model: object, disk: string, path: string}> */
     private function fileRecords(): \Generator
     {
         foreach (Attachment::query()->whereNotNull('path')->cursor() as $row) {
