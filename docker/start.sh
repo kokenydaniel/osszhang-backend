@@ -4,6 +4,7 @@ mkdir -p /var/www/storage/app/private /var/www/storage/app/public /var/www/stora
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 php /var/www/artisan config:clear --no-ansi 2>/dev/null || true
+php /var/www/artisan route:clear --no-ansi 2>/dev/null || true
 php /var/www/artisan storage:probe --no-ansi 2>/dev/null || true
 
 php-fpm -D

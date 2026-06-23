@@ -1,0 +1,2887 @@
+{
+  "version": 1,
+  "generated_at": "2026-06-23T11:29:09.236Z",
+  "app_name": "Összhang",
+  "chunk_count": 228,
+  "chunks": [
+    {
+      "id": "core.rules",
+      "area": "core",
+      "title": "Kritikus app-szabályok",
+      "keywords": [
+        "kategória",
+        "kategoriak",
+        "excel",
+        "import",
+        "beállítás",
+        "modul",
+        "admin",
+        "költségvetés",
+        "útmutató"
+      ],
+      "body": "Új költségkategória CSAK itt: Beállítások → Modulok → Költségvetés kártya → Kategóriák szekció (admin).\nA Költségvetés → + Új tétel NEM hoz létre új kategóriát — csak meglévőből választ.\nKöltségvetés tömeges Excel/CSV import JELENLEG NINCS az appban.\nHónap másolása: Költségvetés menüben az előző hónap tételeit másolja.\nModulok bekapcsolása: Beállítások → Modulok (admin).\nTag jogosultság: Beállítások → Háztartás.\nWebshop import (Shopify, WooCommerce, UNAS): Premium + vállalkozás modul + Beállítások integrációk.\nAI pénzügyi funkciók: Premium csomag.\nSúgó asszisztens minden bejelentkezett felhasználónak elérhető, nem kell Premium."
+    },
+    {
+      "id": "core.navigation",
+      "area": "core",
+      "title": "Navigáció és útvonalak",
+      "keywords": [
+        "hol",
+        "útvonal",
+        "menü",
+        "beállítás",
+        "modul",
+        "navigáció"
+      ],
+      "body": "Fő útvonalak:\n- Irányítópult: /\n- Súgó oldal: /help\n- Csomagok: /pricing\n- Beállítások: /settings\n- Beállítások → Profil: /settings?tab=profile\n- Beállítások → Háztartás (tagok): /settings?tab=household\n- Beállítások → Modulok (kategóriák, modul kapcsolók): /settings?tab=modules\n- Beállítások → Előfizetés: /settings?tab=billing\n- Visszajelzés: /feedback\n\nModulok:\n- Költségvetés: /budget (modul: budget)\n- Megtakarítás: /savings (modul: savings)\n- Tartozások: /debts (modul: debts)\n- Rezsi: /utilities (modul: utilities)\n- Közműórák: /meters (modul: meters)\n- Vállalkozás: /business (modul: business)\n- Zsebpénz: /pocket-money (modul: pocket_money)\n- Biztosítások: /insurance (modul: insurance)\n- Bérbeadás: /rental (modul: rental)\n- Kintlévőség: /receivables (modul: receivables)\n- Utazástervező: /tools/travel (modul: travel_planner)"
+    },
+    {
+      "id": "core.tiers",
+      "area": "core",
+      "title": "Csomagok",
+      "keywords": [
+        "pro",
+        "premium",
+        "ingyenes",
+        "csomag",
+        "előfizetés",
+        "ár"
+      ],
+      "body": "Ingyenes: költségvetés + 1 közös kassza.\nPro: megtakarítás, tartozás, rezsi, közműórák, zsebpénz, biztosítás, bérbeadás, kintlévőség, privát kasszák, rezsimegosztás.\nPremium: minden Pro + vállalkozás, webshop importok, AI funkciók, utazástervező, csatolások, SumUp import."
+    },
+    {
+      "id": "guide.dashboard",
+      "area": "dashboard",
+      "title": "Irányítópult",
+      "keywords": [
+        "irányítópult",
+        "dashboard",
+        "főoldal",
+        "áttekintés",
+        "összefoglaló",
+        "kezdőlap",
+        "Irányítópult",
+        "A háztartás pénzügyi pillanatképe egy helyen.",
+        "Az irányítópult mutatja az aktuális egyenleget, fizetendő összegeket, megtakarításokat és a bekapcsolt modulok figyelmeztetéseit. A kártyák a kiválasztott kasszához és hónaphoz igazodnak."
+      ],
+      "path": "/",
+      "body": "A háztartás pénzügyi pillanatképe egy helyen.\n\nAz irányítópult mutatja az aktuális egyenleget, fizetendő összegeket, megtakarításokat és a bekapcsolt modulok figyelmeztetéseit. A kártyák a kiválasztott kasszához és hónaphoz igazodnak.\n\nElső lépések:\n1. Válaszd ki a kasszát és a hónapot a fejlécben.\n2. A widget sorrend a Beállítások → Irányítópult menüben állítható.\n3. A színes sávokra kattintva ugorhatsz a részletes modulokhoz.\n\nFunkciók:\n- Egyenleg és fizetendő: A költségvetés aktuális pénze és a még nem kifizetett tételek.\n- Figyelmeztetések: Lejárt számlák, elmaradt bevétel, biztosítás, bérleti díj és AI jelzések.\n- Modul összefoglalók: Rezsi mérleg, tartozások, vállalkozás bevétel — ha a modul be van kapcsolva.\n\nTippek:\n- A fejlécben választott kassza és hónap határozza meg, mit látsz — minden kártya ehhez igazodik.\n- Ha valami hiányzik, ellenőrizd: be van-e kapcsolva a modul, és van-e jogosultságod hozzá.\n- A figyelmeztetésekre kattintva közvetlenül a részletes modulhoz ugorhatsz.\n\nRészletes súgó:\nK: Egyenleg és fizetendő\nV: A költségvetés aktuális pénze és a még nem kifizetett tételek.\n\nK: Figyelmeztetések\nV: Lejárt számlák, elmaradt bevétel, biztosítás, bérleti díj és AI jelzések.\n\nK: Modul összefoglalók\nV: Rezsi mérleg, tartozások, vállalkozás bevétel — ha a modul be van kapcsolva.\n\nK: Mi az „Egyenleg” az irányítópulton?\nV: A költségvetésben rögzített egyenleg: bevételek mínusz már kifizetett kiadások. Nem tartalmazza a Széf számláit.\n\nK: Mit jelent a „Fizetendő”?\nV: Az adott hónapban esedékes, de még nem kifizetett tételek összege (kiadások + rezsi).\n\nK: Mit jelent a „Marad” / szabad keret?\nV: Szabad keret a hónap végére: egyenleg mínusz fizetendő. Negatív érték túlköltést jelez.\n\nK: Mit jelent a „Lejárt” figyelmeztetés?\nV: A határidőn túli, még nem rendezett tételek. Ezeket érdemes előbb kifizetni.\n\nK: Mit mutat a „Vagyon” / megtakarítás összesítő?\nV: Összes megtakarítás: bankszámlák és állampapírok együtt, tulajdonos szerint bontva.\n\nK: Mit mutat a vállalkozás kártya az irányítópulton?\nV: A vállalkozás (Little Loom) tárgyhavi árbevétele a rögzített rendelésekből.\n\nK: Mit mutat a rezsi mérleg az irányítópulton?\nV: Rezsi mérleg: ki mennyit fizetett és ki mennyivel tartozik a partnernek. Megosztás nélkül csak a havi számlák összege.\n\nK: Mit mutat a tartozások összesítő?\nV: Összes aktív hitel és kölcsön hátraléka (eredeti összeg mínusz eddig törlesztve).\n\nK: Mi az AI heti összefoglaló?\nV: AI által generált heti összefoglaló a háztartás pénzügyeiről — trendek és figyelmeztetések.\n\nK: Mi az AI rezsi / fogyasztás figyelmeztetés?\nV: A mérőóra-leolvasások és számlák alapján keres szokatlan fogyasztást vagy ugrást.\n\nK: Mikor jelenik meg a zsebpénz kamat figyelmeztetés?\nV: Kiosztható havi kamat — csak az aktuális hónap utolsó napjain (alapból 3), amikor érdemes rögzíteni.\n\nK: Mit mutat a biztosítás emlékeztető?\nV: Közelgő biztosítási megújítások és fedezet/lejárat — ugyanaz, mint a Biztosítások oldalon.\n\nK: Mit mutat az AAM / adó keret becslés?\nV: AAM éves bevételi keret becslése a rögzített rendelések alapján — a Vállalkozás éves nézetével egyezik.\n\nK: Mit jelent a várható bérleti díj?\nV: Aktív ingatlanok havi bérleti díja + áthárított közös költség (NAV: bevétel), az adott hónapra.\n\nK: Mit jelent a befolyt bérleti díj?\nV: Az adott hónapban befizetés napjával rögzített bevételek összege.\n\nK: Mit jelent a hátralékos bérleti díj?\nV: Várható bérleti díj mínusz befolyt — ami még nem érkezett be.\n\nK: Mit jelent a lejárt bérleti díj?\nV: Esedékesség után (türelmi nap) még nem befizetett bérleti díjak.\n\nK: Mit mutat a kintlévőség összesítő?\nV: Magán kölcsönök és előlegek — összesen ennyi pénz van még nálad másoknál (a Kintlévőség modulból).\n\nK: Mit jelent a „Várható bevétel” összesítő?\nV: Nettó várható pénz: elmaradt bevétel + kintlévőség + rezsi egyenleg. Ha a rezsi negatív, te tartozol a partnernek — ez csökkenti az összeget.\n\nK: Tipp\nV: A fejlécben választott kassza és hónap határozza meg, mit látsz — minden kártya ehhez igazodik.\n\nK: Tipp\nV: Ha valami hiányzik, ellenőrizd: be van-e kapcsolva a modul, és van-e jogosultságod hozzá.\n\nK: Tipp\nV: A figyelmeztetésekre kattintva közvetlenül a részletes modulhoz ugorhatsz."
+    },
+    {
+      "id": "guide.budget",
+      "area": "budget",
+      "title": "Költségvetés",
+      "keywords": [
+        "költségvetés",
+        "budget",
+        "bevétel",
+        "kiadás",
+        "tranzakció",
+        "kategória",
+        "kategóriák",
+        "címke",
+        "egyenleg",
+        "fizetendő",
+        "marad",
+        "Költségvetés",
+        "Bevételek és kiadások havi követése — minden háztartás alapmodulja.",
+        "A költségvetés modulban rögzíted a havi bevételeket és kiadásokat, kategóriákba sorolod őket, és látod mennyi pénz marad. Ingyenes csomagban is elérhető."
+      ],
+      "path": "/budget",
+      "moduleId": "budget",
+      "body": "Bevételek és kiadások havi követése — minden háztartás alapmodulja.\n\nA költségvetés modulban rögzíted a havi bevételeket és kiadásokat, kategóriákba sorolod őket, és látod mennyi pénz marad. Ingyenes csomagban is elérhető.\n\nElső lépések:\n1. Menj a Költségvetés menüpontra a bal oldali sávból.\n2. Adj hozzá bevételt vagy kiadást a „+ Új tétel” gombbal — a kategóriát a listából választod.\n3. Új kategória: Beállítások → Modulok → Költségvetés → Kategóriák (admin).\n4. Jelöld kifizetettnek, ha már rendezted — így frissül az egyenleg.\n\nFunkciók:\n- Havi és éves nézet: Hónapról hónapra vagy éves összesítővel dolgozhatsz.\n- Kategóriák: Saját költségcsoportok a Beállításokban — pl. Élelmiszer, Rezsi, Fizetés.\n- Saját keret: Előre lefoglalt összeg egy témára (pl. ajándék), ledgerrel követve.\n- AI elemzések: Premium csomagban: túlköltés okai, fizetési sorrend, spórolási javaslatok.\n\nTippek:\n- A „Marad” = egyenleg mínusz fizetendő. Negatív érték túlköltést jelez.\n- Új kategóriát a Beállítások → Modulok menüben veszel fel, nem az új tételnél.\n\nRészletes súgó:\nK: Havi és éves nézet\nV: Hónapról hónapra vagy éves összesítővel dolgozhatsz.\n\nK: Kategóriák\nV: Saját költségcsoportok a Beállításokban — pl. Élelmiszer, Rezsi, Fizetés.\n\nK: Saját keret\nV: Előre lefoglalt összeg egy témára (pl. ajándék), ledgerrel követve.\n\nK: AI elemzések\nV: Premium csomagban: túlköltés okai, fizetési sorrend, spórolási javaslatok.\n\nK: Mi a kézi egyenleg a költségvetésben?\nV: A háztartás jelenlegi pénze (bankszámla + készpénz). A rezsi elszámolás automatikusan módosítja, ha a partner kifizet téged.\n\nK: Mit jelent a „Fizetendő”?\nV: Ebben a hónapban esedékes, de még nem kifizetett kiadások és rezsi együtt. Rezsinél megosztás esetén a te részed (pl. közös 50%, saját szabály) számít — nem a teljes számla.\n\nK: Mit jelent a „Marad” / szabad keret?\nV: Becsült szabad keret: jelenlegi egyenleg mínusz a még fizetendő összeg.\n\nK: Mit jelent a „Lejárt” figyelmeztetés?\nV: Lejárt határidőjű, még nyitott tételek — sürgősségi lista.\n\nK: Mit jelent az „Elmaradt bevétel”?\nV: Az év elejétől a kiválasztott hónapig minden lejárt, még nem befolyt bevétel összege. Halmozódik hónapról hónapra — pl. január óta hiányzó fizetés összeadódik. A jelenlegi hónap csak akkor számít, ha annak a bevétele is lejárt.\n\nK: Mit jelent a „Tervezett kiadás”?\nV: Az adott hónapra rögzített kiadások és rezsi összesen — függetlenül attól, ki van-e már fizetve. Rezsinél megosztás esetén ugyanaz a te részed számít, mint a Fizetendőnél. A hónap elején ez mutatja, mennyi költés vár rád.\n\nK: Mit jelent a „Tervezett bevétel”?\nV: Az adott hónapra rögzített bevételek összesen — függetlenül attól, megérkezett-e már. A hónap elején ez mutatja a várható bevételt.\n\nK: Mit számít „Kifizetve ebben a hónapban”?\nV: Ténylegesen kifizetett kiadások és rezsi ebben a hónapban. Saját keretes tételeknél a ledgerben felhasznált összeg számít.\n\nK: Mit jelent a tervezett havi egyenleg?\nV: Tervezett bevétel mínusz tervezett kiadás. A hónap elején is látszik, hogy a rögzített tételek alapján kijön-e a hónap, vagy hiány lesz.\n\nK: Mit jelent a „Befolyt bevétel”?\nV: Már megérkezett bevételek ebben a hónapban — kifizetettnek jelölt tételek összege.\n\nK: Hogyan működik az AI túlköltés elemzés?\nV: Túlköltés = negatív havi egyenleg (befolyt bevétel − kifizetett kiadások, rezsivel együtt). A chip-ek a legnagyobb kiadási kategóriákat mutatják, nem magát a túlköltés összeget.\n\nK: Mit mutat a kategória összesítő?\nV: Kategóriánkénti tényleges költés: normál kiadásnál csak kifizetett tételek; saját keretnél (ledger) a felhasznált összeg, nem a teljes keret.\n\nK: Mit mutat az éves kifizetett kiadás?\nV: Az adott évben ténylegesen kifizetett kiadások összege (tételek, rezsi, tartozás-részletek).\n\nK: Mit mutat az éves befolyt bevétel?\nV: Az adott évben befolyt bevételek összege.\n\nK: Mit jelent az éves nettó?\nV: Éves bevétel mínusz éves kifizetett kiadás.\n\nK: Mit mutat az éves összehasonlítás?\nV: Összehasonlítás az előző év azonos időszakával (kifizetett kiadások alapján).\n\nK: Mit mutat az éves kategória bontás?\nV: Kategóriánkénti kifizetett kiadás — az előző év ugyanazon kategóriájához viszonyítva.\n\nK: Mi a legnagyobb kiadási kategória az évben?\nV: A legnagyobb összegű kiadási kategória az évben.\n\nK: Mit mutatnak az éves automatikus mutatók?\nV: Automatikus éves mutatók — átlag, csúcs hónap, megtakarítási arány, rezsi súly.\n\nK: Mi az AI éves összefoglaló?\nV: AI éves összefoglaló a kifizetett tételek és kategóriák alapján — konkrét tanácsokkal.\n\nK: Mit mutatnak a bevételi források éves nézetben?\nV: Befolyt bevételek kategóriánként — pl. Fizetés, Rezsi elszámolás.\n\nK: Mit mutat az éves elmaradt bevétel?\nV: Lejárt, még nem befolyt bevételek összesítve az év hónapjaira bontva.\n\nK: Mit mutat az éves törlesztés összesítő?\nV: A költségvetésbe szinkronizált havi törlesztések — mi lett kifizetve az évben vs. aktuális hátralék.\n\nK: Mit mutat az éves megtakarítás mozgás?\nV: Megtakarítási számlák ledger mozgásai: befizetés, kivét, és becsült egyenleg az év végén.\n\nK: Mit mutat az éves saját keret (ledger) bontás?\nV: Saját keretes kiadások (ledger) bontása: a keret neve alatt hol költöttél (pl. Lidl, Kifli.hu) az év ledger tételei alapján.\n\nK: Mi a tétel megnevezése?\nV: Rövid megnevezés a tételről (pl. „Lidl”, „Netflix”).\n\nK: Mi a költségkategória mező?\nV: Költségkategória — a beállításokban szerkeszthető lista.\n\nK: Hogyan adjak meg összeget?\nV: Összeg forintban. Kiadásnál negatív előjel nem kell.\n\nK: Hogyan működik a deviza (EUR/USD) rögzítés?\nV: Mentés: az összeg EUR/USD-ben marad. A költségvetés számítás (Fizetendő, Marad, kategóriák) forintra vált élő árfolyamon.\n\nK: Mit jelent az esedékesség dátuma?\nV: Mikor esedékes vagy mikor történt a tranzakció.\n\nK: Mit jelent a kifizetés dátuma?\nV: Ha kitöltöd, a tétel kifizetettnek számít és nem jelenik meg a fizetendő listában.\n\nK: Hogyan jelölök kiadást kifizetettnek?\nV: Kattints a státuszra: függőben ↔ kifizetve váltás egy érintéssel. A kifizetés napja automatikusan a mai dátum lesz.\n\nK: Hogyan működik a hónap másolása?\nV: Az előző hónap költségvetési tételeit másolja a kiválasztott hónapra (esedékesség napja megmarad). Minden másolat függőben marad; saját keretes tételeknél a ledger üresen indul.\n\nK: Mi a ledger / saját keret felhasználás?\nV: Mennyit használtál fel ebből a keretből / előlegből.\n\nK: Mi a ledger megjegyzés mező?\nV: Opcionális megjegyzés a ledger bejegyzéshez.\n\nK: Milyen tételtípusok vannak?\nV: Válaszd ki, hogyan számítson a tétel a havi cashflow-ba. A választás után is látszik a rövid magyarázat — mobilon is.\n\nK: Mi a normál kiadás típus?\nV: Közvetlen kiadás: a teljes összeg a „Fizetendő” / „Marad” számításban szerepel, amíg ki nem fizeted. Nem kell külön ledger tételeket rögzíteni.\n\nK: Mi a saját keretes kiadás?\nV: Előre lekötött keret (pl. tankolás): a tétel összege a plafon. A tényleges költést ledger bejegyzésekkel követed. Fizetendő = keret mínusz felhasználva; kifizetettként jelölve a ledger összeg számít „már kifizetve” és kategória összegzésnek.\n\nK: Mi a normál bevétel típus?\nV: Bevétel, ami növeli a költhető egyenleget, ha kifizetettnek jelölöd (pl. fizetés, visszatérítés).\n\nK: Mi a tartalék bevétel típus?\nV: Pénz, amit ebben a hónapban félreteszel — külön „Tartalékok” listában jelenik meg. Nem növeli a cashflow „Marad” összegét, és nem helyettesíti a Megtakarítások bankszámláit.\n\nK: Mi a különbség a tartalék és a megtakarítás között?\nV: Tartalék ≠ megtakarítás számla. Ha bankszámlán / állampapíron van a pénz, azt a Megtakarítások modulban kövesd.\n\nK: Hogyan rögzítek ledger bejegyzést?\nV: A saját keretes kiadásnál itt rögzíted a tényleges felhasználást. A keret összege nem változik ettől — csak a „felhasználva” sáv nő.\n\nK: Tipp\nV: A „Marad” = egyenleg mínusz fizetendő. Negatív érték túlköltést jelez.\n\nK: Tipp\nV: Új kategóriát a Beállítások → Modulok menüben veszel fel, nem az új tételnél."
+    },
+    {
+      "id": "guide.budget_categories",
+      "area": "budget_categories",
+      "title": "Költségvetés kategóriák",
+      "keywords": [
+        "kategória",
+        "kategóriák",
+        "címke",
+        "új kategória",
+        "költségvetés kategória",
+        "category",
+        "Költségvetés kategóriák",
+        "Új kategória a Beállításokban — a + Új tétel csak választ a listából.",
+        "A költségkategóriák a háztartás szintjén, a Beállítások → Modulok → Költségvetés → Kategóriák szekcióban kezelhetők. Új tétel rögzítésekor nem hozol létre kategóriát, csak a meglévők közül választasz."
+      ],
+      "path": "/settings?tab=modules",
+      "body": "Új kategória a Beállításokban — a + Új tétel csak választ a listából.\n\nA költségkategóriák a háztartás szintjén, a Beállítások → Modulok → Költségvetés → Kategóriák szekcióban kezelhetők. Új tétel rögzítésekor nem hozol létre kategóriát, csak a meglévők közül választasz.\n\nElső lépések:\n1. Beállítások → Modulok fül.\n2. Költségvetés kártya → Kategóriák szekció.\n3. „Új kategória” mező — név megadása és hozzáadás.\n4. Költségvetés → + Új tétel → kategória kiválasztása a legördülőből.\n\nFunkciók:\n- Admin szerkesztés: Csak a háztartás adminisztrátora adhat hozzá vagy törölhet kategóriát.\n- Színkód: Kategóriánként állítható szín a költségvetésben.\n- Törlés: Kategória törlésekor a meglévő tételek megmaradnak.\n\nTippek:\n- Új kategóriát csak admin hozhat létre — a + Új tétel űrlapon nem lehet.\n- Érdemes előre gondolkodni a kategóriákon: később is átnevezhető, de a tételek megmaradnak.\n- Színkóddal gyorsabban felismered a kiadásokat a havi listában.\n\nRészletes súgó:\nK: Hol hozok létre új kategóriát?\nV: Beállítások → Modulok → Költségvetés kártya → Kategóriák szekció. Csak a háztartás adminisztrátora szerkesztheti.\n\nK: Miért nem tudok kategóriát létrehozni az „Új tétel” űrlapon?\nV: Az „Új tétel” csak a meglévő kategóriák közül választ — új kategória mindig a Beállításokban jön létre.\n\nK: Admin szerkesztés\nV: Csak a háztartás adminisztrátora adhat hozzá vagy törölhet kategóriát.\n\nK: Színkód\nV: Kategóriánként állítható szín a költségvetésben.\n\nK: Törlés\nV: Kategória törlésekor a meglévő tételek megmaradnak.\n\nK: Hogyan adok hozzá új költségkategóriát?\nV: Költségkategória neve a költségvetésben.\n\nK: Tipp\nV: Új kategóriát csak admin hozhat létre — a + Új tétel űrlapon nem lehet.\n\nK: Tipp\nV: Érdemes előre gondolkodni a kategóriákon: később is átnevezhető, de a tételek megmaradnak.\n\nK: Tipp\nV: Színkóddal gyorsabban felismered a kiadásokat a havi listában."
+    },
+    {
+      "id": "guide.savings",
+      "area": "savings",
+      "title": "Megtakarítás",
+      "keywords": [
+        "megtakarítás",
+        "savings",
+        "széf",
+        "cél",
+        "állampapír",
+        "bankszámla",
+        "befektetés",
+        "Megtakarítás",
+        "Megtakarítási célok, bankszámlák és állampapírok egy helyen.",
+        "A Megtakarítás modulban nyilvántartod a számláidat, céljaidat és portfóliódat. A Pro csomag része; a háztartásban külön be kell kapcsolni."
+      ],
+      "path": "/savings",
+      "moduleId": "savings",
+      "body": "Megtakarítási célok, bankszámlák és állampapírok egy helyen.\n\nA Megtakarítás modulban nyilvántartod a számláidat, céljaidat és portfóliódat. A Pro csomag része; a háztartásban külön be kell kapcsolni.\n\nElső lépések:\n1. Beállítások → Modulok: kapcsold be a Megtakarítást.\n2. Menj a Megtakarítások menüpontra.\n3. Hozz létre számlát vagy célt, majd rögzíts befizetést vagy egyenleget.\n\nFunkciók:\n- Számlák és célok: Bankszámla, készpénz, megtakarítási cél összeggel és határidővel.\n- Állampapír / befektetés: Külön portfólió tételek árfolyammal.\n- Havi befizetés: Tervezett havi összeg a célokhoz.\n- Utazás kapcsolat: Utazástervezőből menthető megtakarítási célként (Premium).\n\nTippek:\n- A megtakarítás számlák nem számítanak bele a költségvetés „Marad” összegébe — külön modul.\n- Állampapírnál add meg a lejáratot, hogy időben emlékeztessen a következő kamatra.\n- Mozgásokat (befizetés/kivét) mindig rögzítsd — így marad pontos az egyenleg.\n\nRészletes súgó:\nK: Számlák és célok\nV: Bankszámla, készpénz, megtakarítási cél összeggel és határidővel.\n\nK: Állampapír / befektetés\nV: Külön portfólió tételek árfolyammal.\n\nK: Havi befizetés\nV: Tervezett havi összeg a célokhoz.\n\nK: Utazás kapcsolat\nV: Utazástervezőből menthető megtakarítási célként (Premium).\n\nK: Mit mutat a személyes megtakarítás összesítő?\nV: Saját és közös bankszámlák egyenlege — nem tartalmazza a Little Loom számlákat.\n\nK: Mit mutat a vállalkozási / feleség számla összesítő?\nV: A vállalkozáshoz / feleséghez kötött számlák és papírok összege.\n\nK: Mit jelent a teljes vagyon?\nV: Számlák + állampapírok együtt, minden tulajdonosra.\n\nK: Mit jelent a befektetési arány?\nV: Az állampapírok aránya a teljes vagyonban — likvid vs. lekötött.\n\nK: Hogyan nevezzek el számlát?\nV: Bank vagy számla neve (pl. OTP megtakarítás, Revolut).\n\nK: Hogyan működik a deviza (EUR/USD) rögzítés?\nV: A számla pénzneme. Az árfolyam a fejlécben állítható.\n\nK: Mi a számla tulajdonos mező?\nV: Kié a számla: saját, közös, vagy Little Loom.\n\nK: Hogyan nevezzek el állampapírt?\nV: Papír megnevezése (pl. PEMÁP 2028, FixMÁP).\n\nK: Mi az állampapír típus?\nV: Állampapír típusa — befolyásolja a kamatszámítást.\n\nK: Mi a befektetett tőke?\nV: Befektetett tőke összege vásárláskor.\n\nK: Mi a lejárati névérték?\nV: Lejáratkor kapott névérték (pl. DKJ 360 000 Ft). Független a MÁK aktuális értéktől, ha közben kivettél a papírból.\n\nK: Mi a hozam / kamat mező?\nV: Éves hozam / kamat százalékban — becsléshez és dashboard emlékeztetőhöz.\n\nK: Mi a vásárlás dátuma?\nV: Mikor vásároltad a papírt.\n\nK: Mi a lejárat dátuma?\nV: Lejárat dátuma — opcionális, emlékeztetőhöz.\n\nK: Mi a következő kamatkifizetés összege?\nV: FixMÁP-hoz hasonló: következő kamatkifizetés összege.\n\nK: Mi a kamat dátuma?\nV: Következő kamat vagy kupon dátuma.\n\nK: Hogyan rögzítek befizetést vagy kivétet?\nV: Befizetés (+) vagy kivét (−) — módosítja a számla egyenlegét.\n\nK: Mi a mozgás megjegyzése?\nV: Opcionális megjegyzés a mozgáshoz.\n\nK: Hogyan szerkesztek korábbi mozgást?\nV: Korábbi tétel javítása: szerkesztés gomb, majd Mentés. Törlés a kuka ikonnal.\n\nK: Tipp\nV: A megtakarítás számlák nem számítanak bele a költségvetés „Marad” összegébe — külön modul.\n\nK: Tipp\nV: Állampapírnál add meg a lejáratot, hogy időben emlékeztessen a következő kamatra.\n\nK: Tipp\nV: Mozgásokat (befizetés/kivét) mindig rögzítsd — így marad pontos az egyenleg."
+    },
+    {
+      "id": "guide.debts",
+      "area": "debts",
+      "title": "Tartozások",
+      "keywords": [
+        "tartozás",
+        "debt",
+        "hitel",
+        "kölcsön",
+        "törlesztés",
+        "részlet",
+        "kamatláb",
+        "Tartozások",
+        "Hitelek, kölcsönök és törlesztési ütemezés.",
+        "A Tartozások modulban követed a hiteleidet, a minimum törlesztéseket és a hátralékot. Pro csomag szükséges."
+      ],
+      "path": "/debts",
+      "moduleId": "debts",
+      "body": "Hitelek, kölcsönök és törlesztési ütemezés.\n\nA Tartozások modulban követed a hiteleidet, a minimum törlesztéseket és a hátralékot. Pro csomag szükséges.\n\nElső lépések:\n1. Kapcsold be a modult a Beállítások → Modulok menüben.\n2. Tartozások menü → Új hitel/kölcsön.\n3. Add meg az eredeti összeget, kamatot és törlesztési tervet.\n4. A törlesztéseket a költségvetésbe is szinkronizálhatod.\n\nFunkciók:\n- Törlesztési terv: Havi részletek és hátralévő összeg.\n- Dokumentumok: Szerződés csatolása a hitelhez.\n- AI stratégia: Premium: hórép vagy göngyöleg javaslat extra befizetéssel.\n\nTippek:\n- A kamatláb és minimum törlesztés pontossága döntő — így reális a lejárat becslés.\n- Extra befizetést a stratégia szekcióban modellezheted, mielőtt ténylegesen fizetsz.\n- Költségvetés-szinkronnal a törlesztés automatikusan megjelenik a havi kiadások között.\n\nRészletes súgó:\nK: Törlesztési terv\nV: Havi részletek és hátralévő összeg.\n\nK: Dokumentumok\nV: Szerződés csatolása a hitelhez.\n\nK: AI stratégia\nV: Premium: hórép vagy göngyöleg javaslat extra befizetéssel.\n\nK: Mit jelent a tartozások hátralék összesítő?\nV: Minden aktív tartozás hátraléka: eredeti összeg − eddig törlesztve. A táblázatban látható részletekkel.\n\nK: Mi a havi minimum törlesztés összesítő?\nV: Az összes hitel havi minimum/részlet összege — ezt érdemes a költségvetésben is követni.\n\nK: Mit jelent a lejárat becslés?\nV: Ha csak a megadott havi részletet fizeted, mikor fut ki utoljára egy hitel. Ha a kamatot nem fedi a részlet, „nincs vége” jelenik meg.\n\nK: Mit jelent a havi kamat becslés?\nV: Becsült kamat, ha a jelenlegi minimumot fizeted — összehasonlításhoz az extra befizetéseknél.\n\nK: Mit mutat a törlesztési haladás?\nV: Az összes tartozásból eddig visszafizetett arány: összes törlesztve / eredeti összeg.\n\nK: Mi a különbség az avalanche és snowball stratégia között?\nV: Avalanche: legmagasabb kamat először (olcsóbb összesen). Snowball: legkisebb hátralék először (gyors sikerélmény).\n\nK: Mit jelent a javasolt törlesztési sorrend?\nV: A kiválasztott stratégia szerinti ajánlott sorrend — melyik tartozást érdemes előbb extra befizetéssel támadni.\n\nK: Mi az extra befizetés mező a stratégiánál?\nV: Mennyivel többet fizetsz a stratégia szerinti első hitelre a minimumon felül — reális összegeket adj meg (pl. +10–50 e Ft).\n\nK: Mit írjak a tartozás nevéhez?\nV: Felismerhető név: pl. Lakáshitel, Autóhitel, Hitelkártya.\n\nK: Mi az eredeti összeg mező?\nV: A hitel eredeti főösszege vagy jelenlegi teljes tartozása forintban.\n\nK: Mi az „eddig törlesztve” mező?\nV: Eddig visszafizetett összeg. A hátralék = eredeti − eddig törlesztve.\n\nK: Miért kell kamatláb?\nV: Éves kamatláb százalékban (THM-hez közel). A lejárat és kamatköltség számításához kell.\n\nK: Mi a minimum havi törlesztés?\nV: A bank által előírt havi törlesztő/részlet. Ha kisebb, mint a havi kamat, a tartozás nem csökken.\n\nK: Mi az esedékesség napja?\nV: A hónap melyik napján esedékes a törlesztés (1–31). Költségvetés-emlékeztetőhöz.\n\nK: Hogyan rögzítek törlesztést?\nV: Most befizetett összeg — növeli az „eddig törlesztve” mezőt.\n\nK: Mi a törlesztés dátuma?\nV: A tényleges befizetés napja — ez jelenik meg az előzményekben és a törlesztett tartozásoknál.\n\nK: Mi a törlesztés megjegyzése?\nV: Opcionális megjegyzés a törlesztéshez (pl. „Júniusi részlet”).\n\nK: Hogyan szinkronizálom a törlesztést a költségvetésbe?\nV: Ha be van pipálva, ugyanakkor kiadásként is rögzíti a költségvetésben a kiválasztott kategóriával.\n\nK: Melyik kategóriába kerüljön a törlesztés?\nV: Melyik költségkategóriába kerüljön a törlesztés a cashflow-ban.\n\nK: Tipp\nV: A kamatláb és minimum törlesztés pontossága döntő — így reális a lejárat becslés.\n\nK: Tipp\nV: Extra befizetést a stratégia szekcióban modellezheted, mielőtt ténylegesen fizetsz.\n\nK: Tipp\nV: Költségvetés-szinkronnal a törlesztés automatikusan megjelenik a havi kiadások között."
+    },
+    {
+      "id": "guide.utilities",
+      "area": "utilities",
+      "title": "Rezsi",
+      "keywords": [
+        "rezsi",
+        "utilities",
+        "számla",
+        "villany",
+        "gáz",
+        "víz",
+        "internet",
+        "közös költség",
+        "megosztás",
+        "Rezsi",
+        "Közüzemi számlák, határidők és partnerrel való elszámolás.",
+        "A Rezsi modulban rögzíted a havi számlákat, követed mi van kifizetve, és opcionálisan megoszthatod a költséget a partnereddel. Pro csomag."
+      ],
+      "path": "/utilities",
+      "moduleId": "utilities",
+      "body": "Közüzemi számlák, határidők és partnerrel való elszámolás.\n\nA Rezsi modulban rögzíted a havi számlákat, követed mi van kifizetve, és opcionálisan megoszthatod a költséget a partnereddel. Pro csomag.\n\nElső lépések:\n1. Rezsi menüpont → új számla vagy sablon alapján.\n2. Add meg az összeget, határidőt és kifizetőt.\n3. Megosztáshoz: Beállítások → Rezsi partner beállítása.\n\nFunkciók:\n- Sablonok: Ismétlődő számlák gyors rögzítése.\n- Rezsi megosztás: Pro funkció: ki fizette, ki mennyivel tartozik.\n- Költségvetés szinkron: Kifizetéskor megjelenik a költségvetésben is.\n\nTippek:\n- Hónap elején másold az előző hónap rezsijét — gyorsabb, mint mindent újra begépelni.\n- Megosztásnál minden számlánál jelöld, ki fizette — ettől lesz pontos a mérleg.\n- A „Tartozás rendezése” nem új számla, hanem elszámolás a partnerrel.\n\nRészletes súgó:\nK: Sablonok\nV: Ismétlődő számlák gyors rögzítése.\n\nK: Rezsi megosztás\nV: Pro funkció: ki fizette, ki mennyivel tartozik.\n\nK: Költségvetés szinkron\nV: Kifizetéskor megjelenik a költségvetésben is.\n\nK: Mit jelent a rezsi egyenleg / mérleg?\nV: Ki mennyivel tartozik a másiknak ebben a hónapban. A „Tartozás rendezése” rögzíti az elszámolást (nem új rezsi sor), és a költségvetésben bevételként vagy kiadásként jelenik meg.\n\nK: Mi a rezsi elszámolás rögzítése?\nV: A hónap rezsi-tartozása rendezve. A költségvetésben külön „Rezsi elszámolás” tételként látszik — bevétel, ha a partner fizetett neked; kiadás, ha te fizettél neki.\n\nK: Mit jelent a „Mi fizettünk”?\nV: Ti általatok befizetett közüzemi és egyéb rezsi összege.\n\nK: Mit jelent a „Partner fizetett”?\nV: A partner által befizetett összeg ebben a hónapban.\n\nK: Mit jelent az összes rezsi tétel?\nV: Összes rögzített rezsi tétel a kiválasztott hónapban.\n\nK: Mit jelent a kifizetett rezsi összeg?\nV: Már kifizetett (paidDate) rezsi tételek összege ebben a hónapban.\n\nK: Mit jelent a várakozó rezsi?\nV: Még nyitott, fizetendő rezsik összege ebben a hónapban.\n\nK: Mit jelent a rezsi készültség?\nV: A hónap rezsitételeinek hány százalékát rendezték már kifizetésként.\n\nK: Hogyan működik a hónap másolása?\nV: Az előző hónap rezsi tételeit másolja a kiválasztott hónapra: ugyanaz a megnevezés, összeg, határidő napja és megosztás. Fizető és kifizetés üresen marad.\n\nK: Mik a rezsi sablonok?\nV: Új hónap kitöltéséhez sablon: megnevezés, becsült összeg, esedékesség napja, megosztás. Üres lista = csak múlt havi másolás vagy kézi rögzítés.\n\nK: Ki fizette a számlát?\nV: Kattints a legördülőre: ki fizette a számlát? Függőbenre állítva törlődik a kifizetés.\n\nK: Hogyan jelölök kiadást kifizetettnek?\nV: Kattints a státuszra: várakozik ↔ kész. A kifizetés napja automatikusan a mai dátum.\n\nK: Mit jelent a „aiAnomaly” mező?\nV: Összeveti a korábbi hónapok fogyasztását/számláit — szokatlanul magas tételnél figyelmeztet.\n\nK: Mi a rezsi típus mező?\nV: Közüzemi típus: villany, gáz, víz, szemét, egyéb.\n\nK: Hogyan adjak meg rezsi összeget?\nV: A számla végösszege forintban.\n\nK: Mi a rezsi fizetési határidő?\nV: Fizetési határidő — megjelenik a fizetendő listában is.\n\nK: Mi a rezsi megosztás / elszámolás típus?\nV: Ki viseli ezt a számlát? Ez határozza meg a rezsi-mérleget és hogy kinél jelenik meg költésként.\n\nK: Hogyan működik a rezsi megosztás?\nV: Rezsi megosztás be van kapcsolva — válaszd ki, ki fizeti ezt a konkrét számlát. A magyarázat mindig látható.\n\nK: Mit jelent a közös (50-50) megosztás?\nV: Közös költség: a teljes összeg fele-fele számít. Mindketten „fizettetek” a saját felezett részt, a havi rezsi-mérlegben is ez jelenik meg.\n\nK: Mit jelent, ha én fizetem a teljes számlát?\nV: Te fizeted a teljes számlát egyedül — a teljes összeg a te oldaladon költésként, a partner felé tartozás jelezhető a mérlegben.\n\nK: Mit jelent, ha a partner fizeti a teljes számlát?\nV: A partner fizeti a teljes számlát — nálad ez nem számít közvetlen költésnek, csak nyilvántartás és a mérleg számára.\n\nK: Tipp\nV: Hónap elején másold az előző hónap rezsijét — gyorsabb, mint mindent újra begépelni.\n\nK: Tipp\nV: Megosztásnál minden számlánál jelöld, ki fizette — ettől lesz pontos a mérleg.\n\nK: Tipp\nV: A „Tartozás rendezése” nem új számla, hanem elszámolás a partnerrel."
+    },
+    {
+      "id": "guide.meters",
+      "area": "meters",
+      "title": "Közműórák",
+      "keywords": [
+        "közműóra",
+        "meters",
+        "mérőóra",
+        "fogyasztás",
+        "óraállás",
+        "leolvasás",
+        "anomália",
+        "Közműórák",
+        "Mérőóra állások és fogyasztás trendek.",
+        "A Közműórák modulban hónapról hónapra rögzíted az óraállásokat, látod a fogyasztást és az AI szokatlan értékeket jelezhet. Pro csomag."
+      ],
+      "path": "/meters",
+      "moduleId": "meters",
+      "body": "Mérőóra állások és fogyasztás trendek.\n\nA Közműórák modulban hónapról hónapra rögzíted az óraállásokat, látod a fogyasztást és az AI szokatlan értékeket jelezhet. Pro csomag.\n\nElső lépések:\n1. Közműórák menü → Új mérőóra (név, egység, helyszín).\n2. Minden hónapban rögzíts új leolvasást.\n3. A grafikon mutatja az előző hónapok és év összehasonlítását.\n\nFunkciók:\n- Fogyasztás számítás: Automatikus különbség az előző leolvasáshoz képest.\n- AI anomália: Premium: szokatlan fogyasztás jelzése az átlaghoz képest.\n\nTippek:\n- Minden hónapban ugyanazon a napon olvasd le az órákat — így összehasonlítható a trend.\n- Ha az óra visszafelé mutat, ellenőrizd a beírt értéket — gyakori elírás.\n- Új mérőnél az első leolvasás alapállás — a másodiktól számít a fogyasztás.\n\nRészletes súgó:\nK: Fogyasztás számítás\nV: Automatikus különbség az előző leolvasáshoz képest.\n\nK: AI anomália\nV: Premium: szokatlan fogyasztás jelzése az átlaghoz képest.\n\nK: Mit mutat a fogyasztás grafikon?\nV: Mérőóra állások időbeli alakulása — ugrás vagy csökkenés is látszik.\n\nK: Mit jelent a „aiAnomaly” mező?\nV: AI keres szokatlan fogyasztási mintát az elmúlt leolvasások alapján.\n\nK: Hogyan választok mérőórát?\nV: Melyik mérőhöz tartozik a leolvasás (villany, gáz, víz…).\n\nK: Mi a leolvasás dátuma?\nV: Mikor olvastad le az órát.\n\nK: Mi az óraállás mező?\nV: Az óra aktuális állása a megadott mértékegységben (kWh, m³…).\n\nK: Mi a fogyasztás becslés éve?\nV: Melyik év fogyasztását becsüljük.\n\nK: Mi a fogyasztás becslés hónapja?\nV: Melyik hónap — az elmúlt leolvasások trendjéből számol.\n\nK: Hogyan nevezzek el új mérőórát?\nV: Felismerhető név (pl. „Villany főóra”).\n\nK: Mi a mértékegység mező?\nV: Mértékegység: kWh, m³, GJ stb.\n\nK: Mi a mérőóra helyszín mező?\nV: Hol van az óra (pl. pince, garázs) — csak megjegyzés.\n\nK: Tipp\nV: Minden hónapban ugyanazon a napon olvasd le az órákat — így összehasonlítható a trend.\n\nK: Tipp\nV: Ha az óra visszafelé mutat, ellenőrizd a beírt értéket — gyakori elírás.\n\nK: Tipp\nV: Új mérőnél az első leolvasás alapállás — a másodiktól számít a fogyasztás."
+    },
+    {
+      "id": "guide.business",
+      "area": "business",
+      "title": "Vállalkozás",
+      "keywords": [
+        "vállalkozás",
+        "business",
+        "webshop",
+        "shopify",
+        "rendelés",
+        "bevétel",
+        "aam",
+        "áfa",
+        "könyvelés",
+        "Vállalkozás",
+        "Vállalkozás bevételek, rendelések és importok.",
+        "A Vállalkozás modul webshop rendeléseket, bevételeket és éves kimutatásokat kezel. Premium csomag szükséges."
+      ],
+      "path": "/business",
+      "moduleId": "business",
+      "body": "Vállalkozás bevételek, rendelések és importok.\n\nA Vállalkozás modul webshop rendeléseket, bevételeket és éves kimutatásokat kezel. Premium csomag szükséges.\n\nElső lépések:\n1. Beállítások → Modulok: Vállalkozás bekapcsolása és név megadása.\n2. Vállalkozás menü → rendelés rögzítése vagy import beállítása.\n3. Shopify / WooCommerce / UNAS: Beállítások → Integrációk (Premium).\n\nFunkciók:\n- Rendelésnapló: Manuális és importált rendelések.\n- Éves elemzés: AAM keret, csatornák, AI éves összefoglaló.\n- Könyvelési ZIP: Premium: havi dokumentumcsomag letöltése.\n\nTippek:\n- A rendelés csak akkor számít bevételnek, ha megadod a tényleges befizetés napját.\n- Webshop import előtt állítsd be az integrációt a Beállításokban — Premium kell hozzá.\n- Éves nézetben követheted az AAM keretet — ne csak havi forgalmat nézz.\n\nRészletes súgó:\nK: Rendelésnapló\nV: Manuális és importált rendelések.\n\nK: Éves elemzés\nV: AAM keret, csatornák, AI éves összefoglaló.\n\nK: Könyvelési ZIP\nV: Premium: havi dokumentumcsomag letöltése.\n\nK: Mit mutat a havi árbevétel?\nV: A kiválasztott hónapban rögzített rendelések összértéke.\n\nK: Mit jelent a beérkezett vállalkozási bevétel?\nV: Már beérkezett / lekönyvelt összeg (kifizetve státusz).\n\nK: Mit jelent a függőben lévő bevétel?\nV: Még nem teljesült befizetés — kintlévőség.\n\nK: Mit jelent a haszonkulcs?\nV: Bevétel mínusz becsült költség — ha van költség mező.\n\nK: Mi az AI vállalkozás stratégia?\nV: AI elemzi a csatornákat és a kintlévőséget — javaslatokkal.\n\nK: Mi a rendelés dátuma?\nV: Rendelés vagy számla dátuma.\n\nK: Ki a vevő mező?\nV: Vevő vagy megrendelő neve.\n\nK: Hogyan adjak meg rendelés összeget?\nV: Rendelés bruttó összege forintban.\n\nK: Mi az értékesítési csatorna?\nV: Honnan jött: webshop, piactér, egyéb csatorna.\n\nK: Mi a fizetési mód?\nV: Utalás, kártya, utánvét stb.\n\nK: Mi a fizetési szolgáltató?\nV: Fizetési szolgáltató (Barion, Stripe…), ha van.\n\nK: Mi a pénz célhelye?\nV: Hová érkezett a pénz: bankszámla vagy platform.\n\nK: Mi a tényleges befizetés napja?\nV: Tényleges kifizetés napja — ettől számít „beérkezettnek”.\n\nK: Mi a számla sorszáma?\nV: Számla sorszáma könyveléshez.\n\nK: Mit jelent a fizetés szekció?\nV: Mikor érkezett meg a pénz és milyen számla tartozik hozzá — ettől lesz „beérkezett” a rendelés.\n\nK: Mit jelent a konverziós arány?\nV: A havi rendelések hány százalékánál érkezett meg a befizetés (RENDBEN / kifizetve státusz).\n\nK: Mit jelent a YTD forgalom?\nV: Year-to-date: az adott év elejétől összes rögzített forgalom.\n\nK: Mit jelent az átlagos rendelési érték (AOV)?\nV: Average Order Value — átlagos rendelési érték: forgalom / rendelésszám.\n\nK: Mi a legjobb csatorna?\nV: Legnagyobb árbevételű értékesítési csatorna az időszakban.\n\nK: Mit jelent a csatornaszám?\nV: Hány különböző értékesítési csatornán volt eladás.\n\nK: Tipp\nV: A rendelés csak akkor számít bevételnek, ha megadod a tényleges befizetés napját.\n\nK: Tipp\nV: Webshop import előtt állítsd be az integrációt a Beállításokban — Premium kell hozzá.\n\nK: Tipp\nV: Éves nézetben követheted az AAM keretet — ne csak havi forgalmat nézz."
+    },
+    {
+      "id": "guide.pocket_money",
+      "area": "pocket_money",
+      "title": "Zsebpénz",
+      "keywords": [
+        "zsebpénz",
+        "pocket",
+        "gyerek",
+        "kamat",
+        "kiosztás",
+        "költés",
+        "Zsebpénz",
+        "Családtagok zsebpénze és kamatozás.",
+        "A Zsebpénz modulban gyerekek (vagy bármely tag) egyenlegét és mozgásait követed. Pro csomag."
+      ],
+      "path": "/pocket-money",
+      "moduleId": "pocket_money",
+      "body": "Családtagok zsebpénze és kamatozás.\n\nA Zsebpénz modulban gyerekek (vagy bármely tag) egyenlegét és mozgásait követed. Pro csomag.\n\nElső lépések:\n1. Beállítások → Modulok: Zsebpénz be.\n2. Zsebpénz menü → tag hozzáadása, majd kiosztás vagy költés rögzítése.\n3. Kamatozás: a hónap végén jelenik meg a figyelmeztetés.\n\nFunkciók:\n- Kiosztás / költés / korrekció: Mozgástípusok külön kezelve.\n- Kamat: Beállítható százalék és szabályok.\n\nTippek:\n- Az egyenleg hónap végéig összesít — nem nullázódik minden hónap elején.\n- Korrekcióval állíthatod a kezdő egyenleget, ha a számított és valós összeg eltér.\n- Kamatozást a hónap utolsó napjain érdemes rögzíteni — addig változhatnak a költések.\n\nRészletes súgó:\nK: Kiosztás / költés / korrekció\nV: Mozgástípusok külön kezelve.\n\nK: Kamat\nV: Beállítható százalék és szabályok.\n\nK: Milyen zsebpénz mozgástípusok vannak?\nV: Kiosztás: adsz zsebpénzt (növeli az egyenleget). Költés: elköltött összeg (csökkenti). Korrekció: ha a számított egyenleg nem stimmel a valósággal — pl. kezdő összeg vagy maradt készpénz (szintén növeli).\n\nK: Hogyan számolódik a zsebpénz egyenleg?\nV: Az egyenleg a kiválasztott hónap végéig összesítve jelenik meg — nem nullázódik minden hónapban. A táblázat csak az adott hónap mozgásait listázza.\n\nK: Hogyan működik a zsebpénz kamatozás beállítása?\nV: A Kamatozás almenüben: kamat %, hogy a teljes egyenlegre vagy csak a hónapban kiosztott zsebpénzre számolunk, és hogy csak spórolás esetén jár-e, vagy költés után a bent maradtra is. A kiosztható kamat figyelmeztetés és a rögzítés gomb csak az aktuális hónap utolsó napjain jelenik meg (alapból 3 nap), mert addig változhatnak a költések.\n\nK: Tipp\nV: Az egyenleg hónap végéig összesít — nem nullázódik minden hónap elején.\n\nK: Tipp\nV: Korrekcióval állíthatod a kezdő egyenleget, ha a számított és valós összeg eltér.\n\nK: Tipp\nV: Kamatozást a hónap utolsó napjain érdemes rögzíteni — addig változhatnak a költések."
+    },
+    {
+      "id": "guide.insurance",
+      "area": "insurance",
+      "title": "Biztosítások",
+      "keywords": [
+        "biztosítás",
+        "insurance",
+        "kötvény",
+        "díj",
+        "megújítás",
+        "fedezet",
+        "Biztosítások",
+        "Biztosítási szerződések és díjak nyilvántartása.",
+        "A Biztosítások modulban tárolod a szerződéseket, díjakat és megújítási dátumokat. Pro csomag."
+      ],
+      "path": "/insurance",
+      "moduleId": "insurance",
+      "body": "Biztosítási szerződések és díjak nyilvántartása.\n\nA Biztosítások modulban tárolod a szerződéseket, díjakat és megújítási dátumokat. Pro csomag.\n\nElső lépések:\n1. Biztosítások menü → Új szerződés.\n2. Add meg a típust, díjat, gyakoriságot és dátumokat.\n3. Opcionálisan kapcsold a költségvetés szinkronhoz.\n\nFunkciók:\n- Emlékeztető: Közelgő megújítás az irányítópulton is.\n- Dokumentum: PDF csatolás Premium csomaggal.\n\nTippek:\n- Add meg a megújítás és fedezet dátumát — az irányítópulton is megjelenik az emlékeztető.\n- Költségvetés-szinkronnal a díjak automatikusan bekerülnek a havi kiadások közé.\n- Díjmentesített szerződésnél ne adj meg fizetendő díjat — felesleges figyelmeztetést kapsz.\n\nRészletes súgó:\nK: Emlékeztető\nV: Közelgő megújítás az irányítópulton is.\n\nK: Dokumentum\nV: PDF csatolás Premium csomaggal.\n\nK: Hogyan működik a biztosítás emlékeztető?\nV: A beállításokban megadott napok számával előtte listázzuk a megújítást és a fedezet végét. Lejárt dátum „lejárt” jelzéssel.\n\nK: Mit kell megadni egy biztosítási szerződésnél?\nV: Szerződés típusa: általános vagy élet / befektetési alap (befizetett összeg = alapérték, frissíthető). Díjmentesített szerződésnél nincs fizetendő díj. Fizetési gyakoriság (havi, negyedéves, féléves, éves) és induló hónap: ha be van kapcsolva a költségvetés-szinkron, a díjak automatikusan megjelennek a költségvetésben (mint a hitel törlesztések). Megújítás és fedezet dátuma külön mező. Ha a fedezet vége múltbeli, a szerződés automatikusan megszűnt / lejárt.\n\nK: Hogyan csatolok biztosítási dokumentumot?\nV: PDF dokumentumok csatolása szerződésenként (kötvény, ajánlat, melléklet). Csatolás funkció és Premium szükséges.\n\nK: Mi történik biztosítás törlésekor?\nV: Törléskor a szerződés eltűnik a listából; a költségvetésben a múltbeli (törlés előtti) hónapok díjai megmaradnak, a jövőbeli szinkronizált tételek nem jelennek meg többé.\n\nK: Tipp\nV: Add meg a megújítás és fedezet dátumát — az irányítópulton is megjelenik az emlékeztető.\n\nK: Tipp\nV: Költségvetés-szinkronnal a díjak automatikusan bekerülnek a havi kiadások közé.\n\nK: Tipp\nV: Díjmentesített szerződésnél ne adj meg fizetendő díjat — felesleges figyelmeztetést kapsz."
+    },
+    {
+      "id": "guide.rental",
+      "area": "rental",
+      "title": "Bérbeadás",
+      "keywords": [
+        "bérbeadás",
+        "rental",
+        "bérleti",
+        "ingatlan",
+        "bérlő",
+        "kaució",
+        "Bérbeadás",
+        "Bérbe adott ingatlanok és bevételek.",
+        "A Bérbeadás modulban ingatlanonként követed a bérleti díjat, közös költséget és befizetéseket. Pro csomag."
+      ],
+      "path": "/rental",
+      "moduleId": "rental",
+      "body": "Bérbe adott ingatlanok és bevételek.\n\nA Bérbeadás modulban ingatlanonként követed a bérleti díjat, közös költséget és befizetéseket. Pro csomag.\n\nElső lépések:\n1. Bérbeadás menü → Új ingatlan.\n2. Állítsd be a havi díjat és esedékességet.\n3. Befizetéskor rögzítsd a dátumot — szinkronizálható a költségvetésbe.\n\nFunkciók:\n- Havi tételek: Bérleti díj és áthárított költség külön.\n- Lejárt figyelmeztetés: Esedékesség után is nyitott tétel jelzése.\n\nTippek:\n- A bérleti díj és áthárított közös költség külön tétel — ne keverd a tulajdonosi költséggel.\n- Befizetés napját mindig rögzítsd — üres mező = még nem érkezett meg a pénz.\n- Költségvetés-szinkronnal a befizetés bevételként jelenik meg a cashflow-ban.\n\nRészletes súgó:\nK: Havi tételek\nV: Bérleti díj és áthárított költség külön.\n\nK: Lejárt figyelmeztetés\nV: Esedékesség után is nyitott tétel jelzése.\n\nK: Mit kell megadni egy bérbe adott ingatlannál?\nV: Bérleti díj és áthárított közös költség (bérlő fizeti) = várható bevétel. Esedékesség napja, megállapodások, szerződés feltöltése. Költségvetés-szinkron: befizetéskor bevételként jelenik meg a költségvetésben.\n\nK: Hogyan rögzítek bérleti bevételt?\nV: Havi tétel ingatlanonként: bérleti díj, közös ktg. áthárítás, esedékesség és befizetés napja. Üres befizetés = még nem érkezett — lejárt figyelmeztetés esedékesség után.\n\nK: Mi a tulajdonosi költség a bérbeadásnál?\nV: Tulajdonosi költség (felújítás, karbantartás, társasházi közös ktg. ha te fizeted) — nem keverendő a bérlőtől számlázott díjjal. Adózásnál külön költségként vezethető.\n\nK: Hogyan exportálok bérbeadás adatot?\nV: Éves CSV export: ingatlanok és havi bevételek (pontosvesszővel elválasztva, Excelhez).\n\nK: Tipp\nV: A bérleti díj és áthárított közös költség külön tétel — ne keverd a tulajdonosi költséggel.\n\nK: Tipp\nV: Befizetés napját mindig rögzítsd — üres mező = még nem érkezett meg a pénz.\n\nK: Tipp\nV: Költségvetés-szinkronnal a befizetés bevételként jelenik meg a cashflow-ban."
+    },
+    {
+      "id": "guide.receivables",
+      "area": "receivables",
+      "title": "Kintlévőség",
+      "keywords": [
+        "kintlévőség",
+        "receivable",
+        "kölcsön",
+        "tartozik",
+        "visszafizetés",
+        "előleg",
+        "Kintlévőség",
+        "Ki mennyivel tartozik neked — magán kölcsönök és előlegek.",
+        "A Kintlévőség modulban nyilvántartod, kinek adtál pénzt és mennyi a hátralék. Pro csomag."
+      ],
+      "path": "/receivables",
+      "moduleId": "receivables",
+      "body": "Ki mennyivel tartozik neked — magán kölcsönök és előlegek.\n\nA Kintlévőség modulban nyilvántartod, kinek adtál pénzt és mennyi a hátralék. Pro csomag.\n\nElső lépések:\n1. Kintlévőség menü → Új kapcsolat vagy tétel.\n2. Rögzíts kölcsönt vagy előleget, majd a visszafizetéseket.\n\nFunkciók:\n- Nyitott összeg: Összesítő az irányítópulton is megjelenik.\n\nTippek:\n- Minden visszafizetést külön rögzíts — így látszik a hátralék csökkenése.\n- Előleg és kölcsön külön tételként kezelhető ugyanannál a személynél.\n- Az irányítópulton összesítve látod, mennyi pénz van még nálad másoknál.\n\nRészletes súgó:\nK: Mire való a kintlévőség modul?\nV: Magán kölcsönök, előlegek és visszafizetendő összegek nyilvántartása — ki mennyivel tartozik neked, mennyi a hátralék.\n\nK: Hogyan rögzítek új kintlévőséget?\nV: Kintlévőség menü → Új kapcsolat vagy tétel → kölcsön vagy előleg összeg → visszafizetések rögzítése.\n\nK: Hol látom az összesítést?\nV: Az irányítópulton megjelenik a nyitott kintlévőség összege, ha a modul be van kapcsolva.\n\nK: Nyitott összeg\nV: Összesítő az irányítópulton is megjelenik.\n\nK: Mit mutat a kintlévőség összesítő?\nV: Magán kölcsönök és előlegek — összesen ennyi pénz van még nálad másoknál (a Kintlévőség modulból).\n\nK: Tipp\nV: Minden visszafizetést külön rögzíts — így látszik a hátralék csökkenése.\n\nK: Tipp\nV: Előleg és kölcsön külön tételként kezelhető ugyanannál a személynél.\n\nK: Tipp\nV: Az irányítópulton összesítve látod, mennyi pénz van még nálad másoknál."
+    },
+    {
+      "id": "guide.travel_planner",
+      "area": "travel_planner",
+      "title": "Utazástervező",
+      "keywords": [
+        "utazás",
+        "travel",
+        "útitervező",
+        "nyaralás",
+        "költség",
+        "útvonal",
+        "pdf",
+        "Utazástervező",
+        "AI utazásköltség-tervező és megtakarítási terv.",
+        "Az Utazástervező AI-val becsüli az utazás költségét, összeveti a pénzügyeiddel, és PDF-et is készíthetsz. Premium csomag."
+      ],
+      "path": "/tools/travel",
+      "moduleId": "travel_planner",
+      "body": "AI utazásköltség-tervező és megtakarítási terv.\n\nAz Utazástervező AI-val becsüli az utazás költségét, összeveti a pénzügyeiddel, és PDF-et is készíthetsz. Premium csomag.\n\nElső lépések:\n1. Okos eszközök → Utazástervező menü.\n2. Töltsd ki az űrlapot (úti cél, napok, keret, közlekedés).\n3. Generálás után szerkesztheted a költségeket és letöltheted a PDF-et.\n\nFunkciók:\n- Költségbontás: Szállás, étel, közlekedés, programok külön.\n- Belefér elemzés: Összevetés a megtakarításoddal és havi kapacitással.\n- Megosztás: Tételenként megosztható költség (pl. két pár).\n\nTippek:\n- Ha a szállás vagy jegy már megvan, jelöld „megvan” — nem számolja újra a költséget.\n- A „Belefér” elemzés a Marad + utazásra szánt megtakarítás alapján számol — pillanatkép.\n- PDF exporttal elmentheted a tervet — hasznos megosztani a társaddal is.\n\nRészletes súgó:\nK: Költségbontás\nV: Szállás, étel, közlekedés, programok külön.\n\nK: Belefér elemzés\nV: Összevetés a megtakarításoddal és havi kapacitással.\n\nK: Megosztás\nV: Tételenként megosztható költség (pl. két pár).\n\nK: Mi a pénz célhelye?\nV: Úti cél — város vagy régió. Külföldnél a költség becslés forintban, de EUR árfolyam megjegyzéssel.\n\nK: Mi az indulási hely?\nV: Indulási hely — autó/vonat költséghez. Alapértelmezés: Budapest.\n\nK: Hány napot adjak meg?\nV: Az utazás teljes napjainak száma (max. 90).\n\nK: Mi a teljes utazási keret?\nV: A teljes utazásra szánt keret forintban. Ha irreálisan alacsony, a terv a reális minimumot mutatja.\n\nK: Mi a tervezett indulás dátuma?\nV: Tervezett indulás — megtakarítási terv és havi félretétel számításához.\n\nK: Mi az utazók száma?\nV: Utazók száma — szállás, étkezés és jegyek költségét szorozza.\n\nK: Mi az utazás stílusa?\nV: Utazás jellege — befolyásolja a napi program és költség szintet.\n\nK: Mi a szállás preferencia?\nV: Szállás preferencia — hostel, apartman vagy hotel ársáv.\n\nK: Milyen közlekedési módok vannak?\nV: Közlekedés: autó (üzemanyag + útdíj + parkolás), repülő (realisztikus jegy), vonat/busz, vagy vegyes minimum.\n\nK: Mit jelent, ha a közlekedés már megvan?\nV: Ha a repülőjegy / vonatjegy / autó utazás már megvan, a közlekedési költség nem számít újra — csak a helyszíni kiadások.\n\nK: Mit jelent, ha a szállás már megvan?\nV: Ha a szállás már le van foglalva vagy megvan, a szállásköltség nem számít újra — csak étkezés, programok és egyéb kiadások.\n\nK: Mi az autó fogyasztás mező?\nV: Autó fogyasztása liter/100 km — pl. 6.5 (kompakt) vagy 9 (SUV). Ez alapján számol az üzemanyagár.\n\nK: Hogyan mentek megtakarítási célként?\nV: Megtakarítási célként menti a becsült összköltséget — megjelenik a Megtakarítások modulban és a költségvetésben.\n\nK: Mit jelent a „Belefér az utazás?”\nV: Összefoglaló: a Marad, a megtakarítás, a rendelkezésre álló összeg és a havi kapacitás alapján dönti el, befér-e az utazás.\n\nK: Mi a szabad keret az utazástervezőben?\nV: Az aktuális hónap szabad kerete a költségvetésben — ugyanaz, mint a „Marad” kártya. Pillanatkép az adott hónapra, nem havi átlag.\n\nK: Mi számít utazásra fordítható megtakarításnak?\nV: „Számít a felső összesítőbe” tételek forintra váltva (ugyanaz az árfolyam, mint a Megtakarítások oldalon). Kimarad: Államkincstár és a külön csoport (pl. vállalkozás). A lista a beleszámított és kimaradó tételeket mutatja.\n\nK: Mi a rendelkezésre álló összeg?\nV: Marad + utazásra számítható megtakarítás. Ez áll rendelkezésre az utazás fedezetére most.\n\nK: Honnan jön a teljes utazási költség?\nV: Az AI által becsült teljes utazási költség. Ha a rendelkezésre álló összeg nem fedezi, a hiányt havi félretétellel lehet pótolni az indulásig.\n\nK: Mi a havi megtakarítási kapacitás?\nV: Az elmúlt 3 hónap átlagos többlete: bevétel − kifizetett kiadás. Megmutatja, mennyit tudsz havonta félretenni — nem ugyanaz, mint a Marad.\n\nK: Mennyi kell havonta félretenni?\nV: Ennyi Ft havi megtakarítás kellene a hiány pótlásához a megadott indulásig.\n\nK: Mit mutat az összehasonlító táblázat?\nV: Minimum (padló), megadott keret, aktuális terv és komfort szint összehasonlítása.\n\nK: Hogyan módosíthatom a költségeket?\nV: A tételeket kifizetettnek jelölheted (nem számít a hátralévőbe), kizárhatod (pl. nincs biztosítás), módosíthatod az összeget, vagy adhatsz hozzá újat. A „Befér az utazás?” a hátralévő költség alapján számol újra.\n\nK: Hogyan működik a költségmegosztás?\nV: Megosztott tételnél a teljes összeg több fél között oszlik (pl. 2 = két házaspár felezi a szállást). A költségvetésbe és a „Belefér” számításba csak a mi részünk kerül.\n\nK: Tipp\nV: Ha a szállás vagy jegy már megvan, jelöld „megvan” — nem számolja újra a költséget.\n\nK: Tipp\nV: A „Belefér” elemzés a Marad + utazásra szánt megtakarítás alapján számol — pillanatkép.\n\nK: Tipp\nV: PDF exporttal elmentheted a tervet — hasznos megosztani a társaddal is."
+    },
+    {
+      "id": "guide.settings",
+      "area": "settings",
+      "title": "Beállítások",
+      "keywords": [
+        "beállítás",
+        "settings",
+        "háztartás",
+        "tag",
+        "modul",
+        "előfizetés",
+        "kategória",
+        "meghívó",
+        "Beállítások",
+        "Háztartás, tagok, modulok és előfizetés kezelése.",
+        "A Beállításokban módosítod a háztartás nevét, új tagot adsz hozzá, modulokat kapcsolsz be, és kezeled az előfizetést."
+      ],
+      "path": "/settings",
+      "body": "Háztartás, tagok, modulok és előfizetés kezelése.\n\nA Beállításokban módosítod a háztartás nevét, új tagot adsz hozzá, modulokat kapcsolsz be, és kezeled az előfizetést.\n\nElső lépések:\n1. Beállítások menü a bal oldali sávból.\n2. Háztartás fül: név, tagok, új fiók létrehozása.\n3. Modulok fül: mely modulok legyenek aktívak.\n4. Előfizetés fül: csomag, számlázás, Stripe portál.\n\nFunkciók:\n- Tag felvétel: Admin hozhat létre felhasználónevet és ideiglenes jelszót.\n- Modul kapcsolók: Pro/Premium modulok csak megfelelő csomaggal használhatók.\n- Integrációk: Shopify, SumUp stb. — Premium.\n\nTippek:\n- Modult csak akkor kapcsolj be, ha tényleg használni is fogod — így áttekinthetőbb a menü.\n- Olvasó szerepkörrel a tag csak megtekinthet — szerkesztéshez admin vagy egyéni jog kell.\n- Kategóriákat a Modulok fülön, a Költségvetés kártyán belül kezeled.\n\nRészletes súgó:\nK: Tag felvétel\nV: Admin hozhat létre felhasználónevet és ideiglenes jelszót.\n\nK: Modul kapcsolók\nV: Pro/Premium modulok csak megfelelő csomaggal használhatók.\n\nK: Integrációk\nV: Shopify, SumUp stb. — Premium.\n\nK: Mi a keresztnév mező?\nV: Megjelenik a háztartás tagjai előtt és az üdvözlésben.\n\nK: Mi a vezetéknév mező?\nV: Családnév — profil és meghívások.\n\nK: Mi a felhasználónév?\nV: Belépési név — csak az admin módosíthatja új fiók létrehozásával.\n\nK: Milyen jelszót adjak meg?\nV: Legalább 8 karakter. A mentés után azonnal érvényes.\n\nK: Miért kell jelszó megerősítés?\nV: Ismételd meg az új jelszót — egyeznie kell.\n\nK: Mi a háztartás neve?\nV: A háztartás neve a felületen és meghívásoknál.\n\nK: Mi a vállalkozás neve?\nV: Vállalkozás megjelenő neve (pl. Little Loom).\n\nK: Ki a rezsi partner?\nV: Rezsi megosztásnál a másik fél háztartási tagja.\n\nK: Milyen felhasználónevet adjak az új tagnak?\nV: Az új tag ezzel a felhasználónévvel lép be (kisbetű, pl. ildi).\n\nK: Mi az ideiglenes jelszó?\nV: Ideiglenes jelszó — első belépés után érdemes cserélni.\n\nK: Milyen szerepkörök vannak?\nV: Admin: minden modul. Olvasó: csak megtekintés. Egyéni: modulonkénti jog.\n\nK: Hogyan állítok be modul jogosultságot?\nV: Mely modulokat láthatja az új tag (ha nem admin).\n\nK: Hogyan adok hozzá új költségkategóriát?\nV: Költségkategória neve a költségvetésben.\n\nK: Mit jelent a háztartás törlése?\nV: Véglegesen törli a háztartást, az összes pénzügyi adatot és minden családtag fiókját. Nem vonható vissza.\n\nK: Hol találom a Shopify URL-t?\nV: A bolt admin címe, pl. bolt-neve.myshopify.com — a Shopify Admin → Beállítások → Bolt részletei alatt találod.\n\nK: Hol találom a Shopify API tokent?\nV: Shopify Admin API hozzáférési token (shpat_… előtaggal). A Shopify Adminban: Beállítások → Alkalmazások és értékesítési csatornák → Alkalmazások fejlesztése → Alkalmazás létrehozása → Admin API jogosultságok (orders olvasás) → Token telepítése / megtekintése. Csak a szerveren tároljuk titkosítva, soha ne oszd meg nyilvánosan.\n\nK: Hol találom a SumUp merchant kódot?\nV: SumUp Merchant kód (pl. MH4H92C7) — a SumUp Dashboard → Fiók / Bolt adatai alatt, vagy a tranzakciók URL-jében.\n\nK: Hol találom a SumUp API kulcsot?\nV: SumUp API kulcs (sup_sk_…). SumUp Developer / Dashboard → API kulcsok. Szükséges jogosultság: tranzakció előzmények (transactions.history) és profil / kifizetések (user.profile vagy user.profile_readonly). Titkosítva tároljuk.\n\nK: Tipp\nV: Modult csak akkor kapcsolj be, ha tényleg használni is fogod — így áttekinthetőbb a menü.\n\nK: Tipp\nV: Olvasó szerepkörrel a tag csak megtekinthet — szerkesztéshez admin vagy egyéni jog kell.\n\nK: Tipp\nV: Kategóriákat a Modulok fülön, a Költségvetés kártyán belül kezeled."
+    },
+    {
+      "id": "guide.subscription",
+      "area": "subscription",
+      "title": "Csomagok és előfizetés",
+      "keywords": [
+        "csomag",
+        "előfizetés",
+        "pro",
+        "premium",
+        "ingyenes",
+        "ár",
+        "fizetés",
+        "stripe",
+        "upgrade",
+        "Csomagok és előfizetés",
+        "Ingyenes, Pro és Premium csomagok összehasonlítása.",
+        "Az ingyenes csomagban a költségvetés és egy közös kassza érhető el. A Pro bővíti megtakarítással, tartozással, rezsi modulokkal. A Premium vállalkozást, AI funkciókat és utazástervezőt ad."
+      ],
+      "path": "/pricing",
+      "body": "Ingyenes, Pro és Premium csomagok összehasonlítása.\n\nAz ingyenes csomagban a költségvetés és egy közös kassza érhető el. A Pro bővíti megtakarítással, tartozással, rezsi modulokkal. A Premium vállalkozást, AI funkciókat és utazástervezőt ad.\n\nElső lépések:\n1. Menj az Árazás oldalra (/pricing) vagy Beállítások → Előfizetés.\n2. Válaszd ki a havi vagy éves számlázást.\n3. A fizetés Stripe-on keresztül történik.\n\nFunkciók:\n- Pro: Privát kasszák, megtakarítás, tartozás, rezsi, órák, zsebpénz, biztosítás, bérbeadás.\n- Premium: Minden Pro + vállalkozás, importok, AI, utazástervező, csatolások.\n\nTippek:\n- Pro modul bekapcsolása önmagában nem elég — a csomagodnak is tartalmaznia kell.\n- Éves előfizetésnél általában kedvezőbb a havi ár — a Beállítások → Előfizetésben választható.\n- Váltás után az adataid megmaradnak — csak a funkciók érhetők el a csomag szerint.\n\nRészletes súgó:\nK: Mit tartalmaz az ingyenes csomag?\nV: Költségvetés modul és egy közös kassza — minden háztartás alapja.\n\nK: Mit ad a Pro csomag?\nV: Privát kasszák, megtakarítás, tartozás, rezsi, közműórák, zsebpénz, biztosítás, bérbeadás, kintlévőség, rezsimegosztás.\n\nK: Mit ad a Premium csomag?\nV: Minden Pro funkció + vállalkozás modul, webshop importok (Shopify, WooCommerce, UNAS), AI elemzések, utazástervező, dokumentum csatolások, SumUp import.\n\nK: Hol kezelem az előfizetést?\nV: Beállítások → Előfizetés fül, vagy az Árazás oldal (/pricing). A fizetés Stripe-on keresztül történik.\n\nK: Pro\nV: Privát kasszák, megtakarítás, tartozás, rezsi, órák, zsebpénz, biztosítás, bérbeadás.\n\nK: Premium\nV: Minden Pro + vállalkozás, importok, AI, utazástervező, csatolások.\n\nK: Tipp\nV: Pro modul bekapcsolása önmagában nem elég — a csomagodnak is tartalmaznia kell.\n\nK: Tipp\nV: Éves előfizetésnél általában kedvezőbb a havi ár — a Beállítások → Előfizetésben választható.\n\nK: Tipp\nV: Váltás után az adataid megmaradnak — csak a funkciók érhetők el a csomag szerint."
+    },
+    {
+      "id": "guide.wallets",
+      "area": "wallets",
+      "title": "Kasszák (pénztárcák)",
+      "keywords": [
+        "kassza",
+        "wallet",
+        "pénztárca",
+        "közös",
+        "privát",
+        "váltás",
+        "Kasszák (pénztárcák)",
+        "Közös és privát kasszák a háztartáson belül.",
+        "A közös kassza mindenkinél elérhető (jogosultságtól függően). A Pro csomag privát kasszákat is engedélyez — saját költségvetés külön."
+      ],
+      "body": "Közös és privát kasszák a háztartáson belül.\n\nA közös kassza mindenkinél elérhető (jogosultságtól függően). A Pro csomag privát kasszákat is engedélyez — saját költségvetés külön.\n\nElső lépések:\n1. A fejlécben a kassza választóval válthatsz.\n2. Új privát kassza: Pro csomag szükséges.\n3. Minden modul a kiválasztott kasszához kötött adatokat mutat.\n\nFunkciók:\n- Közös kassza: Ingyenes csomagban egy közös kassza.\n- Privát kassza: Pro funkció — korlátlan számú személyes kassza.\n\nTippek:\n- Minden modul a kiválasztott kassza adatait mutatja — váltás előtt érdemes ellenőrizni.\n- Privát kassza = teljesen elkülönített költségvetés a közöstől.\n- Ingyenes csomagban egy közös kassza érhető el — Pro-val korlátlan privát is.\n\nRészletes súgó:\nK: Mi a közös kassza?\nV: A közös kassza a háztartás alap pénztárcája — ingyenes csomagban egy közös kassza érhető el. A fejlécben válthatsz kasszát; minden modul a kiválasztott kassza adatait mutatja.\n\nK: Mi a privát kassza?\nV: Pro csomagban korlátlan személyes kasszát hozhatsz létre. A privát kassza saját költségvetést jelent — a közös háztartási adatoktól elkülönül.\n\nK: Hogyan váltok kasszát?\nV: A fejlécben, a kassza választó gombra kattintva láthatod a közös és privát kasszákat, és átválthatsz közöttük.\n\nK: Közös kassza\nV: Ingyenes csomagban egy közös kassza.\n\nK: Privát kassza\nV: Pro funkció — korlátlan számú személyes kassza.\n\nK: Tipp\nV: Minden modul a kiválasztott kassza adatait mutatja — váltás előtt érdemes ellenőrizni.\n\nK: Tipp\nV: Privát kassza = teljesen elkülönített költségvetés a közöstől.\n\nK: Tipp\nV: Ingyenes csomagban egy közös kassza érhető el — Pro-val korlátlan privát is."
+    },
+    {
+      "id": "guide.data_import",
+      "area": "data_import",
+      "title": "Adatimport (Excel, CSV)",
+      "keywords": [
+        "excel",
+        "import",
+        "csv",
+        "feltöltés",
+        "tömeges",
+        "átvitel",
+        "migráció",
+        "xlsx",
+        "Adatimport (Excel, CSV)",
+        "Költségvetés Excel/CSV import jelenleg nem elérhető — alternatívák lent.",
+        "Az appban jelenleg nincs olyan funkció, amellyel egy meglévő Excel fájlból automatikusan feltölthetnéd a teljes költségvetést. A tételeket manuálisan kell felvinni, vagy előző hónapot másolhatsz. Webshop rendelésimport csak a vállalkozás modulban érhető el (Premium)."
+      ],
+      "path": "/budget",
+      "body": "Költségvetés Excel/CSV import jelenleg nem elérhető — alternatívák lent.\n\nAz appban jelenleg nincs olyan funkció, amellyel egy meglévő Excel fájlból automatikusan feltölthetnéd a teljes költségvetést. A tételeket manuálisan kell felvinni, vagy előző hónapot másolhatsz. Webshop rendelésimport csak a vállalkozás modulban érhető el (Premium).\n\nElső lépések:\n1. Költségvetés → + Új tétel: bevételek és kiadások egyenként.\n2. Költségvetés → Hónap másolása: ismétlődő tételek átvitele.\n3. Vállalkozás rendelések: Beállítások → Integrációk (Shopify, WooCommerce, UNAS) — Premium.\n\nFunkciók:\n- Nincs Excel import: Költségvetés tömeges importja nem támogatott.\n- Hónap klónozás: Előző hónap tételeinek másolása az aktuális hónapba.\n- Webshop import: Csak vállalkozás modul, Premium csomag.\n\nTippek:\n- Ha sok adatod van, érdemes kategóriánként haladni, vagy egy hónapot kitölteni és azt klónozni.\n- Excel import jelenleg nem elérhető — a hónap másolása a leggyorsabb tömeges megoldás.\n- Webshop import csak vállalkozás modulban működik, Premium csomaggal.\n\nRészletes súgó:\nK: Lehet Excelből importálni a költségvetést?\nV: Jelenleg nincs tömeges Excel/CSV import a költségvetéshez. A tételeket egyenként kell felvinni, vagy az előző hónapot másolhatod.\n\nK: Hogyan másolok hónapot költségvetésben?\nV: A Költségvetés oldalon a „Hónap másolása” funkció az előző hónap tételeit viszi át — esedékesség napja megmarad, minden másolat függőben marad.\n\nK: Hol érhető el webshop import?\nV: Csak a Vállalkozás modulban, Premium csomaggal: Beállítások → Integrációk (Shopify, WooCommerce, UNAS).\n\nK: Nincs Excel import\nV: Költségvetés tömeges importja nem támogatott.\n\nK: Hónap klónozás\nV: Előző hónap tételeinek másolása az aktuális hónapba.\n\nK: Webshop import\nV: Csak vállalkozás modul, Premium csomag.\n\nK: Tipp\nV: Ha sok adatod van, érdemes kategóriánként haladni, vagy egy hónapot kitölteni és azt klónozni.\n\nK: Tipp\nV: Excel import jelenleg nem elérhető — a hónap másolása a leggyorsabb tömeges megoldás.\n\nK: Tipp\nV: Webshop import csak vállalkozás modulban működik, Premium csomaggal."
+    },
+    {
+      "id": "auth.username",
+      "area": "auth",
+      "title": "Bejelentkezés és regisztráció — username",
+      "keywords": [
+        "auth",
+        "username",
+        "username",
+        "Egyedi belépési név (kisbetű, szám, aláhúzás). Ezzel lépsz be — nincs e-mail."
+      ],
+      "body": "Egyedi belépési név (kisbetű, szám, aláhúzás). Ezzel lépsz be — nincs e-mail."
+    },
+    {
+      "id": "auth.password",
+      "area": "auth",
+      "title": "Bejelentkezés és regisztráció — password",
+      "keywords": [
+        "auth",
+        "password",
+        "password",
+        "A fiókod jelszava. Minimum 8 karakter a regisztrációnál."
+      ],
+      "body": "A fiókod jelszava. Minimum 8 karakter a regisztrációnál."
+    },
+    {
+      "id": "auth.passwordConfirm",
+      "area": "auth",
+      "title": "Bejelentkezés és regisztráció — passwordConfirm",
+      "keywords": [
+        "auth",
+        "passwordConfirm",
+        "passwordConfirm",
+        "Ismételd meg a jelszót — egyeznie kell az előző mezővel."
+      ],
+      "body": "Ismételd meg a jelszót — egyeznie kell az előző mezővel."
+    },
+    {
+      "id": "auth.firstName",
+      "area": "auth",
+      "title": "Bejelentkezés és regisztráció — firstName",
+      "keywords": [
+        "auth",
+        "firstName",
+        "firstName",
+        "Megjelenik az üdvözlésben és a háztartás taglistájában."
+      ],
+      "body": "Megjelenik az üdvözlésben és a háztartás taglistájában."
+    },
+    {
+      "id": "auth.lastName",
+      "area": "auth",
+      "title": "Bejelentkezés és regisztráció — lastName",
+      "keywords": [
+        "auth",
+        "lastName",
+        "lastName",
+        "Családnév a profilodban."
+      ],
+      "body": "Családnév a profilodban."
+    },
+    {
+      "id": "auth.householdName",
+      "area": "auth",
+      "title": "Bejelentkezés és regisztráció — householdName",
+      "keywords": [
+        "auth",
+        "householdName",
+        "householdName",
+        "Új háztartás neve — később a Beállításokban módosítható."
+      ],
+      "body": "Új háztartás neve — később a Beállításokban módosítható."
+    },
+    {
+      "id": "dashboard.balance",
+      "area": "dashboard",
+      "title": "Irányítópult — balance",
+      "keywords": [
+        "dashboard",
+        "balance",
+        "balance",
+        "A költségvetésben rögzített egyenleg: bevételek mínusz már kifizetett kiadások. Nem tartalmazza a Széf számláit."
+      ],
+      "body": "A költségvetésben rögzített egyenleg: bevételek mínusz már kifizetett kiadások. Nem tartalmazza a Széf számláit."
+    },
+    {
+      "id": "dashboard.payable",
+      "area": "dashboard",
+      "title": "Irányítópult — Fizetendő",
+      "keywords": [
+        "dashboard",
+        "payable",
+        "Fizetendő",
+        "Az adott hónapban esedékes, de még nem kifizetett tételek összege (kiadások + rezsi)."
+      ],
+      "body": "Az adott hónapban esedékes, de még nem kifizetett tételek összege (kiadások + rezsi)."
+    },
+    {
+      "id": "dashboard.remaining",
+      "area": "dashboard",
+      "title": "Irányítópult — Marad",
+      "keywords": [
+        "dashboard",
+        "remaining",
+        "Marad",
+        "Szabad keret a hónap végére: egyenleg mínusz fizetendő. Negatív érték túlköltést jelez."
+      ],
+      "body": "Szabad keret a hónap végére: egyenleg mínusz fizetendő. Negatív érték túlköltést jelez."
+    },
+    {
+      "id": "dashboard.overdue",
+      "area": "dashboard",
+      "title": "Irányítópult — overdue",
+      "keywords": [
+        "dashboard",
+        "overdue",
+        "overdue",
+        "A határidőn túli, még nem rendezett tételek. Ezeket érdemes előbb kifizetni."
+      ],
+      "body": "A határidőn túli, még nem rendezett tételek. Ezeket érdemes előbb kifizetni."
+    },
+    {
+      "id": "dashboard.wealth",
+      "area": "dashboard",
+      "title": "Irányítópult — wealth",
+      "keywords": [
+        "dashboard",
+        "wealth",
+        "wealth",
+        "Összes megtakarítás: bankszámlák és állampapírok együtt, tulajdonos szerint bontva."
+      ],
+      "body": "Összes megtakarítás: bankszámlák és állampapírok együtt, tulajdonos szerint bontva."
+    },
+    {
+      "id": "dashboard.business",
+      "area": "dashboard",
+      "title": "Irányítópult — business",
+      "keywords": [
+        "dashboard",
+        "business",
+        "business",
+        "A vállalkozás (Little Loom) tárgyhavi árbevétele a rögzített rendelésekből."
+      ],
+      "body": "A vállalkozás (Little Loom) tárgyhavi árbevétele a rögzített rendelésekből."
+    },
+    {
+      "id": "dashboard.utilities",
+      "area": "dashboard",
+      "title": "Irányítópult — utilities",
+      "keywords": [
+        "dashboard",
+        "utilities",
+        "utilities",
+        "Rezsi mérleg: ki mennyit fizetett és ki mennyivel tartozik a partnernek. Megosztás nélkül csak a havi számlák összege."
+      ],
+      "body": "Rezsi mérleg: ki mennyit fizetett és ki mennyivel tartozik a partnernek. Megosztás nélkül csak a havi számlák összege."
+    },
+    {
+      "id": "dashboard.debts",
+      "area": "dashboard",
+      "title": "Irányítópult — debts",
+      "keywords": [
+        "dashboard",
+        "debts",
+        "debts",
+        "Összes aktív hitel és kölcsön hátraléka (eredeti összeg mínusz eddig törlesztve)."
+      ],
+      "body": "Összes aktív hitel és kölcsön hátraléka (eredeti összeg mínusz eddig törlesztve)."
+    },
+    {
+      "id": "dashboard.aiBriefing",
+      "area": "dashboard",
+      "title": "Irányítópult — aiBriefing",
+      "keywords": [
+        "dashboard",
+        "aiBriefing",
+        "aiBriefing",
+        "AI által generált heti összefoglaló a háztartás pénzügyeiről — trendek és figyelmeztetések."
+      ],
+      "body": "AI által generált heti összefoglaló a háztartás pénzügyeiről — trendek és figyelmeztetések."
+    },
+    {
+      "id": "dashboard.aiUtilities",
+      "area": "dashboard",
+      "title": "Irányítópult — aiUtilities",
+      "keywords": [
+        "dashboard",
+        "aiUtilities",
+        "aiUtilities",
+        "A mérőóra-leolvasások és számlák alapján keres szokatlan fogyasztást vagy ugrást."
+      ],
+      "body": "A mérőóra-leolvasások és számlák alapján keres szokatlan fogyasztást vagy ugrást."
+    },
+    {
+      "id": "dashboard.pocketMoneyInterest",
+      "area": "dashboard",
+      "title": "Irányítópult — pocketMoneyInterest",
+      "keywords": [
+        "dashboard",
+        "pocketMoneyInterest",
+        "pocketMoneyInterest",
+        "Kiosztható havi kamat — csak az aktuális hónap utolsó napjain (alapból 3), amikor érdemes rögzíteni."
+      ],
+      "body": "Kiosztható havi kamat — csak az aktuális hónap utolsó napjain (alapból 3), amikor érdemes rögzíteni."
+    },
+    {
+      "id": "dashboard.insuranceUpcoming",
+      "area": "dashboard",
+      "title": "Irányítópult — insuranceUpcoming",
+      "keywords": [
+        "dashboard",
+        "insuranceUpcoming",
+        "insuranceUpcoming",
+        "Közelgő biztosítási megújítások és fedezet/lejárat — ugyanaz, mint a Biztosítások oldalon."
+      ],
+      "body": "Közelgő biztosítási megújítások és fedezet/lejárat — ugyanaz, mint a Biztosítások oldalon."
+    },
+    {
+      "id": "dashboard.businessTax",
+      "area": "dashboard",
+      "title": "Irányítópult — businessTax",
+      "keywords": [
+        "dashboard",
+        "businessTax",
+        "businessTax",
+        "AAM éves bevételi keret becslése a rögzített rendelések alapján — a Vállalkozás éves nézetével egyezik."
+      ],
+      "body": "AAM éves bevételi keret becslése a rögzített rendelések alapján — a Vállalkozás éves nézetével egyezik."
+    },
+    {
+      "id": "dashboard.rentalExpected",
+      "area": "dashboard",
+      "title": "Irányítópult — rentalExpected",
+      "keywords": [
+        "dashboard",
+        "rentalExpected",
+        "rentalExpected",
+        "Aktív ingatlanok havi bérleti díja + áthárított közös költség (NAV: bevétel), az adott hónapra."
+      ],
+      "body": "Aktív ingatlanok havi bérleti díja + áthárított közös költség (NAV: bevétel), az adott hónapra."
+    },
+    {
+      "id": "dashboard.rentalReceived",
+      "area": "dashboard",
+      "title": "Irányítópult — rentalReceived",
+      "keywords": [
+        "dashboard",
+        "rentalReceived",
+        "rentalReceived",
+        "Az adott hónapban befizetés napjával rögzített bevételek összege."
+      ],
+      "body": "Az adott hónapban befizetés napjával rögzített bevételek összege."
+    },
+    {
+      "id": "dashboard.rentalOutstanding",
+      "area": "dashboard",
+      "title": "Irányítópult — rentalOutstanding",
+      "keywords": [
+        "dashboard",
+        "rentalOutstanding",
+        "rentalOutstanding",
+        "Várható bérleti díj mínusz befolyt — ami még nem érkezett be."
+      ],
+      "body": "Várható bérleti díj mínusz befolyt — ami még nem érkezett be."
+    },
+    {
+      "id": "dashboard.rentalOverdue",
+      "area": "dashboard",
+      "title": "Irányítópult — rentalOverdue",
+      "keywords": [
+        "dashboard",
+        "rentalOverdue",
+        "rentalOverdue",
+        "Esedékesség után (türelmi nap) még nem befizetett bérleti díjak."
+      ],
+      "body": "Esedékesség után (türelmi nap) még nem befizetett bérleti díjak."
+    },
+    {
+      "id": "dashboard.receivablesOutstanding",
+      "area": "dashboard",
+      "title": "Irányítópult — receivablesOutstanding",
+      "keywords": [
+        "dashboard",
+        "receivablesOutstanding",
+        "receivablesOutstanding",
+        "Magán kölcsönök és előlegek — összesen ennyi pénz van még nálad másoknál (a Kintlévőség modulból)."
+      ],
+      "body": "Magán kölcsönök és előlegek — összesen ennyi pénz van még nálad másoknál (a Kintlévőség modulból)."
+    },
+    {
+      "id": "dashboard.expectedInflows",
+      "area": "dashboard",
+      "title": "Irányítópult — expectedInflows",
+      "keywords": [
+        "dashboard",
+        "expectedInflows",
+        "expectedInflows",
+        "Nettó várható pénz: elmaradt bevétel + kintlévőség + rezsi egyenleg. Ha a rezsi negatív, te tartozol a partnernek — ez csökkenti az összeget."
+      ],
+      "body": "Nettó várható pénz: elmaradt bevétel + kintlévőség + rezsi egyenleg. Ha a rezsi negatív, te tartozol a partnernek — ez csökkenti az összeget."
+    },
+    {
+      "id": "budget.manualBalance",
+      "area": "budget",
+      "title": "Költségvetés — Kézi egyenleg",
+      "keywords": [
+        "budget",
+        "manualBalance",
+        "Kézi egyenleg",
+        "A háztartás jelenlegi pénze (bankszámla + készpénz). A rezsi elszámolás automatikusan módosítja, ha a partner kifizet téged."
+      ],
+      "body": "A háztartás jelenlegi pénze (bankszámla + készpénz). A rezsi elszámolás automatikusan módosítja, ha a partner kifizet téged."
+    },
+    {
+      "id": "budget.payable",
+      "area": "budget",
+      "title": "Költségvetés — Fizetendő",
+      "keywords": [
+        "budget",
+        "payable",
+        "Fizetendő",
+        "Ebben a hónapban esedékes, de még nem kifizetett kiadások és rezsi együtt. Rezsinél megosztás esetén a te részed (pl. közös 50%, saját szabály) számít — nem a teljes számla."
+      ],
+      "body": "Ebben a hónapban esedékes, de még nem kifizetett kiadások és rezsi együtt. Rezsinél megosztás esetén a te részed (pl. közös 50%, saját szabály) számít — nem a teljes számla."
+    },
+    {
+      "id": "budget.remaining",
+      "area": "budget",
+      "title": "Költségvetés — Marad",
+      "keywords": [
+        "budget",
+        "remaining",
+        "Marad",
+        "Becsült szabad keret: jelenlegi egyenleg mínusz a még fizetendő összeg."
+      ],
+      "body": "Becsült szabad keret: jelenlegi egyenleg mínusz a még fizetendő összeg."
+    },
+    {
+      "id": "budget.overdue",
+      "area": "budget",
+      "title": "Költségvetés — overdue",
+      "keywords": [
+        "budget",
+        "overdue",
+        "overdue",
+        "Lejárt határidőjű, még nyitott tételek — sürgősségi lista."
+      ],
+      "body": "Lejárt határidőjű, még nyitott tételek — sürgősségi lista."
+    },
+    {
+      "id": "budget.missedIncome",
+      "area": "budget",
+      "title": "Költségvetés — missedIncome",
+      "keywords": [
+        "budget",
+        "missedIncome",
+        "missedIncome",
+        "Az év elejétől a kiválasztott hónapig minden lejárt, még nem befolyt bevétel összege. Halmozódik hónapról hónapra — pl. január óta hiányzó fizetés összeadódik. A jelenlegi hónap csak akkor számít, ha annak a bevétele is lejárt."
+      ],
+      "body": "Az év elejétől a kiválasztott hónapig minden lejárt, még nem befolyt bevétel összege. Halmozódik hónapról hónapra — pl. január óta hiányzó fizetés összeadódik. A jelenlegi hónap csak akkor számít, ha annak a bevétele is lejárt."
+    },
+    {
+      "id": "budget.plannedExpense",
+      "area": "budget",
+      "title": "Költségvetés — plannedExpense",
+      "keywords": [
+        "budget",
+        "plannedExpense",
+        "plannedExpense",
+        "Az adott hónapra rögzített kiadások és rezsi összesen — függetlenül attól, ki van-e már fizetve. Rezsinél megosztás esetén ugyanaz a te részed számít, mint a Fizetendőnél. A hónap elején ez mutatja, mennyi költés vár rád."
+      ],
+      "body": "Az adott hónapra rögzített kiadások és rezsi összesen — függetlenül attól, ki van-e már fizetve. Rezsinél megosztás esetén ugyanaz a te részed számít, mint a Fizetendőnél. A hónap elején ez mutatja, mennyi költés vár rád."
+    },
+    {
+      "id": "budget.plannedIncome",
+      "area": "budget",
+      "title": "Költségvetés — plannedIncome",
+      "keywords": [
+        "budget",
+        "plannedIncome",
+        "plannedIncome",
+        "Az adott hónapra rögzített bevételek összesen — függetlenül attól, megérkezett-e már. A hónap elején ez mutatja a várható bevételt."
+      ],
+      "body": "Az adott hónapra rögzített bevételek összesen — függetlenül attól, megérkezett-e már. A hónap elején ez mutatja a várható bevételt."
+    },
+    {
+      "id": "budget.paidThisMonth",
+      "area": "budget",
+      "title": "Költségvetés — paidThisMonth",
+      "keywords": [
+        "budget",
+        "paidThisMonth",
+        "paidThisMonth",
+        "Ténylegesen kifizetett kiadások és rezsi ebben a hónapban. Saját keretes tételeknél a ledgerben felhasznált összeg számít."
+      ],
+      "body": "Ténylegesen kifizetett kiadások és rezsi ebben a hónapban. Saját keretes tételeknél a ledgerben felhasznált összeg számít."
+    },
+    {
+      "id": "budget.plannedMonthBalance",
+      "area": "budget",
+      "title": "Költségvetés — plannedMonthBalance",
+      "keywords": [
+        "budget",
+        "plannedMonthBalance",
+        "plannedMonthBalance",
+        "Tervezett bevétel mínusz tervezett kiadás. A hónap elején is látszik, hogy a rögzített tételek alapján kijön-e a hónap, vagy hiány lesz."
+      ],
+      "body": "Tervezett bevétel mínusz tervezett kiadás. A hónap elején is látszik, hogy a rögzített tételek alapján kijön-e a hónap, vagy hiány lesz."
+    },
+    {
+      "id": "budget.incomeReceived",
+      "area": "budget",
+      "title": "Költségvetés — incomeReceived",
+      "keywords": [
+        "budget",
+        "incomeReceived",
+        "incomeReceived",
+        "Már megérkezett bevételek ebben a hónapban — kifizetettnek jelölt tételek összege."
+      ],
+      "body": "Már megérkezett bevételek ebben a hónapban — kifizetettnek jelölt tételek összege."
+    },
+    {
+      "id": "budget.aiOverspend",
+      "area": "budget",
+      "title": "Költségvetés — aiOverspend",
+      "keywords": [
+        "budget",
+        "aiOverspend",
+        "aiOverspend",
+        "Túlköltés = negatív havi egyenleg (befolyt bevétel − kifizetett kiadások, rezsivel együtt). A chip-ek a legnagyobb kiadási kategóriákat mutatják, nem magát a túlköltés összeget."
+      ],
+      "body": "Túlköltés = negatív havi egyenleg (befolyt bevétel − kifizetett kiadások, rezsivel együtt). A chip-ek a legnagyobb kiadási kategóriákat mutatják, nem magát a túlköltés összeget."
+    },
+    {
+      "id": "budget.categorySummary",
+      "area": "budget",
+      "title": "Költségvetés — categorySummary",
+      "keywords": [
+        "budget",
+        "categorySummary",
+        "categorySummary",
+        "Kategóriánkénti tényleges költés: normál kiadásnál csak kifizetett tételek; saját keretnél (ledger) a felhasznált összeg, nem a teljes keret."
+      ],
+      "body": "Kategóriánkénti tényleges költés: normál kiadásnál csak kifizetett tételek; saját keretnél (ledger) a felhasznált összeg, nem a teljes keret."
+    },
+    {
+      "id": "budget.yearExpense",
+      "area": "budget",
+      "title": "Költségvetés — yearExpense",
+      "keywords": [
+        "budget",
+        "yearExpense",
+        "yearExpense",
+        "Az adott évben ténylegesen kifizetett kiadások összege (tételek, rezsi, tartozás-részletek)."
+      ],
+      "body": "Az adott évben ténylegesen kifizetett kiadások összege (tételek, rezsi, tartozás-részletek)."
+    },
+    {
+      "id": "budget.yearIncome",
+      "area": "budget",
+      "title": "Költségvetés — yearIncome",
+      "keywords": [
+        "budget",
+        "yearIncome",
+        "yearIncome",
+        "Az adott évben befolyt bevételek összege."
+      ],
+      "body": "Az adott évben befolyt bevételek összege."
+    },
+    {
+      "id": "budget.yearNet",
+      "area": "budget",
+      "title": "Költségvetés — yearNet",
+      "keywords": [
+        "budget",
+        "yearNet",
+        "yearNet",
+        "Éves bevétel mínusz éves kifizetett kiadás."
+      ],
+      "body": "Éves bevétel mínusz éves kifizetett kiadás."
+    },
+    {
+      "id": "budget.yearComparison",
+      "area": "budget",
+      "title": "Költségvetés — yearComparison",
+      "keywords": [
+        "budget",
+        "yearComparison",
+        "yearComparison",
+        "Összehasonlítás az előző év azonos időszakával (kifizetett kiadások alapján)."
+      ],
+      "body": "Összehasonlítás az előző év azonos időszakával (kifizetett kiadások alapján)."
+    },
+    {
+      "id": "budget.yearCategory",
+      "area": "budget",
+      "title": "Költségvetés — yearCategory",
+      "keywords": [
+        "budget",
+        "yearCategory",
+        "yearCategory",
+        "Kategóriánkénti kifizetett kiadás — az előző év ugyanazon kategóriájához viszonyítva."
+      ],
+      "body": "Kategóriánkénti kifizetett kiadás — az előző év ugyanazon kategóriájához viszonyítva."
+    },
+    {
+      "id": "budget.yearTopCategory",
+      "area": "budget",
+      "title": "Költségvetés — yearTopCategory",
+      "keywords": [
+        "budget",
+        "yearTopCategory",
+        "yearTopCategory",
+        "A legnagyobb összegű kiadási kategória az évben."
+      ],
+      "body": "A legnagyobb összegű kiadási kategória az évben."
+    },
+    {
+      "id": "budget.yearInsights",
+      "area": "budget",
+      "title": "Költségvetés — yearInsights",
+      "keywords": [
+        "budget",
+        "yearInsights",
+        "yearInsights",
+        "Automatikus éves mutatók — átlag, csúcs hónap, megtakarítási arány, rezsi súly."
+      ],
+      "body": "Automatikus éves mutatók — átlag, csúcs hónap, megtakarítási arány, rezsi súly."
+    },
+    {
+      "id": "budget.yearAi",
+      "area": "budget",
+      "title": "Költségvetés — yearAi",
+      "keywords": [
+        "budget",
+        "yearAi",
+        "yearAi",
+        "AI éves összefoglaló a kifizetett tételek és kategóriák alapján — konkrét tanácsokkal."
+      ],
+      "body": "AI éves összefoglaló a kifizetett tételek és kategóriák alapján — konkrét tanácsokkal."
+    },
+    {
+      "id": "budget.yearIncomeSources",
+      "area": "budget",
+      "title": "Költségvetés — yearIncomeSources",
+      "keywords": [
+        "budget",
+        "yearIncomeSources",
+        "yearIncomeSources",
+        "Befolyt bevételek kategóriánként — pl. Fizetés, Rezsi elszámolás."
+      ],
+      "body": "Befolyt bevételek kategóriánként — pl. Fizetés, Rezsi elszámolás."
+    },
+    {
+      "id": "budget.yearMissedIncome",
+      "area": "budget",
+      "title": "Költségvetés — yearMissedIncome",
+      "keywords": [
+        "budget",
+        "yearMissedIncome",
+        "yearMissedIncome",
+        "Lejárt, még nem befolyt bevételek összesítve az év hónapjaira bontva."
+      ],
+      "body": "Lejárt, még nem befolyt bevételek összesítve az év hónapjaira bontva."
+    },
+    {
+      "id": "budget.yearDebts",
+      "area": "budget",
+      "title": "Költségvetés — yearDebts",
+      "keywords": [
+        "budget",
+        "yearDebts",
+        "yearDebts",
+        "A költségvetésbe szinkronizált havi törlesztések — mi lett kifizetve az évben vs. aktuális hátralék."
+      ],
+      "body": "A költségvetésbe szinkronizált havi törlesztések — mi lett kifizetve az évben vs. aktuális hátralék."
+    },
+    {
+      "id": "budget.yearSavings",
+      "area": "budget",
+      "title": "Költségvetés — yearSavings",
+      "keywords": [
+        "budget",
+        "yearSavings",
+        "yearSavings",
+        "Megtakarítási számlák ledger mozgásai: befizetés, kivét, és becsült egyenleg az év végén."
+      ],
+      "body": "Megtakarítási számlák ledger mozgásai: befizetés, kivét, és becsült egyenleg az év végén."
+    },
+    {
+      "id": "budget.yearLedger",
+      "area": "budget",
+      "title": "Költségvetés — yearLedger",
+      "keywords": [
+        "budget",
+        "yearLedger",
+        "yearLedger",
+        "Saját keretes kiadások (ledger) bontása: a keret neve alatt hol költöttél (pl. Lidl, Kifli.hu) az év ledger tételei alapján."
+      ],
+      "body": "Saját keretes kiadások (ledger) bontása: a keret neve alatt hol költöttél (pl. Lidl, Kifli.hu) az év ledger tételei alapján."
+    },
+    {
+      "id": "budget.description",
+      "area": "budget",
+      "title": "Költségvetés — description",
+      "keywords": [
+        "budget",
+        "description",
+        "description",
+        "Rövid megnevezés a tételről (pl. „Lidl”, „Netflix”)."
+      ],
+      "body": "Rövid megnevezés a tételről (pl. „Lidl”, „Netflix”)."
+    },
+    {
+      "id": "budget.category",
+      "area": "budget",
+      "title": "Költségvetés — Költségkategória",
+      "keywords": [
+        "budget",
+        "category",
+        "Költségkategória",
+        "Költségkategória — a beállításokban szerkeszthető lista."
+      ],
+      "body": "Költségkategória — a beállításokban szerkeszthető lista."
+    },
+    {
+      "id": "budget.amount",
+      "area": "budget",
+      "title": "Költségvetés — amount",
+      "keywords": [
+        "budget",
+        "amount",
+        "amount",
+        "Összeg forintban. Kiadásnál negatív előjel nem kell."
+      ],
+      "body": "Összeg forintban. Kiadásnál negatív előjel nem kell."
+    },
+    {
+      "id": "budget.currency",
+      "area": "budget",
+      "title": "Költségvetés — currency",
+      "keywords": [
+        "budget",
+        "currency",
+        "currency",
+        "Mentés: az összeg EUR/USD-ben marad. A költségvetés számítás (Fizetendő, Marad, kategóriák) forintra vált élő árfolyamon."
+      ],
+      "body": "Mentés: az összeg EUR/USD-ben marad. A költségvetés számítás (Fizetendő, Marad, kategóriák) forintra vált élő árfolyamon."
+    },
+    {
+      "id": "budget.date",
+      "area": "budget",
+      "title": "Költségvetés — date",
+      "keywords": [
+        "budget",
+        "date",
+        "date",
+        "Mikor esedékes vagy mikor történt a tranzakció."
+      ],
+      "body": "Mikor esedékes vagy mikor történt a tranzakció."
+    },
+    {
+      "id": "budget.paidDate",
+      "area": "budget",
+      "title": "Költségvetés — paidDate",
+      "keywords": [
+        "budget",
+        "paidDate",
+        "paidDate",
+        "Ha kitöltöd, a tétel kifizetettnek számít és nem jelenik meg a fizetendő listában."
+      ],
+      "body": "Ha kitöltöd, a tétel kifizetettnek számít és nem jelenik meg a fizetendő listában."
+    },
+    {
+      "id": "budget.statusToggle",
+      "area": "budget",
+      "title": "Költségvetés — statusToggle",
+      "keywords": [
+        "budget",
+        "statusToggle",
+        "statusToggle",
+        "Kattints a státuszra: függőben ↔ kifizetve váltás egy érintéssel. A kifizetés napja automatikusan a mai dátum lesz."
+      ],
+      "body": "Kattints a státuszra: függőben ↔ kifizetve váltás egy érintéssel. A kifizetés napja automatikusan a mai dátum lesz."
+    },
+    {
+      "id": "budget.cloneMonth",
+      "area": "budget",
+      "title": "Költségvetés — Hónap másolása",
+      "keywords": [
+        "budget",
+        "cloneMonth",
+        "Hónap másolása",
+        "Az előző hónap költségvetési tételeit másolja a kiválasztott hónapra (esedékesség napja megmarad). Minden másolat függőben marad; saját keretes tételeknél a ledger üresen indul."
+      ],
+      "body": "Az előző hónap költségvetési tételeit másolja a kiválasztott hónapra (esedékesség napja megmarad). Minden másolat függőben marad; saját keretes tételeknél a ledger üresen indul."
+    },
+    {
+      "id": "budget.ledgerAmount",
+      "area": "budget",
+      "title": "Költségvetés — Saját keret / ledger",
+      "keywords": [
+        "budget",
+        "ledgerAmount",
+        "Saját keret / ledger",
+        "Mennyit használtál fel ebből a keretből / előlegből."
+      ],
+      "body": "Mennyit használtál fel ebből a keretből / előlegből."
+    },
+    {
+      "id": "budget.ledgerNote",
+      "area": "budget",
+      "title": "Költségvetés — ledgerNote",
+      "keywords": [
+        "budget",
+        "ledgerNote",
+        "ledgerNote",
+        "Opcionális megjegyzés a ledger bejegyzéshez."
+      ],
+      "body": "Opcionális megjegyzés a ledger bejegyzéshez."
+    },
+    {
+      "id": "budget.txTypeIntro",
+      "area": "budget",
+      "title": "Költségvetés — txTypeIntro",
+      "keywords": [
+        "budget",
+        "txTypeIntro",
+        "txTypeIntro",
+        "Válaszd ki, hogyan számítson a tétel a havi cashflow-ba. A választás után is látszik a rövid magyarázat — mobilon is."
+      ],
+      "body": "Válaszd ki, hogyan számítson a tétel a havi cashflow-ba. A választás után is látszik a rövid magyarázat — mobilon is."
+    },
+    {
+      "id": "budget.expenseNormal",
+      "area": "budget",
+      "title": "Költségvetés — Normál kiadás",
+      "keywords": [
+        "budget",
+        "expenseNormal",
+        "Normál kiadás",
+        "Közvetlen kiadás: a teljes összeg a „Fizetendő” / „Marad” számításban szerepel, amíg ki nem fizeted. Nem kell külön ledger tételeket rögzíteni."
+      ],
+      "body": "Közvetlen kiadás: a teljes összeg a „Fizetendő” / „Marad” számításban szerepel, amíg ki nem fizeted. Nem kell külön ledger tételeket rögzíteni."
+    },
+    {
+      "id": "budget.expenseLedger",
+      "area": "budget",
+      "title": "Költségvetés — Saját keretes kiadás",
+      "keywords": [
+        "budget",
+        "expenseLedger",
+        "Saját keretes kiadás",
+        "Előre lekötött keret (pl. tankolás): a tétel összege a plafon. A tényleges költést ledger bejegyzésekkel követed. Fizetendő = keret mínusz felhasználva; kifizetettként jelölve a ledger összeg számít „már kifizetve” és kategória összegzésnek."
+      ],
+      "body": "Előre lekötött keret (pl. tankolás): a tétel összege a plafon. A tényleges költést ledger bejegyzésekkel követed. Fizetendő = keret mínusz felhasználva; kifizetettként jelölve a ledger összeg számít „már kifizetve” és kategória összegzésnek."
+    },
+    {
+      "id": "budget.incomeNormal",
+      "area": "budget",
+      "title": "Költségvetés — incomeNormal",
+      "keywords": [
+        "budget",
+        "incomeNormal",
+        "incomeNormal",
+        "Bevétel, ami növeli a költhető egyenleget, ha kifizetettnek jelölöd (pl. fizetés, visszatérítés)."
+      ],
+      "body": "Bevétel, ami növeli a költhető egyenleget, ha kifizetettnek jelölöd (pl. fizetés, visszatérítés)."
+    },
+    {
+      "id": "budget.incomeReserve",
+      "area": "budget",
+      "title": "Költségvetés — Tartalék bevétel",
+      "keywords": [
+        "budget",
+        "incomeReserve",
+        "Tartalék bevétel",
+        "Pénz, amit ebben a hónapban félreteszel — külön „Tartalékok” listában jelenik meg. Nem növeli a cashflow „Marad” összegét, és nem helyettesíti a Megtakarítások bankszámláit."
+      ],
+      "body": "Pénz, amit ebben a hónapban félreteszel — külön „Tartalékok” listában jelenik meg. Nem növeli a cashflow „Marad” összegét, és nem helyettesíti a Megtakarítások bankszámláit."
+    },
+    {
+      "id": "budget.reserveWarning",
+      "area": "budget",
+      "title": "Költségvetés — reserveWarning",
+      "keywords": [
+        "budget",
+        "reserveWarning",
+        "reserveWarning",
+        "Tartalék ≠ megtakarítás számla. Ha bankszámlán / állampapíron van a pénz, azt a Megtakarítások modulban kövesd."
+      ],
+      "body": "Tartalék ≠ megtakarítás számla. Ha bankszámlán / állampapíron van a pénz, azt a Megtakarítások modulban kövesd."
+    },
+    {
+      "id": "budget.ledgerModalIntro",
+      "area": "budget",
+      "title": "Költségvetés — ledgerModalIntro",
+      "keywords": [
+        "budget",
+        "ledgerModalIntro",
+        "ledgerModalIntro",
+        "A saját keretes kiadásnál itt rögzíted a tényleges felhasználást. A keret összege nem változik ettől — csak a „felhasználva” sáv nő."
+      ],
+      "body": "A saját keretes kiadásnál itt rögzíted a tényleges felhasználást. A keret összege nem változik ettől — csak a „felhasználva” sáv nő."
+    },
+    {
+      "id": "debts.remaining",
+      "area": "debts",
+      "title": "Tartozások — Marad",
+      "keywords": [
+        "debts",
+        "remaining",
+        "Marad",
+        "Minden aktív tartozás hátraléka: eredeti összeg − eddig törlesztve. A táblázatban látható részletekkel."
+      ],
+      "body": "Minden aktív tartozás hátraléka: eredeti összeg − eddig törlesztve. A táblázatban látható részletekkel."
+    },
+    {
+      "id": "debts.monthlyMin",
+      "area": "debts",
+      "title": "Tartozások — monthlyMin",
+      "keywords": [
+        "debts",
+        "monthlyMin",
+        "monthlyMin",
+        "Az összes hitel havi minimum/részlet összege — ezt érdemes a költségvetésben is követni."
+      ],
+      "body": "Az összes hitel havi minimum/részlet összege — ezt érdemes a költségvetésben is követni."
+    },
+    {
+      "id": "debts.payoffEstimate",
+      "area": "debts",
+      "title": "Tartozások — payoffEstimate",
+      "keywords": [
+        "debts",
+        "payoffEstimate",
+        "payoffEstimate",
+        "Ha csak a megadott havi részletet fizeted, mikor fut ki utoljára egy hitel. Ha a kamatot nem fedi a részlet, „nincs vége” jelenik meg."
+      ],
+      "body": "Ha csak a megadott havi részletet fizeted, mikor fut ki utoljára egy hitel. Ha a kamatot nem fedi a részlet, „nincs vége” jelenik meg."
+    },
+    {
+      "id": "debts.monthlyInterest",
+      "area": "debts",
+      "title": "Tartozások — monthlyInterest",
+      "keywords": [
+        "debts",
+        "monthlyInterest",
+        "monthlyInterest",
+        "Becsült kamat, ha a jelenlegi minimumot fizeted — összehasonlításhoz az extra befizetéseknél."
+      ],
+      "body": "Becsült kamat, ha a jelenlegi minimumot fizeted — összehasonlításhoz az extra befizetéseknél."
+    },
+    {
+      "id": "debts.progress",
+      "area": "debts",
+      "title": "Tartozások — progress",
+      "keywords": [
+        "debts",
+        "progress",
+        "progress",
+        "Az összes tartozásból eddig visszafizetett arány: összes törlesztve / eredeti összeg."
+      ],
+      "body": "Az összes tartozásból eddig visszafizetett arány: összes törlesztve / eredeti összeg."
+    },
+    {
+      "id": "debts.strategy",
+      "area": "debts",
+      "title": "Tartozások — strategy",
+      "keywords": [
+        "debts",
+        "strategy",
+        "strategy",
+        "Avalanche: legmagasabb kamat először (olcsóbb összesen). Snowball: legkisebb hátralék először (gyors sikerélmény)."
+      ],
+      "body": "Avalanche: legmagasabb kamat először (olcsóbb összesen). Snowball: legkisebb hátralék először (gyors sikerélmény)."
+    },
+    {
+      "id": "debts.strategyOrder",
+      "area": "debts",
+      "title": "Tartozások — strategyOrder",
+      "keywords": [
+        "debts",
+        "strategyOrder",
+        "strategyOrder",
+        "A kiválasztott stratégia szerinti ajánlott sorrend — melyik tartozást érdemes előbb extra befizetéssel támadni."
+      ],
+      "body": "A kiválasztott stratégia szerinti ajánlott sorrend — melyik tartozást érdemes előbb extra befizetéssel támadni."
+    },
+    {
+      "id": "debts.extraPayment",
+      "area": "debts",
+      "title": "Tartozások — extraPayment",
+      "keywords": [
+        "debts",
+        "extraPayment",
+        "extraPayment",
+        "Mennyivel többet fizetsz a stratégia szerinti első hitelre a minimumon felül — reális összegeket adj meg (pl. +10–50 e Ft)."
+      ],
+      "body": "Mennyivel többet fizetsz a stratégia szerinti első hitelre a minimumon felül — reális összegeket adj meg (pl. +10–50 e Ft)."
+    },
+    {
+      "id": "debts.name",
+      "area": "debts",
+      "title": "Tartozások — name",
+      "keywords": [
+        "debts",
+        "name",
+        "name",
+        "Felismerhető név: pl. Lakáshitel, Autóhitel, Hitelkártya."
+      ],
+      "body": "Felismerhető név: pl. Lakáshitel, Autóhitel, Hitelkártya."
+    },
+    {
+      "id": "debts.targetAmount",
+      "area": "debts",
+      "title": "Tartozások — targetAmount",
+      "keywords": [
+        "debts",
+        "targetAmount",
+        "targetAmount",
+        "A hitel eredeti főösszege vagy jelenlegi teljes tartozása forintban."
+      ],
+      "body": "A hitel eredeti főösszege vagy jelenlegi teljes tartozása forintban."
+    },
+    {
+      "id": "debts.paidAmount",
+      "area": "debts",
+      "title": "Tartozások — paidAmount",
+      "keywords": [
+        "debts",
+        "paidAmount",
+        "paidAmount",
+        "Eddig visszafizetett összeg. A hátralék = eredeti − eddig törlesztve."
+      ],
+      "body": "Eddig visszafizetett összeg. A hátralék = eredeti − eddig törlesztve."
+    },
+    {
+      "id": "debts.interestRate",
+      "area": "debts",
+      "title": "Tartozások — interestRate",
+      "keywords": [
+        "debts",
+        "interestRate",
+        "interestRate",
+        "Éves kamatláb százalékban (THM-hez közel). A lejárat és kamatköltség számításához kell."
+      ],
+      "body": "Éves kamatláb százalékban (THM-hez közel). A lejárat és kamatköltség számításához kell."
+    },
+    {
+      "id": "debts.minimumPayment",
+      "area": "debts",
+      "title": "Tartozások — minimumPayment",
+      "keywords": [
+        "debts",
+        "minimumPayment",
+        "minimumPayment",
+        "A bank által előírt havi törlesztő/részlet. Ha kisebb, mint a havi kamat, a tartozás nem csökken."
+      ],
+      "body": "A bank által előírt havi törlesztő/részlet. Ha kisebb, mint a havi kamat, a tartozás nem csökken."
+    },
+    {
+      "id": "debts.dueDay",
+      "area": "debts",
+      "title": "Tartozások — dueDay",
+      "keywords": [
+        "debts",
+        "dueDay",
+        "dueDay",
+        "A hónap melyik napján esedékes a törlesztés (1–31). Költségvetés-emlékeztetőhöz."
+      ],
+      "body": "A hónap melyik napján esedékes a törlesztés (1–31). Költségvetés-emlékeztetőhöz."
+    },
+    {
+      "id": "debts.payAmount",
+      "area": "debts",
+      "title": "Tartozások — payAmount",
+      "keywords": [
+        "debts",
+        "payAmount",
+        "payAmount",
+        "Most befizetett összeg — növeli az „eddig törlesztve” mezőt."
+      ],
+      "body": "Most befizetett összeg — növeli az „eddig törlesztve” mezőt."
+    },
+    {
+      "id": "debts.payDate",
+      "area": "debts",
+      "title": "Tartozások — payDate",
+      "keywords": [
+        "debts",
+        "payDate",
+        "payDate",
+        "A tényleges befizetés napja — ez jelenik meg az előzményekben és a törlesztett tartozásoknál."
+      ],
+      "body": "A tényleges befizetés napja — ez jelenik meg az előzményekben és a törlesztett tartozásoknál."
+    },
+    {
+      "id": "debts.payNote",
+      "area": "debts",
+      "title": "Tartozások — payNote",
+      "keywords": [
+        "debts",
+        "payNote",
+        "payNote",
+        "Opcionális megjegyzés a törlesztéshez (pl. „Júniusi részlet”)."
+      ],
+      "body": "Opcionális megjegyzés a törlesztéshez (pl. „Júniusi részlet”)."
+    },
+    {
+      "id": "debts.payBudget",
+      "area": "debts",
+      "title": "Tartozások — payBudget",
+      "keywords": [
+        "debts",
+        "payBudget",
+        "payBudget",
+        "Ha be van pipálva, ugyanakkor kiadásként is rögzíti a költségvetésben a kiválasztott kategóriával."
+      ],
+      "body": "Ha be van pipálva, ugyanakkor kiadásként is rögzíti a költségvetésben a kiválasztott kategóriával."
+    },
+    {
+      "id": "debts.payCategory",
+      "area": "debts",
+      "title": "Tartozások — payCategory",
+      "keywords": [
+        "debts",
+        "payCategory",
+        "payCategory",
+        "Melyik költségkategóriába kerüljön a törlesztés a cashflow-ban."
+      ],
+      "body": "Melyik költségkategóriába kerüljön a törlesztés a cashflow-ban."
+    },
+    {
+      "id": "savings.personal",
+      "area": "savings",
+      "title": "Megtakarítások — personal",
+      "keywords": [
+        "savings",
+        "personal",
+        "personal",
+        "Saját és közös bankszámlák egyenlege — nem tartalmazza a Little Loom számlákat."
+      ],
+      "body": "Saját és közös bankszámlák egyenlege — nem tartalmazza a Little Loom számlákat."
+    },
+    {
+      "id": "savings.wife",
+      "area": "savings",
+      "title": "Megtakarítások — wife",
+      "keywords": [
+        "savings",
+        "wife",
+        "wife",
+        "A vállalkozáshoz / feleséghez kötött számlák és papírok összege."
+      ],
+      "body": "A vállalkozáshoz / feleséghez kötött számlák és papírok összege."
+    },
+    {
+      "id": "savings.totalWealth",
+      "area": "savings",
+      "title": "Megtakarítások — totalWealth",
+      "keywords": [
+        "savings",
+        "totalWealth",
+        "totalWealth",
+        "Számlák + állampapírok együtt, minden tulajdonosra."
+      ],
+      "body": "Számlák + állampapírok együtt, minden tulajdonosra."
+    },
+    {
+      "id": "savings.investRatio",
+      "area": "savings",
+      "title": "Megtakarítások — investRatio",
+      "keywords": [
+        "savings",
+        "investRatio",
+        "investRatio",
+        "Az állampapírok aránya a teljes vagyonban — likvid vs. lekötött."
+      ],
+      "body": "Az állampapírok aránya a teljes vagyonban — likvid vs. lekötött."
+    },
+    {
+      "id": "savings.accountName",
+      "area": "savings",
+      "title": "Megtakarítások — accountName",
+      "keywords": [
+        "savings",
+        "accountName",
+        "accountName",
+        "Bank vagy számla neve (pl. OTP megtakarítás, Revolut)."
+      ],
+      "body": "Bank vagy számla neve (pl. OTP megtakarítás, Revolut)."
+    },
+    {
+      "id": "savings.currency",
+      "area": "savings",
+      "title": "Megtakarítások — currency",
+      "keywords": [
+        "savings",
+        "currency",
+        "currency",
+        "A számla pénzneme. Az árfolyam a fejlécben állítható."
+      ],
+      "body": "A számla pénzneme. Az árfolyam a fejlécben állítható."
+    },
+    {
+      "id": "savings.owner",
+      "area": "savings",
+      "title": "Megtakarítások — owner",
+      "keywords": [
+        "savings",
+        "owner",
+        "owner",
+        "Kié a számla: saját, közös, vagy Little Loom."
+      ],
+      "body": "Kié a számla: saját, közös, vagy Little Loom."
+    },
+    {
+      "id": "savings.invName",
+      "area": "savings",
+      "title": "Megtakarítások — invName",
+      "keywords": [
+        "savings",
+        "invName",
+        "invName",
+        "Papír megnevezése (pl. PEMÁP 2028, FixMÁP)."
+      ],
+      "body": "Papír megnevezése (pl. PEMÁP 2028, FixMÁP)."
+    },
+    {
+      "id": "savings.invType",
+      "area": "savings",
+      "title": "Megtakarítások — invType",
+      "keywords": [
+        "savings",
+        "invType",
+        "invType",
+        "Állampapír típusa — befolyásolja a kamatszámítást."
+      ],
+      "body": "Állampapír típusa — befolyásolja a kamatszámítást."
+    },
+    {
+      "id": "savings.principal",
+      "area": "savings",
+      "title": "Megtakarítások — principal",
+      "keywords": [
+        "savings",
+        "principal",
+        "principal",
+        "Befektetett tőke összege vásárláskor."
+      ],
+      "body": "Befektetett tőke összege vásárláskor."
+    },
+    {
+      "id": "savings.maturityAmount",
+      "area": "savings",
+      "title": "Megtakarítások — maturityAmount",
+      "keywords": [
+        "savings",
+        "maturityAmount",
+        "maturityAmount",
+        "Lejáratkor kapott névérték (pl. DKJ 360 000 Ft). Független a MÁK aktuális értéktől, ha közben kivettél a papírból."
+      ],
+      "body": "Lejáratkor kapott névérték (pl. DKJ 360 000 Ft). Független a MÁK aktuális értéktől, ha közben kivettél a papírból."
+    },
+    {
+      "id": "savings.invRate",
+      "area": "savings",
+      "title": "Megtakarítások — invRate",
+      "keywords": [
+        "savings",
+        "invRate",
+        "invRate",
+        "Éves hozam / kamat százalékban — becsléshez és dashboard emlékeztetőhöz."
+      ],
+      "body": "Éves hozam / kamat százalékban — becsléshez és dashboard emlékeztetőhöz."
+    },
+    {
+      "id": "savings.purchaseDate",
+      "area": "savings",
+      "title": "Megtakarítások — purchaseDate",
+      "keywords": [
+        "savings",
+        "purchaseDate",
+        "purchaseDate",
+        "Mikor vásároltad a papírt."
+      ],
+      "body": "Mikor vásároltad a papírt."
+    },
+    {
+      "id": "savings.maturityDate",
+      "area": "savings",
+      "title": "Megtakarítások — maturityDate",
+      "keywords": [
+        "savings",
+        "maturityDate",
+        "maturityDate",
+        "Lejárat dátuma — opcionális, emlékeztetőhöz."
+      ],
+      "body": "Lejárat dátuma — opcionális, emlékeztetőhöz."
+    },
+    {
+      "id": "savings.payoutAmount",
+      "area": "savings",
+      "title": "Megtakarítások — payoutAmount",
+      "keywords": [
+        "savings",
+        "payoutAmount",
+        "payoutAmount",
+        "FixMÁP-hoz hasonló: következő kamatkifizetés összege."
+      ],
+      "body": "FixMÁP-hoz hasonló: következő kamatkifizetés összege."
+    },
+    {
+      "id": "savings.payoutDate",
+      "area": "savings",
+      "title": "Megtakarítások — payoutDate",
+      "keywords": [
+        "savings",
+        "payoutDate",
+        "payoutDate",
+        "Következő kamat vagy kupon dátuma."
+      ],
+      "body": "Következő kamat vagy kupon dátuma."
+    },
+    {
+      "id": "savings.historyAmount",
+      "area": "savings",
+      "title": "Megtakarítások — historyAmount",
+      "keywords": [
+        "savings",
+        "historyAmount",
+        "historyAmount",
+        "Befizetés (+) vagy kivét (−) — módosítja a számla egyenlegét."
+      ],
+      "body": "Befizetés (+) vagy kivét (−) — módosítja a számla egyenlegét."
+    },
+    {
+      "id": "savings.historyNote",
+      "area": "savings",
+      "title": "Megtakarítások — historyNote",
+      "keywords": [
+        "savings",
+        "historyNote",
+        "historyNote",
+        "Opcionális megjegyzés a mozgáshoz."
+      ],
+      "body": "Opcionális megjegyzés a mozgáshoz."
+    },
+    {
+      "id": "savings.historyEdit",
+      "area": "savings",
+      "title": "Megtakarítások — historyEdit",
+      "keywords": [
+        "savings",
+        "historyEdit",
+        "historyEdit",
+        "Korábbi tétel javítása: szerkesztés gomb, majd Mentés. Törlés a kuka ikonnal."
+      ],
+      "body": "Korábbi tétel javítása: szerkesztés gomb, majd Mentés. Törlés a kuka ikonnal."
+    },
+    {
+      "id": "utilities.balance",
+      "area": "utilities",
+      "title": "Rezsi — balance",
+      "keywords": [
+        "utilities",
+        "balance",
+        "balance",
+        "Ki mennyivel tartozik a másiknak ebben a hónapban. A „Tartozás rendezése” rögzíti az elszámolást (nem új rezsi sor), és a költségvetésben bevételként vagy kiadásként jelenik meg."
+      ],
+      "body": "Ki mennyivel tartozik a másiknak ebben a hónapban. A „Tartozás rendezése” rögzíti az elszámolást (nem új rezsi sor), és a költségvetésben bevételként vagy kiadásként jelenik meg."
+    },
+    {
+      "id": "utilities.settlementRecord",
+      "area": "utilities",
+      "title": "Rezsi — settlementRecord",
+      "keywords": [
+        "utilities",
+        "settlementRecord",
+        "settlementRecord",
+        "A hónap rezsi-tartozása rendezve. A költségvetésben külön „Rezsi elszámolás” tételként látszik — bevétel, ha a partner fizetett neked; kiadás, ha te fizettél neki."
+      ],
+      "body": "A hónap rezsi-tartozása rendezve. A költségvetésben külön „Rezsi elszámolás” tételként látszik — bevétel, ha a partner fizetett neked; kiadás, ha te fizettél neki."
+    },
+    {
+      "id": "utilities.wePaid",
+      "area": "utilities",
+      "title": "Rezsi — wePaid",
+      "keywords": [
+        "utilities",
+        "wePaid",
+        "wePaid",
+        "Ti általatok befizetett közüzemi és egyéb rezsi összege."
+      ],
+      "body": "Ti általatok befizetett közüzemi és egyéb rezsi összege."
+    },
+    {
+      "id": "utilities.partnerPaid",
+      "area": "utilities",
+      "title": "Rezsi — partnerPaid",
+      "keywords": [
+        "utilities",
+        "partnerPaid",
+        "partnerPaid",
+        "A partner által befizetett összeg ebben a hónapban."
+      ],
+      "body": "A partner által befizetett összeg ebben a hónapban."
+    },
+    {
+      "id": "utilities.totalBills",
+      "area": "utilities",
+      "title": "Rezsi — totalBills",
+      "keywords": [
+        "utilities",
+        "totalBills",
+        "totalBills",
+        "Összes rögzített rezsi tétel a kiválasztott hónapban."
+      ],
+      "body": "Összes rögzített rezsi tétel a kiválasztott hónapban."
+    },
+    {
+      "id": "utilities.paid",
+      "area": "utilities",
+      "title": "Rezsi — paid",
+      "keywords": [
+        "utilities",
+        "paid",
+        "paid",
+        "Már kifizetett (paidDate) rezsi tételek összege ebben a hónapban."
+      ],
+      "body": "Már kifizetett (paidDate) rezsi tételek összege ebben a hónapban."
+    },
+    {
+      "id": "utilities.waiting",
+      "area": "utilities",
+      "title": "Rezsi — waiting",
+      "keywords": [
+        "utilities",
+        "waiting",
+        "waiting",
+        "Még nyitott, fizetendő rezsik összege ebben a hónapban."
+      ],
+      "body": "Még nyitott, fizetendő rezsik összege ebben a hónapban."
+    },
+    {
+      "id": "utilities.readiness",
+      "area": "utilities",
+      "title": "Rezsi — readiness",
+      "keywords": [
+        "utilities",
+        "readiness",
+        "readiness",
+        "A hónap rezsitételeinek hány százalékát rendezték már kifizetésként."
+      ],
+      "body": "A hónap rezsitételeinek hány százalékát rendezték már kifizetésként."
+    },
+    {
+      "id": "utilities.cloneMonth",
+      "area": "utilities",
+      "title": "Rezsi — Hónap másolása",
+      "keywords": [
+        "utilities",
+        "cloneMonth",
+        "Hónap másolása",
+        "Az előző hónap rezsi tételeit másolja a kiválasztott hónapra: ugyanaz a megnevezés, összeg, határidő napja és megosztás. Fizető és kifizetés üresen marad."
+      ],
+      "body": "Az előző hónap rezsi tételeit másolja a kiválasztott hónapra: ugyanaz a megnevezés, összeg, határidő napja és megosztás. Fizető és kifizetés üresen marad."
+    },
+    {
+      "id": "utilities.utilityTemplates",
+      "area": "utilities",
+      "title": "Rezsi — utilityTemplates",
+      "keywords": [
+        "utilities",
+        "utilityTemplates",
+        "utilityTemplates",
+        "Új hónap kitöltéséhez sablon: megnevezés, becsült összeg, esedékesség napja, megosztás. Üres lista = csak múlt havi másolás vagy kézi rögzítés."
+      ],
+      "body": "Új hónap kitöltéséhez sablon: megnevezés, becsült összeg, esedékesség napja, megosztás. Üres lista = csak múlt havi másolás vagy kézi rögzítés."
+    },
+    {
+      "id": "utilities.payerSelect",
+      "area": "utilities",
+      "title": "Rezsi — payerSelect",
+      "keywords": [
+        "utilities",
+        "payerSelect",
+        "payerSelect",
+        "Kattints a legördülőre: ki fizette a számlát? Függőbenre állítva törlődik a kifizetés."
+      ],
+      "body": "Kattints a legördülőre: ki fizette a számlát? Függőbenre állítva törlődik a kifizetés."
+    },
+    {
+      "id": "utilities.statusToggle",
+      "area": "utilities",
+      "title": "Rezsi — statusToggle",
+      "keywords": [
+        "utilities",
+        "statusToggle",
+        "statusToggle",
+        "Kattints a státuszra: várakozik ↔ kész. A kifizetés napja automatikusan a mai dátum."
+      ],
+      "body": "Kattints a státuszra: várakozik ↔ kész. A kifizetés napja automatikusan a mai dátum."
+    },
+    {
+      "id": "utilities.aiAnomaly",
+      "area": "utilities",
+      "title": "Rezsi — aiAnomaly",
+      "keywords": [
+        "utilities",
+        "aiAnomaly",
+        "aiAnomaly",
+        "Összeveti a korábbi hónapok fogyasztását/számláit — szokatlanul magas tételnél figyelmeztet."
+      ],
+      "body": "Összeveti a korábbi hónapok fogyasztását/számláit — szokatlanul magas tételnél figyelmeztet."
+    },
+    {
+      "id": "utilities.billType",
+      "area": "utilities",
+      "title": "Rezsi — billType",
+      "keywords": [
+        "utilities",
+        "billType",
+        "billType",
+        "Közüzemi típus: villany, gáz, víz, szemét, egyéb."
+      ],
+      "body": "Közüzemi típus: villany, gáz, víz, szemét, egyéb."
+    },
+    {
+      "id": "utilities.billAmount",
+      "area": "utilities",
+      "title": "Rezsi — billAmount",
+      "keywords": [
+        "utilities",
+        "billAmount",
+        "billAmount",
+        "A számla végösszege forintban."
+      ],
+      "body": "A számla végösszege forintban."
+    },
+    {
+      "id": "utilities.billDue",
+      "area": "utilities",
+      "title": "Rezsi — billDue",
+      "keywords": [
+        "utilities",
+        "billDue",
+        "billDue",
+        "Fizetési határidő — megjelenik a fizetendő listában is."
+      ],
+      "body": "Fizetési határidő — megjelenik a fizetendő listában is."
+    },
+    {
+      "id": "utilities.settlement",
+      "area": "utilities",
+      "title": "Rezsi — settlement",
+      "keywords": [
+        "utilities",
+        "settlement",
+        "settlement",
+        "Ki viseli ezt a számlát? Ez határozza meg a rezsi-mérleget és hogy kinél jelenik meg költésként."
+      ],
+      "body": "Ki viseli ezt a számlát? Ez határozza meg a rezsi-mérleget és hogy kinél jelenik meg költésként."
+    },
+    {
+      "id": "utilities.settlementIntro",
+      "area": "utilities",
+      "title": "Rezsi — settlementIntro",
+      "keywords": [
+        "utilities",
+        "settlementIntro",
+        "settlementIntro",
+        "Rezsi megosztás be van kapcsolva — válaszd ki, ki fizeti ezt a konkrét számlát. A magyarázat mindig látható."
+      ],
+      "body": "Rezsi megosztás be van kapcsolva — válaszd ki, ki fizeti ezt a konkrét számlát. A magyarázat mindig látható."
+    },
+    {
+      "id": "utilities.settlementShared",
+      "area": "utilities",
+      "title": "Rezsi — settlementShared",
+      "keywords": [
+        "utilities",
+        "settlementShared",
+        "settlementShared",
+        "Közös költség: a teljes összeg fele-fele számít. Mindketten „fizettetek” a saját felezett részt, a havi rezsi-mérlegben is ez jelenik meg."
+      ],
+      "body": "Közös költség: a teljes összeg fele-fele számít. Mindketten „fizettetek” a saját felezett részt, a havi rezsi-mérlegben is ez jelenik meg."
+    },
+    {
+      "id": "utilities.settlementMine",
+      "area": "utilities",
+      "title": "Rezsi — settlementMine",
+      "keywords": [
+        "utilities",
+        "settlementMine",
+        "settlementMine",
+        "Te fizeted a teljes számlát egyedül — a teljes összeg a te oldaladon költésként, a partner felé tartozás jelezhető a mérlegben."
+      ],
+      "body": "Te fizeted a teljes számlát egyedül — a teljes összeg a te oldaladon költésként, a partner felé tartozás jelezhető a mérlegben."
+    },
+    {
+      "id": "utilities.settlementPartner",
+      "area": "utilities",
+      "title": "Rezsi — settlementPartner",
+      "keywords": [
+        "utilities",
+        "settlementPartner",
+        "settlementPartner",
+        "A partner fizeti a teljes számlát — nálad ez nem számít közvetlen költésnek, csak nyilvántartás és a mérleg számára."
+      ],
+      "body": "A partner fizeti a teljes számlát — nálad ez nem számít közvetlen költésnek, csak nyilvántartás és a mérleg számára."
+    },
+    {
+      "id": "meters.chart",
+      "area": "meters",
+      "title": "Közműórák — chart",
+      "keywords": [
+        "meters",
+        "chart",
+        "chart",
+        "Mérőóra állások időbeli alakulása — ugrás vagy csökkenés is látszik."
+      ],
+      "body": "Mérőóra állások időbeli alakulása — ugrás vagy csökkenés is látszik."
+    },
+    {
+      "id": "meters.aiAnomaly",
+      "area": "meters",
+      "title": "Közműórák — aiAnomaly",
+      "keywords": [
+        "meters",
+        "aiAnomaly",
+        "aiAnomaly",
+        "AI keres szokatlan fogyasztási mintát az elmúlt leolvasások alapján."
+      ],
+      "body": "AI keres szokatlan fogyasztási mintát az elmúlt leolvasások alapján."
+    },
+    {
+      "id": "meters.meterSelect",
+      "area": "meters",
+      "title": "Közműórák — meterSelect",
+      "keywords": [
+        "meters",
+        "meterSelect",
+        "meterSelect",
+        "Melyik mérőhöz tartozik a leolvasás (villany, gáz, víz…)."
+      ],
+      "body": "Melyik mérőhöz tartozik a leolvasás (villany, gáz, víz…)."
+    },
+    {
+      "id": "meters.readingDate",
+      "area": "meters",
+      "title": "Közműórák — readingDate",
+      "keywords": [
+        "meters",
+        "readingDate",
+        "readingDate",
+        "Mikor olvastad le az órát."
+      ],
+      "body": "Mikor olvastad le az órát."
+    },
+    {
+      "id": "meters.readingValue",
+      "area": "meters",
+      "title": "Közműórák — readingValue",
+      "keywords": [
+        "meters",
+        "readingValue",
+        "readingValue",
+        "Az óra aktuális állása a megadott mértékegységben (kWh, m³…)."
+      ],
+      "body": "Az óra aktuális állása a megadott mértékegységben (kWh, m³…)."
+    },
+    {
+      "id": "meters.estimateYear",
+      "area": "meters",
+      "title": "Közműórák — estimateYear",
+      "keywords": [
+        "meters",
+        "estimateYear",
+        "estimateYear",
+        "Melyik év fogyasztását becsüljük."
+      ],
+      "body": "Melyik év fogyasztását becsüljük."
+    },
+    {
+      "id": "meters.estimateMonth",
+      "area": "meters",
+      "title": "Közműórák — estimateMonth",
+      "keywords": [
+        "meters",
+        "estimateMonth",
+        "estimateMonth",
+        "Melyik hónap — az elmúlt leolvasások trendjéből számol."
+      ],
+      "body": "Melyik hónap — az elmúlt leolvasások trendjéből számol."
+    },
+    {
+      "id": "meters.newMeterName",
+      "area": "meters",
+      "title": "Közműórák — newMeterName",
+      "keywords": [
+        "meters",
+        "newMeterName",
+        "newMeterName",
+        "Felismerhető név (pl. „Villany főóra”)."
+      ],
+      "body": "Felismerhető név (pl. „Villany főóra”)."
+    },
+    {
+      "id": "meters.newMeterUnit",
+      "area": "meters",
+      "title": "Közműórák — newMeterUnit",
+      "keywords": [
+        "meters",
+        "newMeterUnit",
+        "newMeterUnit",
+        "Mértékegység: kWh, m³, GJ stb."
+      ],
+      "body": "Mértékegység: kWh, m³, GJ stb."
+    },
+    {
+      "id": "meters.newMeterLocation",
+      "area": "meters",
+      "title": "Közműórák — newMeterLocation",
+      "keywords": [
+        "meters",
+        "newMeterLocation",
+        "newMeterLocation",
+        "Hol van az óra (pl. pince, garázs) — csak megjegyzés."
+      ],
+      "body": "Hol van az óra (pl. pince, garázs) — csak megjegyzés."
+    },
+    {
+      "id": "business.monthlyRevenue",
+      "area": "business",
+      "title": "Vállalkozás — monthlyRevenue",
+      "keywords": [
+        "business",
+        "monthlyRevenue",
+        "monthlyRevenue",
+        "A kiválasztott hónapban rögzített rendelések összértéke."
+      ],
+      "body": "A kiválasztott hónapban rögzített rendelések összértéke."
+    },
+    {
+      "id": "business.paid",
+      "area": "business",
+      "title": "Vállalkozás — paid",
+      "keywords": [
+        "business",
+        "paid",
+        "paid",
+        "Már beérkezett / lekönyvelt összeg (kifizetve státusz)."
+      ],
+      "body": "Már beérkezett / lekönyvelt összeg (kifizetve státusz)."
+    },
+    {
+      "id": "business.pending",
+      "area": "business",
+      "title": "Vállalkozás — pending",
+      "keywords": [
+        "business",
+        "pending",
+        "pending",
+        "Még nem teljesült befizetés — kintlévőség."
+      ],
+      "body": "Még nem teljesült befizetés — kintlévőség."
+    },
+    {
+      "id": "business.margin",
+      "area": "business",
+      "title": "Vállalkozás — margin",
+      "keywords": [
+        "business",
+        "margin",
+        "margin",
+        "Bevétel mínusz becsült költség — ha van költség mező."
+      ],
+      "body": "Bevétel mínusz becsült költség — ha van költség mező."
+    },
+    {
+      "id": "business.aiStrategist",
+      "area": "business",
+      "title": "Vállalkozás — aiStrategist",
+      "keywords": [
+        "business",
+        "aiStrategist",
+        "aiStrategist",
+        "AI elemzi a csatornákat és a kintlévőséget — javaslatokkal."
+      ],
+      "body": "AI elemzi a csatornákat és a kintlévőséget — javaslatokkal."
+    },
+    {
+      "id": "business.orderDate",
+      "area": "business",
+      "title": "Vállalkozás — orderDate",
+      "keywords": [
+        "business",
+        "orderDate",
+        "orderDate",
+        "Rendelés vagy számla dátuma."
+      ],
+      "body": "Rendelés vagy számla dátuma."
+    },
+    {
+      "id": "business.customer",
+      "area": "business",
+      "title": "Vállalkozás — customer",
+      "keywords": [
+        "business",
+        "customer",
+        "customer",
+        "Vevő vagy megrendelő neve."
+      ],
+      "body": "Vevő vagy megrendelő neve."
+    },
+    {
+      "id": "business.orderAmount",
+      "area": "business",
+      "title": "Vállalkozás — orderAmount",
+      "keywords": [
+        "business",
+        "orderAmount",
+        "orderAmount",
+        "Rendelés bruttó összege forintban."
+      ],
+      "body": "Rendelés bruttó összege forintban."
+    },
+    {
+      "id": "business.channel",
+      "area": "business",
+      "title": "Vállalkozás — channel",
+      "keywords": [
+        "business",
+        "channel",
+        "channel",
+        "Honnan jött: webshop, piactér, egyéb csatorna."
+      ],
+      "body": "Honnan jött: webshop, piactér, egyéb csatorna."
+    },
+    {
+      "id": "business.paymentMethod",
+      "area": "business",
+      "title": "Vállalkozás — paymentMethod",
+      "keywords": [
+        "business",
+        "paymentMethod",
+        "paymentMethod",
+        "Utalás, kártya, utánvét stb."
+      ],
+      "body": "Utalás, kártya, utánvét stb."
+    },
+    {
+      "id": "business.provider",
+      "area": "business",
+      "title": "Vállalkozás — provider",
+      "keywords": [
+        "business",
+        "provider",
+        "provider",
+        "Fizetési szolgáltató (Barion, Stripe…), ha van."
+      ],
+      "body": "Fizetési szolgáltató (Barion, Stripe…), ha van."
+    },
+    {
+      "id": "business.destination",
+      "area": "business",
+      "title": "Vállalkozás — destination",
+      "keywords": [
+        "business",
+        "destination",
+        "destination",
+        "Hová érkezett a pénz: bankszámla vagy platform."
+      ],
+      "body": "Hová érkezett a pénz: bankszámla vagy platform."
+    },
+    {
+      "id": "business.paidDateBiz",
+      "area": "business",
+      "title": "Vállalkozás — paidDateBiz",
+      "keywords": [
+        "business",
+        "paidDateBiz",
+        "paidDateBiz",
+        "Tényleges kifizetés napja — ettől számít „beérkezettnek”."
+      ],
+      "body": "Tényleges kifizetés napja — ettől számít „beérkezettnek”."
+    },
+    {
+      "id": "business.invoiceNumber",
+      "area": "business",
+      "title": "Vállalkozás — invoiceNumber",
+      "keywords": [
+        "business",
+        "invoiceNumber",
+        "invoiceNumber",
+        "Számla sorszáma könyveléshez."
+      ],
+      "body": "Számla sorszáma könyveléshez."
+    },
+    {
+      "id": "business.paymentSection",
+      "area": "business",
+      "title": "Vállalkozás — paymentSection",
+      "keywords": [
+        "business",
+        "paymentSection",
+        "paymentSection",
+        "Mikor érkezett meg a pénz és milyen számla tartozik hozzá — ettől lesz „beérkezett” a rendelés."
+      ],
+      "body": "Mikor érkezett meg a pénz és milyen számla tartozik hozzá — ettől lesz „beérkezett” a rendelés."
+    },
+    {
+      "id": "business.conversion",
+      "area": "business",
+      "title": "Vállalkozás — conversion",
+      "keywords": [
+        "business",
+        "conversion",
+        "conversion",
+        "A havi rendelések hány százalékánál érkezett meg a befizetés (RENDBEN / kifizetve státusz)."
+      ],
+      "body": "A havi rendelések hány százalékánál érkezett meg a befizetés (RENDBEN / kifizetve státusz)."
+    },
+    {
+      "id": "business.ytd",
+      "area": "business",
+      "title": "Vállalkozás — ytd",
+      "keywords": [
+        "business",
+        "ytd",
+        "ytd",
+        "Year-to-date: az adott év elejétől összes rögzített forgalom."
+      ],
+      "body": "Year-to-date: az adott év elejétől összes rögzített forgalom."
+    },
+    {
+      "id": "business.aov",
+      "area": "business",
+      "title": "Vállalkozás — aov",
+      "keywords": [
+        "business",
+        "aov",
+        "aov",
+        "Average Order Value — átlagos rendelési érték: forgalom / rendelésszám."
+      ],
+      "body": "Average Order Value — átlagos rendelési érték: forgalom / rendelésszám."
+    },
+    {
+      "id": "business.topChannel",
+      "area": "business",
+      "title": "Vállalkozás — topChannel",
+      "keywords": [
+        "business",
+        "topChannel",
+        "topChannel",
+        "Legnagyobb árbevételű értékesítési csatorna az időszakban."
+      ],
+      "body": "Legnagyobb árbevételű értékesítési csatorna az időszakban."
+    },
+    {
+      "id": "business.channelCount",
+      "area": "business",
+      "title": "Vállalkozás — channelCount",
+      "keywords": [
+        "business",
+        "channelCount",
+        "channelCount",
+        "Hány különböző értékesítési csatornán volt eladás."
+      ],
+      "body": "Hány különböző értékesítési csatornán volt eladás."
+    },
+    {
+      "id": "settings.firstName",
+      "area": "settings",
+      "title": "Beállítások — firstName",
+      "keywords": [
+        "settings",
+        "firstName",
+        "firstName",
+        "Megjelenik a háztartás tagjai előtt és az üdvözlésben."
+      ],
+      "body": "Megjelenik a háztartás tagjai előtt és az üdvözlésben."
+    },
+    {
+      "id": "settings.lastName",
+      "area": "settings",
+      "title": "Beállítások — lastName",
+      "keywords": [
+        "settings",
+        "lastName",
+        "lastName",
+        "Családnév — profil és meghívások."
+      ],
+      "body": "Családnév — profil és meghívások."
+    },
+    {
+      "id": "settings.username",
+      "area": "settings",
+      "title": "Beállítások — username",
+      "keywords": [
+        "settings",
+        "username",
+        "username",
+        "Belépési név — csak az admin módosíthatja új fiók létrehozásával."
+      ],
+      "body": "Belépési név — csak az admin módosíthatja új fiók létrehozásával."
+    },
+    {
+      "id": "settings.password",
+      "area": "settings",
+      "title": "Beállítások — password",
+      "keywords": [
+        "settings",
+        "password",
+        "password",
+        "Legalább 8 karakter. A mentés után azonnal érvényes."
+      ],
+      "body": "Legalább 8 karakter. A mentés után azonnal érvényes."
+    },
+    {
+      "id": "settings.passwordConfirm",
+      "area": "settings",
+      "title": "Beállítások — passwordConfirm",
+      "keywords": [
+        "settings",
+        "passwordConfirm",
+        "passwordConfirm",
+        "Ismételd meg az új jelszót — egyeznie kell."
+      ],
+      "body": "Ismételd meg az új jelszót — egyeznie kell."
+    },
+    {
+      "id": "settings.householdName",
+      "area": "settings",
+      "title": "Beállítások — householdName",
+      "keywords": [
+        "settings",
+        "householdName",
+        "householdName",
+        "A háztartás neve a felületen és meghívásoknál."
+      ],
+      "body": "A háztartás neve a felületen és meghívásoknál."
+    },
+    {
+      "id": "settings.businessName",
+      "area": "settings",
+      "title": "Beállítások — businessName",
+      "keywords": [
+        "settings",
+        "businessName",
+        "businessName",
+        "Vállalkozás megjelenő neve (pl. Little Loom)."
+      ],
+      "body": "Vállalkozás megjelenő neve (pl. Little Loom)."
+    },
+    {
+      "id": "settings.shopifyUrl",
+      "area": "settings",
+      "title": "Beállítások — shopifyUrl",
+      "keywords": [
+        "settings",
+        "shopifyUrl",
+        "shopifyUrl",
+        "A bolt admin címe, pl. bolt-neve.myshopify.com — a Shopify Admin → Beállítások → Bolt részletei alatt találod."
+      ],
+      "body": "A bolt admin címe, pl. bolt-neve.myshopify.com — a Shopify Admin → Beállítások → Bolt részletei alatt találod."
+    },
+    {
+      "id": "settings.shopifyToken",
+      "area": "settings",
+      "title": "Beállítások — shopifyToken",
+      "keywords": [
+        "settings",
+        "shopifyToken",
+        "shopifyToken",
+        "Shopify Admin API hozzáférési token (shpat_… előtaggal). A Shopify Adminban: Beállítások → Alkalmazások és értékesítési csatornák → Alkalmazások fejlesztése → Alkalmazás létrehozása → Admin API jogosultságok (orders olvasás) → Token telepítése / megtekintése. Csak a szerveren tároljuk titkosítva, soha ne oszd meg nyilvánosan."
+      ],
+      "body": "Shopify Admin API hozzáférési token (shpat_… előtaggal). A Shopify Adminban: Beállítások → Alkalmazások és értékesítési csatornák → Alkalmazások fejlesztése → Alkalmazás létrehozása → Admin API jogosultságok (orders olvasás) → Token telepítése / megtekintése. Csak a szerveren tároljuk titkosítva, soha ne oszd meg nyilvánosan."
+    },
+    {
+      "id": "settings.sumupMerchantCode",
+      "area": "settings",
+      "title": "Beállítások — sumupMerchantCode",
+      "keywords": [
+        "settings",
+        "sumupMerchantCode",
+        "sumupMerchantCode",
+        "SumUp Merchant kód (pl. MH4H92C7) — a SumUp Dashboard → Fiók / Bolt adatai alatt, vagy a tranzakciók URL-jében."
+      ],
+      "body": "SumUp Merchant kód (pl. MH4H92C7) — a SumUp Dashboard → Fiók / Bolt adatai alatt, vagy a tranzakciók URL-jében."
+    },
+    {
+      "id": "settings.sumupApiKey",
+      "area": "settings",
+      "title": "Beállítások — sumupApiKey",
+      "keywords": [
+        "settings",
+        "sumupApiKey",
+        "sumupApiKey",
+        "SumUp API kulcs (sup_sk_…). SumUp Developer / Dashboard → API kulcsok. Szükséges jogosultság: tranzakció előzmények (transactions.history) és profil / kifizetések (user.profile vagy user.profile_readonly). Titkosítva tároljuk."
+      ],
+      "body": "SumUp API kulcs (sup_sk_…). SumUp Developer / Dashboard → API kulcsok. Szükséges jogosultság: tranzakció előzmények (transactions.history) és profil / kifizetések (user.profile vagy user.profile_readonly). Titkosítva tároljuk."
+    },
+    {
+      "id": "settings.splitPartner",
+      "area": "settings",
+      "title": "Beállítások — Rezsi partner",
+      "keywords": [
+        "settings",
+        "splitPartner",
+        "Rezsi partner",
+        "Rezsi megosztásnál a másik fél háztartási tagja."
+      ],
+      "body": "Rezsi megosztásnál a másik fél háztartási tagja."
+    },
+    {
+      "id": "settings.inviteUsername",
+      "area": "settings",
+      "title": "Beállítások — inviteUsername",
+      "keywords": [
+        "settings",
+        "inviteUsername",
+        "inviteUsername",
+        "Az új tag ezzel a felhasználónévvel lép be (kisbetű, pl. ildi)."
+      ],
+      "body": "Az új tag ezzel a felhasználónévvel lép be (kisbetű, pl. ildi)."
+    },
+    {
+      "id": "settings.invitePassword",
+      "area": "settings",
+      "title": "Beállítások — invitePassword",
+      "keywords": [
+        "settings",
+        "invitePassword",
+        "invitePassword",
+        "Ideiglenes jelszó — első belépés után érdemes cserélni."
+      ],
+      "body": "Ideiglenes jelszó — első belépés után érdemes cserélni."
+    },
+    {
+      "id": "settings.inviteRole",
+      "area": "settings",
+      "title": "Beállítások — Tag szerepkör",
+      "keywords": [
+        "settings",
+        "inviteRole",
+        "Tag szerepkör",
+        "Admin: minden modul. Olvasó: csak megtekintés. Egyéni: modulonkénti jog."
+      ],
+      "body": "Admin: minden modul. Olvasó: csak megtekintés. Egyéni: modulonkénti jog."
+    },
+    {
+      "id": "settings.invitePermissions",
+      "area": "settings",
+      "title": "Beállítások — Tag jogosultságok",
+      "keywords": [
+        "settings",
+        "invitePermissions",
+        "Tag jogosultságok",
+        "Mely modulokat láthatja az új tag (ha nem admin)."
+      ],
+      "body": "Mely modulokat láthatja az új tag (ha nem admin)."
+    },
+    {
+      "id": "settings.categoryName",
+      "area": "settings",
+      "title": "Beállítások — Új kategória felvitele",
+      "keywords": [
+        "settings",
+        "categoryName",
+        "Új kategória felvitele",
+        "Költségkategória neve a költségvetésben."
+      ],
+      "body": "Költségkategória neve a költségvetésben."
+    },
+    {
+      "id": "settings.pocketMoneyEntryType",
+      "area": "settings",
+      "title": "Beállítások — pocketMoneyEntryType",
+      "keywords": [
+        "settings",
+        "pocketMoneyEntryType",
+        "pocketMoneyEntryType",
+        "Kiosztás: adsz zsebpénzt (növeli az egyenleget). Költés: elköltött összeg (csökkenti). Korrekció: ha a számított egyenleg nem stimmel a valósággal — pl. kezdő összeg vagy maradt készpénz (szintén növeli)."
+      ],
+      "body": "Kiosztás: adsz zsebpénzt (növeli az egyenleget). Költés: elköltött összeg (csökkenti). Korrekció: ha a számított egyenleg nem stimmel a valósággal — pl. kezdő összeg vagy maradt készpénz (szintén növeli)."
+    },
+    {
+      "id": "settings.pocketMoneyBalance",
+      "area": "settings",
+      "title": "Beállítások — pocketMoneyBalance",
+      "keywords": [
+        "settings",
+        "pocketMoneyBalance",
+        "pocketMoneyBalance",
+        "Az egyenleg a kiválasztott hónap végéig összesítve jelenik meg — nem nullázódik minden hónapban. A táblázat csak az adott hónap mozgásait listázza."
+      ],
+      "body": "Az egyenleg a kiválasztott hónap végéig összesítve jelenik meg — nem nullázódik minden hónapban. A táblázat csak az adott hónap mozgásait listázza."
+    },
+    {
+      "id": "settings.pocketMoneyInterest",
+      "area": "settings",
+      "title": "Beállítások — pocketMoneyInterest",
+      "keywords": [
+        "settings",
+        "pocketMoneyInterest",
+        "pocketMoneyInterest",
+        "A Kamatozás almenüben: kamat %, hogy a teljes egyenlegre vagy csak a hónapban kiosztott zsebpénzre számolunk, és hogy csak spórolás esetén jár-e, vagy költés után a bent maradtra is. A kiosztható kamat figyelmeztetés és a rögzítés gomb csak az aktuális hónap utolsó napjain jelenik meg (alapból 3 nap), mert addig változhatnak a költések."
+      ],
+      "body": "A Kamatozás almenüben: kamat %, hogy a teljes egyenlegre vagy csak a hónapban kiosztott zsebpénzre számolunk, és hogy csak spórolás esetén jár-e, vagy költés után a bent maradtra is. A kiosztható kamat figyelmeztetés és a rögzítés gomb csak az aktuális hónap utolsó napjain jelenik meg (alapból 3 nap), mert addig változhatnak a költések."
+    },
+    {
+      "id": "settings.insuranceReminder",
+      "area": "settings",
+      "title": "Beállítások — insuranceReminder",
+      "keywords": [
+        "settings",
+        "insuranceReminder",
+        "insuranceReminder",
+        "A beállításokban megadott napok számával előtte listázzuk a megújítást és a fedezet végét. Lejárt dátum „lejárt” jelzéssel."
+      ],
+      "body": "A beállításokban megadott napok számával előtte listázzuk a megújítást és a fedezet végét. Lejárt dátum „lejárt” jelzéssel."
+    },
+    {
+      "id": "settings.insurancePolicy",
+      "area": "settings",
+      "title": "Beállítások — insurancePolicy",
+      "keywords": [
+        "settings",
+        "insurancePolicy",
+        "insurancePolicy",
+        "Szerződés típusa: általános vagy élet / befektetési alap (befizetett összeg = alapérték, frissíthető). Díjmentesített szerződésnél nincs fizetendő díj. Fizetési gyakoriság (havi, negyedéves, féléves, éves) és induló hónap: ha be van kapcsolva a költségvetés-szinkron, a díjak automatikusan megjelennek a költségvetésben (mint a hitel törlesztések). Megújítás és fedezet dátuma külön mező. Ha a fedezet vége múltbeli, a szerződés automatikusan megszűnt / lejárt."
+      ],
+      "body": "Szerződés típusa: általános vagy élet / befektetési alap (befizetett összeg = alapérték, frissíthető). Díjmentesített szerződésnél nincs fizetendő díj. Fizetési gyakoriság (havi, negyedéves, féléves, éves) és induló hónap: ha be van kapcsolva a költségvetés-szinkron, a díjak automatikusan megjelennek a költségvetésben (mint a hitel törlesztések). Megújítás és fedezet dátuma külön mező. Ha a fedezet vége múltbeli, a szerződés automatikusan megszűnt / lejárt."
+    },
+    {
+      "id": "settings.insuranceAttachment",
+      "area": "settings",
+      "title": "Beállítások — insuranceAttachment",
+      "keywords": [
+        "settings",
+        "insuranceAttachment",
+        "insuranceAttachment",
+        "PDF dokumentumok csatolása szerződésenként (kötvény, ajánlat, melléklet). Csatolás funkció és Premium szükséges."
+      ],
+      "body": "PDF dokumentumok csatolása szerződésenként (kötvény, ajánlat, melléklet). Csatolás funkció és Premium szükséges."
+    },
+    {
+      "id": "settings.insuranceDelete",
+      "area": "settings",
+      "title": "Beállítások — insuranceDelete",
+      "keywords": [
+        "settings",
+        "insuranceDelete",
+        "insuranceDelete",
+        "Törléskor a szerződés eltűnik a listából; a költségvetésben a múltbeli (törlés előtti) hónapok díjai megmaradnak, a jövőbeli szinkronizált tételek nem jelennek meg többé."
+      ],
+      "body": "Törléskor a szerződés eltűnik a listából; a költségvetésben a múltbeli (törlés előtti) hónapok díjai megmaradnak, a jövőbeli szinkronizált tételek nem jelennek meg többé."
+    },
+    {
+      "id": "settings.deleteHousehold",
+      "area": "settings",
+      "title": "Beállítások — deleteHousehold",
+      "keywords": [
+        "settings",
+        "deleteHousehold",
+        "deleteHousehold",
+        "Véglegesen törli a háztartást, az összes pénzügyi adatot és minden családtag fiókját. Nem vonható vissza."
+      ],
+      "body": "Véglegesen törli a háztartást, az összes pénzügyi adatot és minden családtag fiókját. Nem vonható vissza."
+    },
+    {
+      "id": "settings.rentalProperty",
+      "area": "settings",
+      "title": "Beállítások — rentalProperty",
+      "keywords": [
+        "settings",
+        "rentalProperty",
+        "rentalProperty",
+        "Bérleti díj és áthárított közös költség (bérlő fizeti) = várható bevétel. Esedékesség napja, megállapodások, szerződés feltöltése. Költségvetés-szinkron: befizetéskor bevételként jelenik meg a költségvetésben."
+      ],
+      "body": "Bérleti díj és áthárított közös költség (bérlő fizeti) = várható bevétel. Esedékesség napja, megállapodások, szerződés feltöltése. Költségvetés-szinkron: befizetéskor bevételként jelenik meg a költségvetésben."
+    },
+    {
+      "id": "settings.rentalIncome",
+      "area": "settings",
+      "title": "Beállítások — rentalIncome",
+      "keywords": [
+        "settings",
+        "rentalIncome",
+        "rentalIncome",
+        "Havi tétel ingatlanonként: bérleti díj, közös ktg. áthárítás, esedékesség és befizetés napja. Üres befizetés = még nem érkezett — lejárt figyelmeztetés esedékesség után."
+      ],
+      "body": "Havi tétel ingatlanonként: bérleti díj, közös ktg. áthárítás, esedékesség és befizetés napja. Üres befizetés = még nem érkezett — lejárt figyelmeztetés esedékesség után."
+    },
+    {
+      "id": "settings.rentalExpense",
+      "area": "settings",
+      "title": "Beállítások — rentalExpense",
+      "keywords": [
+        "settings",
+        "rentalExpense",
+        "rentalExpense",
+        "Tulajdonosi költség (felújítás, karbantartás, társasházi közös ktg. ha te fizeted) — nem keverendő a bérlőtől számlázott díjjal. Adózásnál külön költségként vezethető."
+      ],
+      "body": "Tulajdonosi költség (felújítás, karbantartás, társasházi közös ktg. ha te fizeted) — nem keverendő a bérlőtől számlázott díjjal. Adózásnál külön költségként vezethető."
+    },
+    {
+      "id": "settings.rentalExport",
+      "area": "settings",
+      "title": "Beállítások — rentalExport",
+      "keywords": [
+        "settings",
+        "rentalExport",
+        "rentalExport",
+        "Éves CSV export: ingatlanok és havi bevételek (pontosvesszővel elválasztva, Excelhez)."
+      ],
+      "body": "Éves CSV export: ingatlanok és havi bevételek (pontosvesszővel elválasztva, Excelhez)."
+    },
+    {
+      "id": "travel.destination",
+      "area": "travel",
+      "title": "Utazástervező — destination",
+      "keywords": [
+        "travel",
+        "destination",
+        "destination",
+        "Úti cél — város vagy régió. Külföldnél a költség becslés forintban, de EUR árfolyam megjegyzéssel."
+      ],
+      "body": "Úti cél — város vagy régió. Külföldnél a költség becslés forintban, de EUR árfolyam megjegyzéssel."
+    },
+    {
+      "id": "travel.origin",
+      "area": "travel",
+      "title": "Utazástervező — origin",
+      "keywords": [
+        "travel",
+        "origin",
+        "origin",
+        "Indulási hely — autó/vonat költséghez. Alapértelmezés: Budapest."
+      ],
+      "body": "Indulási hely — autó/vonat költséghez. Alapértelmezés: Budapest."
+    },
+    {
+      "id": "travel.duration",
+      "area": "travel",
+      "title": "Utazástervező — duration",
+      "keywords": [
+        "travel",
+        "duration",
+        "duration",
+        "Az utazás teljes napjainak száma (max. 90)."
+      ],
+      "body": "Az utazás teljes napjainak száma (max. 90)."
+    },
+    {
+      "id": "travel.budget",
+      "area": "travel",
+      "title": "Utazástervező — budget",
+      "keywords": [
+        "travel",
+        "budget",
+        "budget",
+        "A teljes utazásra szánt keret forintban. Ha irreálisan alacsony, a terv a reális minimumot mutatja."
+      ],
+      "body": "A teljes utazásra szánt keret forintban. Ha irreálisan alacsony, a terv a reális minimumot mutatja."
+    },
+    {
+      "id": "travel.targetDate",
+      "area": "travel",
+      "title": "Utazástervező — targetDate",
+      "keywords": [
+        "travel",
+        "targetDate",
+        "targetDate",
+        "Tervezett indulás — megtakarítási terv és havi félretétel számításához."
+      ],
+      "body": "Tervezett indulás — megtakarítási terv és havi félretétel számításához."
+    },
+    {
+      "id": "travel.travelers",
+      "area": "travel",
+      "title": "Utazástervező — travelers",
+      "keywords": [
+        "travel",
+        "travelers",
+        "travelers",
+        "Utazók száma — szállás, étkezés és jegyek költségét szorozza."
+      ],
+      "body": "Utazók száma — szállás, étkezés és jegyek költségét szorozza."
+    },
+    {
+      "id": "travel.tripStyle",
+      "area": "travel",
+      "title": "Utazástervező — tripStyle",
+      "keywords": [
+        "travel",
+        "tripStyle",
+        "tripStyle",
+        "Utazás jellege — befolyásolja a napi program és költség szintet."
+      ],
+      "body": "Utazás jellege — befolyásolja a napi program és költség szintet."
+    },
+    {
+      "id": "travel.accommodation",
+      "area": "travel",
+      "title": "Utazástervező — accommodation",
+      "keywords": [
+        "travel",
+        "accommodation",
+        "accommodation",
+        "Szállás preferencia — hostel, apartman vagy hotel ársáv."
+      ],
+      "body": "Szállás preferencia — hostel, apartman vagy hotel ársáv."
+    },
+    {
+      "id": "travel.transportMode",
+      "area": "travel",
+      "title": "Utazástervező — transportMode",
+      "keywords": [
+        "travel",
+        "transportMode",
+        "transportMode",
+        "Közlekedés: autó (üzemanyag + útdíj + parkolás), repülő (realisztikus jegy), vonat/busz, vagy vegyes minimum."
+      ],
+      "body": "Közlekedés: autó (üzemanyag + útdíj + parkolás), repülő (realisztikus jegy), vonat/busz, vagy vegyes minimum."
+    },
+    {
+      "id": "travel.transportBooked",
+      "area": "travel",
+      "title": "Utazástervező — transportBooked",
+      "keywords": [
+        "travel",
+        "transportBooked",
+        "transportBooked",
+        "Ha a repülőjegy / vonatjegy / autó utazás már megvan, a közlekedési költség nem számít újra — csak a helyszíni kiadások."
+      ],
+      "body": "Ha a repülőjegy / vonatjegy / autó utazás már megvan, a közlekedési költség nem számít újra — csak a helyszíni kiadások."
+    },
+    {
+      "id": "travel.accommodationBooked",
+      "area": "travel",
+      "title": "Utazástervező — accommodationBooked",
+      "keywords": [
+        "travel",
+        "accommodationBooked",
+        "accommodationBooked",
+        "Ha a szállás már le van foglalva vagy megvan, a szállásköltség nem számít újra — csak étkezés, programok és egyéb kiadások."
+      ],
+      "body": "Ha a szállás már le van foglalva vagy megvan, a szállásköltség nem számít újra — csak étkezés, programok és egyéb kiadások."
+    },
+    {
+      "id": "travel.carConsumption",
+      "area": "travel",
+      "title": "Utazástervező — carConsumption",
+      "keywords": [
+        "travel",
+        "carConsumption",
+        "carConsumption",
+        "Autó fogyasztása liter/100 km — pl. 6.5 (kompakt) vagy 9 (SUV). Ez alapján számol az üzemanyagár."
+      ],
+      "body": "Autó fogyasztása liter/100 km — pl. 6.5 (kompakt) vagy 9 (SUV). Ez alapján számol az üzemanyagár."
+    },
+    {
+      "id": "travel.saveGoal",
+      "area": "travel",
+      "title": "Utazástervező — saveGoal",
+      "keywords": [
+        "travel",
+        "saveGoal",
+        "saveGoal",
+        "Megtakarítási célként menti a becsült összköltséget — megjelenik a Megtakarítások modulban és a költségvetésben."
+      ],
+      "body": "Megtakarítási célként menti a becsült összköltséget — megjelenik a Megtakarítások modulban és a költségvetésben."
+    },
+    {
+      "id": "travel.financialFit",
+      "area": "travel",
+      "title": "Utazástervező — financialFit",
+      "keywords": [
+        "travel",
+        "financialFit",
+        "financialFit",
+        "Összefoglaló: a Marad, a megtakarítás, a rendelkezésre álló összeg és a havi kapacitás alapján dönti el, befér-e az utazás."
+      ],
+      "body": "Összefoglaló: a Marad, a megtakarítás, a rendelkezésre álló összeg és a havi kapacitás alapján dönti el, befér-e az utazás."
+    },
+    {
+      "id": "travel.financialFitDisposable",
+      "area": "travel",
+      "title": "Utazástervező — financialFitDisposable",
+      "keywords": [
+        "travel",
+        "financialFitDisposable",
+        "financialFitDisposable",
+        "Az aktuális hónap szabad kerete a költségvetésben — ugyanaz, mint a „Marad” kártya. Pillanatkép az adott hónapra, nem havi átlag."
+      ],
+      "body": "Az aktuális hónap szabad kerete a költségvetésben — ugyanaz, mint a „Marad” kártya. Pillanatkép az adott hónapra, nem havi átlag."
+    },
+    {
+      "id": "travel.financialFitTravelSavings",
+      "area": "travel",
+      "title": "Utazástervező — financialFitTravelSavings",
+      "keywords": [
+        "travel",
+        "financialFitTravelSavings",
+        "financialFitTravelSavings",
+        "„Számít a felső összesítőbe” tételek forintra váltva (ugyanaz az árfolyam, mint a Megtakarítások oldalon). Kimarad: Államkincstár és a külön csoport (pl. vállalkozás). A lista a beleszámított és kimaradó tételeket mutatja."
+      ],
+      "body": "„Számít a felső összesítőbe” tételek forintra váltva (ugyanaz az árfolyam, mint a Megtakarítások oldalon). Kimarad: Államkincstár és a külön csoport (pl. vállalkozás). A lista a beleszámított és kimaradó tételeket mutatja."
+    },
+    {
+      "id": "travel.financialFitAvailable",
+      "area": "travel",
+      "title": "Utazástervező — financialFitAvailable",
+      "keywords": [
+        "travel",
+        "financialFitAvailable",
+        "financialFitAvailable",
+        "Marad + utazásra számítható megtakarítás. Ez áll rendelkezésre az utazás fedezetére most."
+      ],
+      "body": "Marad + utazásra számítható megtakarítás. Ez áll rendelkezésre az utazás fedezetére most."
+    },
+    {
+      "id": "travel.financialFitTripCost",
+      "area": "travel",
+      "title": "Utazástervező — financialFitTripCost",
+      "keywords": [
+        "travel",
+        "financialFitTripCost",
+        "financialFitTripCost",
+        "Az AI által becsült teljes utazási költség. Ha a rendelkezésre álló összeg nem fedezi, a hiányt havi félretétellel lehet pótolni az indulásig."
+      ],
+      "body": "Az AI által becsült teljes utazási költség. Ha a rendelkezésre álló összeg nem fedezi, a hiányt havi félretétellel lehet pótolni az indulásig."
+    },
+    {
+      "id": "travel.financialFitMonthlyCapacity",
+      "area": "travel",
+      "title": "Utazástervező — financialFitMonthlyCapacity",
+      "keywords": [
+        "travel",
+        "financialFitMonthlyCapacity",
+        "financialFitMonthlyCapacity",
+        "Az elmúlt 3 hónap átlagos többlete: bevétel − kifizetett kiadás. Megmutatja, mennyit tudsz havonta félretenni — nem ugyanaz, mint a Marad."
+      ],
+      "body": "Az elmúlt 3 hónap átlagos többlete: bevétel − kifizetett kiadás. Megmutatja, mennyit tudsz havonta félretenni — nem ugyanaz, mint a Marad."
+    },
+    {
+      "id": "travel.financialFitMonthlyRequired",
+      "area": "travel",
+      "title": "Utazástervező — financialFitMonthlyRequired",
+      "keywords": [
+        "travel",
+        "financialFitMonthlyRequired",
+        "financialFitMonthlyRequired",
+        "Ennyi Ft havi megtakarítás kellene a hiány pótlásához a megadott indulásig."
+      ],
+      "body": "Ennyi Ft havi megtakarítás kellene a hiány pótlásához a megadott indulásig."
+    },
+    {
+      "id": "travel.comparison",
+      "area": "travel",
+      "title": "Utazástervező — comparison",
+      "keywords": [
+        "travel",
+        "comparison",
+        "comparison",
+        "Minimum (padló), megadott keret, aktuális terv és komfort szint összehasonlítása."
+      ],
+      "body": "Minimum (padló), megadott keret, aktuális terv és komfort szint összehasonlítása."
+    },
+    {
+      "id": "travel.costAdjustments",
+      "area": "travel",
+      "title": "Utazástervező — costAdjustments",
+      "keywords": [
+        "travel",
+        "costAdjustments",
+        "costAdjustments",
+        "A tételeket kifizetettnek jelölheted (nem számít a hátralévőbe), kizárhatod (pl. nincs biztosítás), módosíthatod az összeget, vagy adhatsz hozzá újat. A „Befér az utazás?” a hátralévő költség alapján számol újra."
+      ],
+      "body": "A tételeket kifizetettnek jelölheted (nem számít a hátralévőbe), kizárhatod (pl. nincs biztosítás), módosíthatod az összeget, vagy adhatsz hozzá újat. A „Befér az utazás?” a hátralévő költség alapján számol újra."
+    },
+    {
+      "id": "travel.costSplit",
+      "area": "travel",
+      "title": "Utazástervező — costSplit",
+      "keywords": [
+        "travel",
+        "costSplit",
+        "costSplit",
+        "Megosztott tételnél a teljes összeg több fél között oszlik (pl. 2 = két házaspár felezi a szállást). A költségvetésbe és a „Belefér” számításba csak a mi részünk kerül."
+      ],
+      "body": "Megosztott tételnél a teljes összeg több fél között oszlik (pl. 2 = két házaspár felezi a szállást). A költségvetésbe és a „Belefér” számításba csak a mi részünk kerül."
+    }
+  ]
+}

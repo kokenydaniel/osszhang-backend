@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\DashboardAiCfoController;
 use App\Http\Controllers\Api\FeedbackReportController;
 use App\Http\Controllers\Api\AdminFeedbackReportController;
 use App\Http\Controllers\Api\DebtController;
+use App\Http\Controllers\Api\HelpAssistantController;
 use App\Http\Controllers\Api\HouseholdController;
 use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\InvestmentController;
@@ -90,6 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/feedback-reports/{feedbackReport}', [FeedbackReportController::class, 'show']);
     Route::post('/feedback-reports/{feedbackReport}/messages', [FeedbackReportController::class, 'storeMessage']);
     Route::post('/feedback-reports', [FeedbackReportController::class, 'store']);
+    Route::post('/help/assistant', [HelpAssistantController::class, 'chat']);
 });
 
 Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
