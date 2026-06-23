@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('accommodation_preference', 32)->default('mixed');
             $table->string('transport_mode', 32)->default('mixed');
             $table->boolean('transport_already_booked')->default(false);
+            $table->boolean('accommodation_already_booked')->default(false);
             $table->decimal('car_fuel_consumption_l100', 5, 2)->nullable();
             $table->json('plan_payload');
             $table->json('input_payload')->nullable();
