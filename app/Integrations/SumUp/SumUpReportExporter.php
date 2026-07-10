@@ -170,7 +170,7 @@ class SumUpReportExporter
             'SumUp bevételi jelentés',
             $periodLabel,
             $merchantCode,
-            '<p class="muted">Összefoglaló a könyveléshez — PenzPilot automatikus export.</p>
+            '<p class="muted">Összefoglaló a könyveléshez — automatikus export.</p>
             <h2>Összesítés</h2>
             <table><tbody>
                 <tr><td>Sikeres tranzakciók száma</td><td class="num">'.$successful.'</td></tr>
@@ -273,7 +273,7 @@ class SumUpReportExporter
             .'<h1>'.e($title).'</h1>'
             .'<p><strong>Időszak:</strong> '.e($periodLabel).'</p>'
             .'<p><strong>Merchant:</strong> '.e($merchantCode).'</p>'
-            .'<p class="muted">Exportálva: '.e(now()->timezone($this->timezone())->format('Y-m-d H:i')).' · PenzPilot</p>'
+            .'<p class="muted">Exportálva: '.e(now()->timezone($this->timezone())->format('Y-m-d H:i')).'</p>'
             .$body
             .'</body></html>';
     }

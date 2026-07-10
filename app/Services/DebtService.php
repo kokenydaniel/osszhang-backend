@@ -161,6 +161,9 @@ class DebtService
                     'source' => in_array($row['source'] ?? '', ['budget', 'debt_pay'], true)
                         ? (string) $row['source']
                         : 'budget',
+                    'note' => isset($row['note']) && is_string($row['note']) && trim($row['note']) !== ''
+                        ? trim($row['note'])
+                        : null,
                 ],
                 $validated['installmentPayments'],
             ));

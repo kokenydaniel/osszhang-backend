@@ -88,6 +88,7 @@ class DebtRecordFormatter extends AbstractEncryptedRecordFormatter
                 'paidAt' => is_string($paidAt) && $paidAt !== '' ? $paidAt : null,
                 'amount' => (float) ($row['amount'] ?? 0),
                 'source' => $source,
+                'note' => isset($row['note']) && is_string($row['note']) && trim($row['note']) !== '' ? trim($row['note']) : null,
             ];
         }
 

@@ -137,6 +137,7 @@ Route::middleware(['auth:sanctum', 'household.editor'])->group(function () {
         Route::post('/meters/{meter}/readings', [MeterController::class, 'addReading']);
         Route::put('/meters/{meter}/readings/{reading}', [MeterController::class, 'updateReading']);
         Route::delete('/meters/{meter}/readings/{reading}', [MeterController::class, 'deleteReading']);
+        Route::delete('/meters/{meter}/readings', [MeterController::class, 'bulkDeleteReadings']);
     });
 
     Route::middleware('tier.module:business')->group(function () {

@@ -91,9 +91,9 @@ class MeterService
             'date' => $validated['date'],
             'month' => (int) $date->format('m'),
             'year' => (int) $date->format('Y'),
-            'is_reset' => $request->isReset || $request->is_reset || false,
-            'is_estimated' => $request->isEstimated || $request->is_estimated || false,
-            'is_official' => $request->isOfficial || $request->is_official || false,
+            'is_reset' => $request->boolean('isReset') || $request->boolean('is_reset'),
+            'is_estimated' => $request->boolean('isEstimated') || $request->boolean('is_estimated'),
+            'is_official' => $request->boolean('isOfficial') || $request->boolean('is_official'),
         ]);
         $this->crypto->persistReading($reading, $household, [
             'value' => (float) $validated['value'],
@@ -118,10 +118,15 @@ class MeterService
         $reading->date = $validated['date'];
         $reading->month = (int) $date->format('m');
         $reading->year = (int) $date->format('Y');
-        $reading->is_reset = $request->isReset || $request->is_reset || $reading->is_reset;
-        $reading->is_estimated = $request->isEstimated || $request->is_estimated || $reading->is_estimated;
-        $reading->is_official = $request->isOfficial || $request->is_official || $reading->is_official;
-
+        if ($request->has('isReset') || $request->has('is_reset')) {
+            $reading->is_reset = $request->boolean('isReset') || $request->boolean('is_reset');
+        }
+        if ($request->has('isEstimated') || $request->has('is_estimated')) {
+            $reading->is_estimated = $request->boolean('isEstimated') || $request->boolean('is_estimated');
+        }
+        if ($request->has('isOfficial') || $request->has('is_official')) {
+            $reading->is_official = $request->boolean('isOfficial') || $request->boolean('is_official');
+        }
         $resolved = $this->crypto->readingResolved($reading, $household);
         $resolved['value'] = (float) $validated['value'];
         $this->crypto->persistReading($reading, $household, $resolved);
@@ -139,6 +144,19 @@ class MeterService
     {
         $meter = Meter::where('household_id', $household->id)->findOrFail($meterId);
         MeterReading::where('meter_id', $meter->id)->findOrFail($readingId)->delete();
+
+        $this->recalculateConsumptions($meter->id, $household);
+
+        return $this->crypto->formatMeter(
+            $meter->fresh()->load(['readings' => fn ($q) => $q->orderBy('date', 'desc')]),
+            $household,
+        );
+    }
+
+    public function deleteReadingsBulk(Household $household, int|string $meterId, array $readingIds): array
+    {
+        $meter = Meter::where('household_id', $household->id)->findOrFail($meterId);
+        MeterReading::where('meter_id', $meter->id)->whereIn('id', $readingIds)->delete();
 
         $this->recalculateConsumptions($meter->id, $household);
 

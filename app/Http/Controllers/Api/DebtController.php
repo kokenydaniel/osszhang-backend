@@ -40,6 +40,7 @@ class DebtController extends Controller
             'installmentPayments.*.paidAt' => 'nullable|date_format:Y-m-d',
             'installmentPayments.*.amount' => 'required_with:installmentPayments|numeric|min:0',
             'installmentPayments.*.source' => 'required_with:installmentPayments|string|in:budget,debt_pay',
+            'installmentPayments.*.note' => 'nullable|string|max:500',
         ]);
 
         return response()->json(
@@ -68,6 +69,7 @@ class DebtController extends Controller
             'installmentPayments.*.paidAt' => 'nullable|date_format:Y-m-d',
             'installmentPayments.*.amount' => 'required_with:installmentPayments|numeric|min:0',
             'installmentPayments.*.source' => 'required_with:installmentPayments|string|in:budget,debt_pay',
+            'installmentPayments.*.note' => 'nullable|string|max:500',
         ]);
 
         return response()->json(

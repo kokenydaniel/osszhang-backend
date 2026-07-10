@@ -315,26 +315,57 @@ class AIFinanceService
                 continue;
             }
             $targetData = $this->crypto->readingResolved($target, $household);
-            $historical = $meter->readings
+            $historicalRaw = $meter->readings
+                ->sortBy('date')
+                ->skip(1)
                 ->filter(fn ($r) => ! ((int) $r->year === (int) $validated['year'] && (int) $r->month === (int) $validated['month']))
-                ->map(fn ($r) => max(0, (float) ($this->crypto->readingResolved($r, $household)['consumption'] ?? 0)))
                 ->values();
 
-            if ($historical->count() < 3) {
+            $historical = $historicalRaw->map(function ($r) use ($household) {
+                return [
+                    'year' => (int) $r->year,
+                    'month' => (int) $r->month,
+                    'consumption' => max(0, (float) ($this->crypto->readingResolved($r, $household)['consumption'] ?? 0))
+                ];
+            });
+
+            $sameMonthHistorical = $historical->filter(fn ($r) => $r['month'] === (int) $validated['month']);
+
+            if ($sameMonthHistorical->count() >= 1) {
+                $yearlySums = $sameMonthHistorical->groupBy('year')->map(fn ($group) => $group->sum('consumption'));
+                $avg = $yearlySums->avg();
+                
+                $monthsHu = ['január', 'február', 'március', 'április', 'május', 'június', 'július', 'augusztus', 'szeptember', 'október', 'november', 'december'];
+                $monthName = $monthsHu[(int) $validated['month'] - 1] ?? 'adott hónap';
+                $baseText = "az elmúlt évek azonos időszakának ({$monthName}) átlagához képest";
+            } elseif ($historical->count() >= 3) {
+                $yearlySums = $historical->groupBy(fn($r) => $r['year'] . '-' . $r['month'])->map(fn ($group) => $group->sum('consumption'));
+                $avg = $yearlySums->avg();
+                $baseText = "a történelmi havi átlaghoz képest";
+            } else {
                 continue;
             }
-            $avg = $historical->avg();
+
             $threshold = max(1, $avg * 0.35);
             $actualConsumption = (float) ($targetData['consumption'] ?? 0);
             $diff = $actualConsumption - (float) $avg;
+            
             if (abs($diff) > $threshold) {
+                $percent = $avg > 0 ? round((abs($diff) / $avg) * 100) : 100;
+                $amount = round(abs($diff), 1);
+                $unit = $meter->unit ?? 'egység';
+                
+                $reason = $diff > 0 
+                    ? "{$percent}%-kal ({$amount} {$unit} különbséggel) magasabb a fogyasztás {$baseText}." 
+                    : "{$percent}%-kal ({$amount} {$unit} különbséggel) alacsonyabb a fogyasztás {$baseText}.";
+
                 $anomalies[] = [
                     'meter_id' => $meter->id,
                     'meter_name' => (string) ($meterData['name'] ?? ''),
                     'expected' => round($avg, 2),
                     'actual' => $actualConsumption,
                     'severity' => abs($diff) > ($avg * 0.6) ? 'high' : 'medium',
-                    'reason' => $diff > 0 ? 'Szokatlanul magas fogyasztás az átlaghoz képest.' : 'Szokatlanul alacsony fogyasztás az átlaghoz képest.',
+                    'reason' => $reason,
                 ];
             }
         }

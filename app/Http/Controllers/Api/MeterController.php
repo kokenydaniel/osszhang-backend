@@ -62,6 +62,18 @@ class MeterController extends Controller
         );
     }
 
+    public function bulkDeleteReadings(Request $request, $meterId)
+    {
+        $v = $request->validate([
+            'reading_ids' => 'required|array|min:1',
+            'reading_ids.*' => 'integer',
+        ]);
+
+        return response()->json(
+            $this->meterService->deleteReadingsBulk($request->user()->household, $meterId, $v['reading_ids']),
+        );
+    }
+
     public function destroy($id)
     {
         $this->meterService->delete(auth()->user()->household_id, $id);
